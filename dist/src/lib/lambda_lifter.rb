@@ -1,7 +1,7 @@
 class LambdaLifter
   def self.run
     solver = Solver.new
-    mine = Mine.new
+    mine = Mine.new($stdin.read)
     solver.solve(mine)
   end
 end
