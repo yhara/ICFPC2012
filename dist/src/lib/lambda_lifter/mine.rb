@@ -121,6 +121,10 @@ class LambdaLifter
         height += 1
       end
 
+      if self[@robot.x, @robot.y + 1] == :empty &&
+         get(@robot.x, @robot.y + 1) == :rock
+        @losing = true
+      end
       @map = @updated_map
       return
     end
@@ -133,8 +137,7 @@ class LambdaLifter
      if @command == :abort
        return :abort
      end
-     if self[@robot.x, @robot.y + 1] == :empty &&
-         get(@robot.x, @robot.y + 1) == :rock
+     if @losing
        return :losing
      end
      return false
