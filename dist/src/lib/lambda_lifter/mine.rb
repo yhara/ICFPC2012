@@ -22,13 +22,15 @@ class LambdaLifter
       'A' => :abort
     }
 
-    attr_accessor :robot, :lambdas, :updated_map, :lift
+    attr_accessor :robot, :lambdas, :lift
     attr_reader :width, :height
 
     def initialize(mine_description)
-      @map = nil
-      parse(mine_description)
-      @updated_map = @map.dup
+      unless mine_description.nil?
+        @map = nil
+        parse(mine_description)
+        @updated_map = @map.dup
+      end
     end
 
     # 内部データを返す。
@@ -46,6 +48,18 @@ class LambdaLifter
         x, y = arg1.x, arg1.y
       end
       @map[@map.length - y][x - 1]
+    end
+
+    # 自分自身を複製したMineオブジェクトを返す。
+    def dup
+      mine = Mine.new(nil)
+      mine.instance_variable_set(:@map, @map.dup)
+      robot = Robot.new(mine, @robot.x, @robot.y)
+      mine.instance_variable_set(:@robot, robot)
+      mine.instance_variable_set(:@lambdas, @lambdas.dup)
+      mine.instance_variable_set(:@width, @width)
+      mine.instance_variable_set(:@height, @height)
+      mine.instance_variable_set(:@lift, @lift)
     end
 
     # マップを新規作成する。

@@ -85,5 +85,37 @@ class LambdaLifter
       end
     end
 
+    context "dupが呼ばれたとき" do
+      should "内部のmapを複製すること" do
+        mine2 = @mine.dup
+
+        assert_equal @mine.raw_map, mine2.raw_map
+        assert_not_equal @mine.raw_map.object_id, mine2.raw_map.object_id
+      end
+
+      should "内部のrobotを複製すること" do
+        mine2 = @mine.dup
+
+        assert_equal @mine.robot, mine2.robot
+        assert_not_equal @mine.robot.object_id, mine2.robot.object_id
+      end
+
+      should "内部のlambdasを複製すること" do
+        mine2 = @mine.dup
+
+        assert_equal @mine.lambdas, mine2.lambdas
+        assert_not_equal @mine.lambdas.object_id, mine2.lambdas.object_id
+      end
+
+      should "その他の情報を複製すること" do
+        mine2 = @mine.dup
+
+        assert_equal @mine.width, mine2.width
+        assert_equal @mine.height, mine2.height
+        assert_equal @mine.lift, mine2.lift
+        assert_not_equal @mine.lambdas.object_id, mine2.lambdas.object_id
+      end
+    end
+
   end
 end
