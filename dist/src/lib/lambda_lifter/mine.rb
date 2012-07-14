@@ -54,7 +54,7 @@ class LambdaLifter
     # マップを書き換える。
     def step!(command)
       @updated_map = @map.dup
-      @command = COMMAND[command]
+      @command = COMMANDS[command]
 
       if @robot.movable?(@command)
         set(@robot.x, @robot.y, :empty)
