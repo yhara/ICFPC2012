@@ -47,25 +47,25 @@ Object.extend(
 
     setArroundCells: function(map, x, y) {
       if (y < map.height) {
-	this.above = map.getCell(x, y + 1);
+        this.above = map.getCell(x, y + 1);
       }
       if (y > 1) {
-	this.below = map.getCell(x, y - 1);
+        this.below = map.getCell(x, y - 1);
       }
       if (x < map.width) {
-	this.right = map.getCell(x + 1, y);
+        this.right = map.getCell(x + 1, y);
       }
       if (x > 1) {
-	this.left = map.getCell(x - 1, y);
+        this.left = map.getCell(x - 1, y);
       }
     },
 
     calcNewState: function(remainedLambdaNum) {
       if (this.type == "rock") {
-	this.calcNewStateForRock();
+        this.calcNewStateForRock();
       }
       else if (this.type == "closed-lift") {
-	this.calcNewStateForClosedList(remainedLambdaNum);
+        this.calcNewStateForClosedList(remainedLambdaNum);
       }
       else {
       }
@@ -73,34 +73,34 @@ Object.extend(
 
     calcNewStateForRock: function() {
       if (this.below && this.below.type == "empty") {
-	this.newState = "empty";
- 	this.below.newState = "rock";
+        this.newState = "empty";
+        this.below.newState = "rock";
       }
       else if (this.below       && this.below.type == "rock" &&
-	       this.right       && this.right.type == "empty" &&
-	       this.right.below && this.right.below.type == "empty") {
-	this.newState = "empty";
-	this.right.below.newState = "rock";
+               this.right       && this.right.type == "empty" &&
+               this.right.below && this.right.below.type == "empty") {
+        this.newState = "empty";
+        this.right.below.newState = "rock";
       }
       else if (this.below       && this.below.type       == "rock"         &&
-	       ( this.right       && this.right.type       != "empty" ||
-	         this.right.below && this.right.below.type != "empty"    ) &&
-	       this.left        && this.left.type        == "empty"        &&
-	       this.left.below  && this.left.below.type  == "empty") {
-	this.newState = "empty";
-	this.left.below.newState = "rock";
+               ( this.right       && this.right.type       != "empty" ||
+                 this.right.below && this.right.below.type != "empty"    ) &&
+               this.left        && this.left.type        == "empty"        &&
+               this.left.below  && this.left.below.type  == "empty") {
+        this.newState = "empty";
+        this.left.below.newState = "rock";
       }
       else if (this.below       && this.below.type       == "lambda" &&
-	       this.right       && this.right.type       == "empty"  &&
-	       this.right.below && this.right.below.type == "empty") {
-	this.newState = "empty";
-	this.right.below.newState = "rock";
+               this.right       && this.right.type       == "empty"  &&
+               this.right.below && this.right.below.type == "empty") {
+        this.newState = "empty";
+        this.right.below.newState = "rock";
       }
     },
 
     calcNewStateForClosedList: function(remainedLambdaNum) {
       if (remainedLambdaNum == 0) {
-	this.newState = "open-lift";
+        this.newState = "open-lift";
       }
     },
 
@@ -112,78 +112,90 @@ Object.extend(
 
     destroyRobot: function() {
       if (this.type == "rock" && this.below.type == "robot") {
-	return true;
+        return true;
       }
       else {
-	return false;
+        return false;
       }
     },
 
     // ここからRobot専用
     action: function(action) {
       if (this.type != "robot") {
-	return;
+        return;
       }
       switch (action) {
       case "L":
-	this.moveLeft();
-	break;
+        this.moveLeft();
+        break;
       case "R":
-	this.moveRight();
-	break;
+        this.moveRight();
+        break;
       case "U":
-	this.moveUp();
-	break;
+        this.moveUp();
+        break;
       case "D":
-	this.moveDown();
-	break;
+        this.moveDown();
+        break;
       case "W":
-	this.wait();
-	break;
+        this.wait();
+        break;
       case "A":
-	this.abort();
-	break;
+        this.abort();
+        break;
       default:
       }
     },
 
     moveLeft: function() {
       if (this.movable(this.left)) {
-	this.newState = "empty";
-	this.left.newState = "robot";
+        this.newState = "empty";
+        this.left.newState = "robot";
+      }
+      else if (this.left && this.left.type == "rock" &&
+               this.left.left.type == "empty") {
+        this.newState = "empty";
+        this.left.newState = "robot";
+        this.left.left.newState = "rock";
       }
     },
 
     moveRight: function() {
       if (this.movable(this.right)) {
-	this.newState = "empty";
-	this.right.newState = "robot";
+        this.newState = "empty";
+        this.right.newState = "robot";
+      }
+      else if (this.right && this.right.type == "rock" &&
+               this.right.right.type == "empty") {
+        this.newState = "empty";
+        this.right.newState = "robot";
+        this.right.right.newState = "rock";
       }
     },
 
     moveUp: function() {
       if (this.movable(this.above)) {
-	this.newState = "empty";
-	this.above.newState = "robot";
+        this.newState = "empty";
+        this.above.newState = "robot";
       }
     },
 
     moveDown: function() {
       if (this.movable(this.below)) {
-	this.newState = "empty";
-	this.below.newState = "robot";
+        this.newState = "empty";
+        this.below.newState = "robot";
       }
     },
 
     movable: function(destCell) {
       if (destCell.type == "empty" ||
-	  destCell.type == "earth" ||
-	  destCell.type == "lambda" ||
-	  destCell.type == "open-lift") {
-	return true;
+          destCell.type == "earth" ||
+          destCell.type == "lambda" ||
+          destCell.type == "open-lift") {
+        return true;
       }
       else {
-	return false;
+        return false;
       }
     },
 
@@ -210,19 +222,19 @@ Object.extend(
       this.remainedLambdaNum = 0;
       this.cells = new Array(this.height);
       for(var i = 0; i < this.height; i++) {
-	this.cells[i] = new Array(this.width);
-	for(var j = 0; j < this.width; j++) {
-	  var cellType = mapConfig.eachCellTypes[i][j];
-	  this.cells[i][j] = new Cell( j + 1,
-				       this.height - i,
-				       cellType);
-	  if (cellType == "robot") {
-	    this.robot = this.cells[i][j];
-	  }
-	  if (cellType == "lambda") {
-	    this.remainedLambdaNum++;
-	  }
-	}
+        this.cells[i] = new Array(this.width);
+        for(var j = 0; j < this.width; j++) {
+          var cellType = mapConfig.eachCellTypes[i][j];
+          this.cells[i][j] = new Cell( j + 1,
+                                       this.height - i,
+                                       cellType);
+          if (cellType == "robot") {
+            this.robot = this.cells[i][j];
+          }
+          if (cellType == "lambda") {
+            this.remainedLambdaNum++;
+          }
+        }
       }
 
       this.won = null;
@@ -238,18 +250,18 @@ Object.extend(
       res.height = dataStrAry.length;
       res.width = 0;
       for (var m = 0; m < dataStrAry.length; m++) {
-	if (dataStrAry[m].length > res.width) {
-	  res.width = dataStrAry[m].length;
-	}
+        if (dataStrAry[m].length > res.width) {
+          res.width = dataStrAry[m].length;
+        }
       }
       res.eachCellTypes = new Array(res.height);
       for(var i = 0; i < res.height; i++) {
-	res.eachCellTypes[res.height - (i + 1)] = new Array(res.width);
-	for(var j = 0; j < res.width; j++) {
-	  var key = dataStrAry[res.height - (i + 1)][j] ?
-	    dataStrAry[res.height - (i + 1)][j] : " ";
-	  res.eachCellTypes[res.height - (i + 1)][j] = ObjectsMapping[key];
-	}
+        res.eachCellTypes[res.height - (i + 1)] = new Array(res.width);
+        for(var j = 0; j < res.width; j++) {
+          var key = dataStrAry[res.height - (i + 1)][j] ?
+            dataStrAry[res.height - (i + 1)][j] : " ";
+          res.eachCellTypes[res.height - (i + 1)][j] = ObjectsMapping[key];
+        }
       }
       return res;
     },
@@ -266,47 +278,47 @@ Object.extend(
     drawCells: function() {
       this.remainedLambdaNum = 0;
       for(var y = 1; y <= this.height; y++) {
-	for(var x = 1; x <= this.width; x++) {
-	  var cell = this.getCell(x, y);
-	  if (cell.type == "lambda") {
-	    this.remainedLambdaNum++;
-	  }
-	  if (cell.newState) {
-	    if (cell.type == "open-lift" && cell.newState == "robot") {
-	      this.won = true;
-	    }
-	    cell.update();
-	    if (cell.destroyRobot()) {
-	      this.lost = true;
-	    }
-	    if (cell.type == "robot") {
-	      this.robot = cell;
-	    }
-	  }
-	  this.canvasCtx.drawImage(cell.imageElem,
-				   (cell.x - 1) * ImageSize[0],
-				   this.canvas.height - (cell.y * ImageSize[1]),
-				   ImageSize[0],
-				   ImageSize[1]
-				  );
-	  cell.clearArroundCells();
-	  cell.setArroundCells(this, x, y);
-	}
+        for(var x = 1; x <= this.width; x++) {
+          var cell = this.getCell(x, y);
+          if (cell.type == "lambda") {
+            this.remainedLambdaNum++;
+          }
+          if (cell.newState) {
+            if (cell.type == "open-lift" && cell.newState == "robot") {
+              this.won = true;
+            }
+            cell.update();
+            if (cell.destroyRobot()) {
+              this.lost = true;
+            }
+            if (cell.type == "robot") {
+              this.robot = cell;
+            }
+          }
+          this.canvasCtx.drawImage(cell.imageElem,
+                                   (cell.x - 1) * ImageSize[0],
+                                   this.canvas.height - (cell.y * ImageSize[1]),
+                                   ImageSize[0],
+                                   ImageSize[1]
+                                  );
+          cell.clearArroundCells();
+          cell.setArroundCells(this, x, y);
+        }
       }
     },
 
     update: function() {
       for(var y = 1; y <= this.height; y++) {
-	for(var x = 1; x <= this.width; x++) {
-	  var cell = this.getCell(x, y);
-	  cell.calcNewState(this.remainedLambdaNum);
-	}
+        for(var x = 1; x <= this.width; x++) {
+          var cell = this.getCell(x, y);
+          cell.calcNewState(this.remainedLambdaNum);
+        }
       }
     },
 
     moveRobot: function(command) {
       if (command == "A") {
-	this.aborted = true;
+        this.aborted = true;
       }
       this.robot.action(command);
     }
@@ -343,7 +355,7 @@ Object.extend(
     pushCommands: function(str) {
       var only_cmd_char = this.selectCommandCharacter(str);
       for (var i = 0; i < only_cmd_char.length; i++) {
-	this.robotCommandQueue.push(only_cmd_char.charAt(i));
+        this.robotCommandQueue.push(only_cmd_char.charAt(i));
       }
       this.displayCommands();
     },
@@ -354,14 +366,14 @@ Object.extend(
 
     displayCommands: function(){
       if (this.robotCommandQueue.length >= 0) {
-	$("registered-command").value = this.robotCommandQueue.join(",");
+        $("registered-command").value = this.robotCommandQueue.join(",");
       }
     },
 
     step: function() {
       if (this.robotCommandQueue.length < 1) {
-	alert("Robot のコマンドを登録してください");
-	return;
+        alert("Robot のコマンドを登録してください");
+        return;
       }
       // 1. Robot の行動
       this.map.moveRobot(this.robotCommandQueue.shift());
@@ -379,19 +391,19 @@ Object.extend(
     
     checkWining: function() {
       if (this.map.won) {
-	alert("You Win!");
+        alert("You Win!");
       }
     },
 
     checkLosing: function() {
       if (this.map.lost) {
-	alert("Robot was destroyed!");
+        alert("Robot was destroyed!");
       }
     },
 
     checkAborted: function() {
       if (this.map.aborted) {
-	alert("Aborted!");
+        alert("Aborted!");
       }
     }
   }
