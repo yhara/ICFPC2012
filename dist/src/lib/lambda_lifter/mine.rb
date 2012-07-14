@@ -79,7 +79,7 @@ class LambdaLifter
           if self[@robot.x - 1, @robot.y] == :rock
             # このフェイズでの岩の動きは直後の更新時に影響するものであ
             # るため、@map を直接書き換える。
-            self[@robot.x - 2, @robot.y] = :rock
+            set(@robot.x - 2, @robot.y, :rock)
           end
           set(@robot.x - 1, @robot.y, :robot)
         when :right
