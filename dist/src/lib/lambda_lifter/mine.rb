@@ -23,8 +23,14 @@ class LambdaLifter
     end
 
     # ゲーム座標の(x, y)にあるものをシンボルで返す。左下が(1, 1)
-    def [](x, y)
-      # TODO
+    # 引数はPosか、整数2つを渡す
+    # 例： mine[pos], mine[1, 2]
+    def [](arg1, arg2=nil)
+      if arg2
+        x, y = arg1, arg2
+      else
+        x, y = arg1.x, arg1.y
+      end
     end
 
     # マップを新規作成する。
