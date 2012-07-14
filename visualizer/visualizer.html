@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Lambda Lifting</title>
+  </head>
+  <script class="javascript" src="javascripts/prototype.js"></script>
+  <script class="javascript" src="javascripts/lambda-lifting.js"></script>
+  <script class="javascript" src="javascripts/map-data.js"></script>
+  <script type="text/javascript">
+  <!--
+    function initialize() {
+      var myWorld = new World();
+      myWorld.start();
+      $("step").onclick = function(){
+        myWorld.step();
+      };
+      $("lstep").onclick = function(){
+        myWorld.robotCommandQueue.push("L");
+        myWorld.step();
+      };
+      $("ustep").onclick = function(){
+        myWorld.robotCommandQueue.push("U");
+        myWorld.step();
+      };
+      $("dstep").onclick = function(){
+        myWorld.robotCommandQueue.push("D");
+        myWorld.step();
+      };
+      $("rstep").onclick = function(){
+        myWorld.robotCommandQueue.push("R");
+        myWorld.step();
+      };
+      $("wstep").onclick = function(){
+        myWorld.robotCommandQueue.push("W");
+        myWorld.step();
+      };
+      $("astep").onclick = function(){
+        myWorld.robotCommandQueue.push("A");
+        myWorld.step();
+      };
+      $("restart").onclick = function(){
+        myWorld.restart();
+      };
+      $("setmap1").onclick = function(){
+        myWorld.mapDataString = MapData.sample1;
+        myWorld.restart();
+      };
+      $("setmap2").onclick = function(){
+        myWorld.mapDataString = MapData.sample2;
+        myWorld.restart();
+      };
+      $("setmap3").onclick = function(){
+        myWorld.mapDataString = MapData.sample3;
+        myWorld.restart();
+      };
+      $("setmap4").onclick = function(){
+        myWorld.mapDataString = MapData.sample4;
+        myWorld.restart();
+      };
+      $("setmap5").onclick = function(){
+        myWorld.mapDataString = MapData.sample5;
+        myWorld.restart();
+      };
+      $("setmap6").onclick = function(){
+        myWorld.mapDataString = MapData.sample6;
+        myWorld.restart();
+      };
+      $("setmap7").onclick = function(){
+        myWorld.mapDataString = MapData.sample7;
+        myWorld.restart();
+      };
+      $("setmap8").onclick = function(){
+        myWorld.mapDataString = MapData.sample8;
+        myWorld.restart();
+      };
+      $("setmap9").onclick = function(){
+        myWorld.mapDataString = MapData.sample9;
+        myWorld.restart();
+      };
+      $("setmap10").onclick = function(){
+        myWorld.mapDataString = MapData.sample10;
+        myWorld.restart();
+      };
+      $("small").onclick = function(){
+      ImageSize = [25, 25];
+        myWorld.restart();
+      };
+      $("middle").onclick = function(){
+      ImageSize = [32, 32];
+        myWorld.restart();
+      };
+      $("large").onclick = function(){
+      ImageSize = [40, 40];
+        myWorld.restart();
+      };
+      $("input-command").onclick = function(){
+        myWorld.pushCommands($("action-command").value);
+      };
+    }
+  //-->
+  </script>
+  <body onload="initialize();">
+    <div id="screen">
+    </div>
+    <div id="score">
+      <div id="got-lambda">
+      </div>
+      <div id="remained-lambda">
+      </div>
+      <input type="text" id="registered-command">
+      </input>
+      </div>
+    </div>
+    <div id="button-row1">
+      <button id="step">step</button>
+      <button id="lstep">L & step</button>
+      <button id="ustep">U & step</button>
+      <button id="dstep">D & step</button>
+      <button id="rstep">R & step</button>
+      <button id="wstep">W & step</button>
+      <button id="astep">A & step</button>
+    </div>
+    <div id="button-row2">
+      <button id="restart">restart</button>
+      <button id="setmap1">MAP 1</button>
+      <button id="setmap2">MAP 2</button>
+      <button id="setmap3">MAP 3</button>
+      <button id="setmap4">MAP 4</button>
+      <button id="setmap5">MAP 5</button>
+    </div>
+    <div id="button-row3">
+      <button id="setmap6">MAP 6</button>
+      <button id="setmap7">MAP 7</button>
+      <button id="setmap8">MAP 8</button>
+      <button id="setmap9">MAP 9</button>
+      <button id="setmap10">MAP 10</button>
+      <button id="small">small</button>
+      <button id="middle">middle</button>
+      <button id="large">large</button>
+    </div>
+    <div id="button-row4">
+      <textarea id="action-command" cols="40" rows="2">
+      </textarea>
+      <button id="input-command">INPUT</button>
+    </div>
+  </body>
+</html>
