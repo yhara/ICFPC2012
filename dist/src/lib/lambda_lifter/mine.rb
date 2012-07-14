@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # シミュレータ
 class LambdaLifter
   class Mine
@@ -114,6 +115,18 @@ class LambdaLifter
     def finished?
      # TODO
      # :winning, :abort, :losing, falseのどれかを返す。
+    end
+
+    def losing?
+      finished? == :losing
+    end
+
+    def winning?
+      finished? == :winning
+    end
+
+    def abort?
+      finished? == :abort
     end
 
     private
