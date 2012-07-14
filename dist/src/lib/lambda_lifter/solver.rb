@@ -65,11 +65,13 @@ class LambdaLifter
     end
 
     # 次の目的地を探す
-    # TODO: すでに試した場所だったら異なるcheckpointを設定
     # TODO: 簡単わかる無理そうなlambdaを検出する
     #       (たとえば岩にふさがっているものなど）
     def find_checkpoint
-      checkpoint = nearest_point(@mine.lambdas, @mine.robot.pos)
+      possible_lambdas = @mine.lambdas.select do |l|
+        possible_checkpoint?(@checkpoint_route + [l])
+      end
+      checkpoint = nearest_point(possible_lambdas, @mine.robot.pos)
       checkpoint = @mine.lift if checkpoint.nil?
       return checkpoint
     end
