@@ -8,8 +8,8 @@ class LambdaLifter
       @cmd_mine_cache = {}
       @dead_cmd_route = {}
       @checkpoint_watermarks = []
-      @checkpoint_route = []
-      @dead_checkpoint_route = {}
+      @check_route = []
+      @dead_check_route = {}
       # TODO: ハイスコアを一緒に覚えておきSIGINTが送られたらその命令列
       # を送る。"A"が必要なものか、それ以外のものかを区別。
       @highscore = []
@@ -34,30 +34,27 @@ class LambdaLifter
     # checkpointまでの経路を解く
     def solve_to_checkpoint(checkpoint)
       next_pos = nil
+      cur_check_route = @check_route.dup
       while next_pos != checkpoint
         return highscore if @trapped_sigint
         cmd = judge_next_command(checkpoint)
         if cmd
           @cmdqueue << cmd
-          if m = cached_mine(@checkpoint_route, @cmdqueue)
+          if m = cached_mine(@check_route, @cmdqueue)
             @mine = m
           else
             @mine.step!(cmd)
           end
           if @mine.losing?
             rollback!
-            if not possible_checkpoint?(@checkpoint_route)
-              return false
-            end
+            return false if cur_check_route != @check_route
           else
-            cache_mine(@checkpoint_route, @cmdqueue, @mine)
+            cache_mine(@check_route, @cmdqueue, @mine)
           end
         else
           # 実行可能なコマンドがない
           rollback!
-          if not possible_checkpoint?(@checkpoint_route)
-            return false
-          end
+          return false if cur_check_route != @check_route
         end
         next_pos = @mine.robot.pos
       end
@@ -69,10 +66,12 @@ class LambdaLifter
     #       (たとえば岩にふさがっているものなど）
     def find_checkpoint
       possible_lambdas = @mine.lambdas.select do |l|
-        possible_checkpoint?(@checkpoint_route + [l])
+        possible_check_route?(@check_route + [l])
       end
       checkpoint = nearest_point(possible_lambdas, @mine.robot.pos)
-      checkpoint = @mine.lift if checkpoint.nil?
+      if checkpoint.nil? && @mine.lambdas.empty?
+        checkpoint = @mine.lift
+      end
       return checkpoint
     end
 
@@ -111,12 +110,12 @@ class LambdaLifter
       # 成功のケースがないcheckpointを記録
       if !@checkpoint_watermarks.empty? &&
           @cmdqueue.size < @checkpoint_watermarks.last
-        @dead_cmd_route[@checkpoint_route] = true
+        @dead_cmd_route[@check_route] = true
         @checkpoint_watermarks.pop
-        expire_cache_mine(@checkpoint_route)
-        @checkpoint_route.pop
+        expire_cache_mine(@check_route)
+        @check_route.pop
       end
-      @mine = cached_mine(@checkpoint_route, @cmdqueue)
+      @mine = cached_mine(@check_route, @cmdqueue)
     end
 
     # 可能性のあるrouteか？
@@ -125,29 +124,29 @@ class LambdaLifter
       return true
     end
 
-    # 可能性のあるcheckpointか？
-    def possible_checkpoint?(check_route)
-      return false if @dead_checkpoint_route[check_route]
+    # 可能性のあるcheckpointのrouteか？
+    def possible_check_route?(check_route)
+      return false if @dead_check_route[check_route]
       return true
     end
 
-    def cached_mine(checkpoint_route, cmdqueue)
-      cache = (@cmd_mine_cache[checkpoint_route] ||= {})
+    def cached_mine(check_route, cmdqueue)
+      cache = (@cmd_mine_cache[check_route] ||= {})
       return cache[cmdqueue]
     end
 
-    def cache_mine(checkpoint_route, cmdqueue, mine)
-      cache = (@cmd_mine_cache[checkpoint_route] ||= {})
+    def cache_mine(check_route, cmdqueue, mine)
+      cache = (@cmd_mine_cache[check_route] ||= {})
       cache[cmdqueue] = mine.dup
     end
 
-    def expire_cache_mine(checkpoint_route)
-      @cmd_mine_cache.delete(checkpoint_route)
+    def expire_cache_mine(check_route)
+      @cmd_mine_cache.delete(check_route)
     end
 
     def checkpoint!(point)
       @checkpoint_watermarks << @cmdqueue.size
-      @checkpoint_route << point
+      @check_route << point
     end
 
     def handle_sigint
