@@ -13,7 +13,6 @@ class LambdaLifter
     end
 
     should "x, yを基にした比較が可能であること" do
-      pend
       a = LambdaLifter::Pos.new(2, 5)
       b = LambdaLifter::Pos.new(2, 5)
       c = LambdaLifter::Pos.new(1, 2)

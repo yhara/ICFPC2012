@@ -7,7 +7,7 @@ class LambdaLifter
     end
 
     def <=>(other)
-      [x, y] <=> [other.y, other.x]
+      [x, y] <=> [other.x, other.y]
     end
     include Comparable
 
