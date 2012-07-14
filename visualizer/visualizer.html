@@ -121,6 +121,39 @@
         myWorld.mapDataString = $("map-text").value;
         myWorld.restart();
       };
+      Event.observe(window.document, 'keydown',
+        function(e) {
+          switch(e.keyCode){
+            case 72: /* h */
+              myWorld.robotCommandQueue.push("L");
+              myWorld.step();
+              break;
+            case 74: /* j */
+              myWorld.robotCommandQueue.push("D");
+              myWorld.step();
+              break;
+            case 75: /* k */
+              myWorld.robotCommandQueue.push("U");
+              myWorld.step();
+              break;
+            case 76: /* l */
+              myWorld.robotCommandQueue.push("R");
+              myWorld.step();
+              break;
+            case 190: /* . */
+            case 87: /* w */
+              myWorld.robotCommandQueue.push("W");
+              myWorld.step();
+              break;
+            case 65: /* a */
+              myWorld.robotCommandQueue.push("A");
+              myWorld.step();
+              break;
+            default: 
+              //console.log(e.keyCode);
+          }
+        },
+        false);
     }
   //-->
   </script>
