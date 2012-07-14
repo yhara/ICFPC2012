@@ -8,8 +8,8 @@ class LambdaLifter
     attr_reader :pos
     def_delegators(:@pos, :x, :y)
 
-    def initialize(map, x, y)
-      @map = map
+    def initialize(mine, x, y)
+      @mine = mine
       @pos = Pos.new(x, y)
     end
 
@@ -22,11 +22,11 @@ class LambdaLifter
     def movable?(direction)
       delta = DIRECTION_TO_DELTA[direction]
       new_pos = pos + delta
-      case @map[new_pos]
+      case @mine[new_pos]
       when :empty, :earth, :lambda, :open_lift
         return true
       when :rock
-        return delta.y.zero? && @map[new_pos + delta] == :empty
+        return delta.y.zero? && @mine[new_pos + delta] == :empty
       else
         return false
       end
