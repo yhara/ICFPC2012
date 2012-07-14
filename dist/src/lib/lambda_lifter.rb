@@ -1,8 +1,8 @@
 class LambdaLifter
   def self.run
-    solver = Solver.new
     mine = Mine.new(ARGF.read)
-    solver.solve(mine)
+    solver = Solver.new(mine)
+    return solver.solve
   end
 end
 

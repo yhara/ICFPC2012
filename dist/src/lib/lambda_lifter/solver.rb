@@ -1,12 +1,22 @@
 # -*- coding: utf-8 -*-
 class LambdaLifter
   class Solver
-    def initialize
+    def initialize(mine)
+      @mine = mine
       @started_at = Time.now
       @visited = {}
     end
 
-    def solve(mine)
+    # コマンドの列を文字列で返す。
+    # 例："DLLRA"
+    def solve
+      until mine.finished?
+        next_command = xxx(mine)
+        mine.step!(next_command)
+      end
+    end
+
+    def xxx(mine)
       @current_mine = mine
       @sequence = []
 
