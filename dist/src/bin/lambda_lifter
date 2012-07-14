@@ -1,4 +1,3 @@
 #! /usr/bin/env ruby
-
-# TODO: LambdaLifter.run
-puts("A")
+require_relative "../lib/lambda_lifter.rb"
+LambdaLifter.run
