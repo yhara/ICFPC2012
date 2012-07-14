@@ -5,10 +5,13 @@ class LambdaLifter
       @mine = mine
       @started_at = Time.now
       @cmdqueue = []
+      # TODO: メモリサイズの懸念。ある程度のサイズになったらtruncateすべき。
       @memo = {}
       # TODO: ハイスコアを一緒に覚えておきSIGINTが送られたらその命令列
       # を送る
-      @highscore = nil
+      @highscore = []
+      @trapped_sigint = false
+      Signal.trap(:INT){ @trapped_sigint = true }
     end
 
     # コマンドの列を文字列で返す。
@@ -17,6 +20,7 @@ class LambdaLifter
       while next_goal = find_next_goal
         next_pos = nil
         while next_pos != next_goal
+          return @highscore + "A" if @trapped_sigint
           cmd = judge_next_command(next_goal)
           if cmd
             @cmdqueue << cmd
