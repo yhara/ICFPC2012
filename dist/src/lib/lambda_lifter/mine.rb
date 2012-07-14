@@ -120,9 +120,8 @@ class LambdaLifter
         height += 1
       end
 
-      result = finished?
       @map = @updated_map
-      return result
+      return
     end
   
     def finished?
