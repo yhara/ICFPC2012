@@ -22,7 +22,7 @@ class LambdaLifter
       'A' => :abort
     }
 
-    attr_accessor :robot, :lambdas, :updated_map
+    attr_accessor :robot, :lambdas, :updated_map, :lift
 
     def initialize(mine_description)
       @map = nil
@@ -142,11 +142,14 @@ class LambdaLifter
     def parse(mine_description)
       mine_description = mine_description.split("\n")
       @lambdas = 0
-      grid = mine_description.each_with_object([]) do |line, g|
-        g << line.each_char.map do |c|
+      grid = mine_description.each_with_object([]).with_index do |(line, g), y|
+        g << line.each_char.map.with_index do |c, x|
           layout = LAYOUTS[c]
-          if layout == :lambda
+          case layout
+          when :lambda
             @lambdas += 1
+          when :closed_lift
+            @lift = [x, y]
           end
           layout
         end
