@@ -18,11 +18,19 @@ class LambdaLifter
         next_pos = nil
         while next_pos != next_goal
           cmd = judge_next_command(next_goal)
-          if cmd 
+          if cmd
             @cmdqueue << cmd
-            @mine.step!(cmd)
-            rollback! if @mine.losing?
-            @memo[@cmdqueue] = @mine.dup
+            if m = cached_mine(@cmdqueue)
+              @mine = m
+            else
+              @mine.step!(cmd)
+            end
+            if @mine.losing?
+              @memo[@cmdqueue] = false
+              rollback!
+            else
+              @memo[@cmdqueue] = @mine.dup
+            end
           else
             # 実行可能なコマンドがない
             rollback!
@@ -76,12 +84,16 @@ class LambdaLifter
     # 1つ前のmineにロールバック
     def rollback!
       @cmdqueue.pop
-      @mine = @memo[@cmdqueue]
+      @mine = cached_mine(@cmdqueue)
     end
 
     def possible_route?(cmdqueue)
-      return false if @memo[cmdqueue] == false
+      return false if cached_mine(cmdqueue) == false
       return true
+    end
+
+    def cached_mine(cmdqueue)
+      @memo[cmdqueue]
     end
   end
 end
