@@ -9,7 +9,6 @@ class LambdaLifter
     end
 
     should "移動先が空、地面、Lambda、Open Lambda Liftであれば移動可能であること" do
-      pend
       mine = Mine.new(<<-'EOD')
 #####
 # \ #
@@ -24,7 +23,6 @@ class LambdaLifter
     end
 
     should "移動先が岩でもその先が空白なら移動可能であること" do
-      pend
       mine = Mine.new(<<-'EOD')
 #####
 #R* #
@@ -34,7 +32,6 @@ class LambdaLifter
     end
 
     should "移動先が岩でその先が空白じゃなければ移動不可であること" do
-      pend
       mine = Mine.new(<<-'EOD')
 #######
 #  \  #
@@ -51,7 +48,6 @@ class LambdaLifter
     end
 
     should "それ以外（壁かClosed Lambda Lift）なら移動不可であること" do
-      pend
       mine = Mine.new(<<-'EOD')
 ####
 #RL#
@@ -62,7 +58,6 @@ class LambdaLifter
     end
 
     should "移動可能なPosの配列を返せること" do
-      pend
       mine = Mine.new(<<-'EOD')
 #######
 #     #
