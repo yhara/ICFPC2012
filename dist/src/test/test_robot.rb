@@ -57,6 +57,16 @@ class LambdaLifter
         assert_equal false, mine.robot.movable?(:left), "壁"
         assert_equal false, mine.robot.movable?(:right), "Closed Lambda Lift"
       end
+
+      should "移動コマンドでなければnilを返すこと" do
+        mine = Mine.new(<<-'EOD')
+####
+#RL#
+####
+        EOD
+        assert_equal nil, mine.robot.movable?(:wait)
+        assert_equal nil, mine.robot.movable?(:abort)
+      end
     end
 
     should "移動可能なPosの配列を返せること" do

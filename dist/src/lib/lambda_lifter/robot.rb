@@ -21,6 +21,7 @@ class LambdaLifter
 
     def movable?(direction)
       delta = DIRECTION_TO_DELTA[direction]
+      return nil if !delta
       new_pos = pos + delta
       case @mine[new_pos]
       when :empty, :earth, :lambda, :open_lift
