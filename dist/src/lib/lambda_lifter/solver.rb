@@ -14,7 +14,7 @@ class LambdaLifter
       # を送る。"A"が必要なものか、それ以外のものかを区別。
       @highscore = []
       @trapped_sigint = false
-      Signal.trap(:INT){ @trapped_sigint = true }
+      Signal.trap(:INT){ handle_sigint }
     end
 
     # コマンドの列を文字列で返す。
@@ -98,8 +98,8 @@ class LambdaLifter
 
     # 移動可能な位置
     def movable_positions(robot)
-      return (robot.movable_positions + robot.pos).
-        select{|a| possible_route?(@cmdqueue + robot.command_to(a)) }
+      return (robot.movable_positions + [robot.pos]).
+        select{|a| possible_route?(@cmdqueue + [robot.command_to(a)]) }
     end
 
     # 1つ前のmineにロールバック
@@ -140,8 +140,13 @@ class LambdaLifter
       @checkpoint_route << point
     end
 
+    def handle_sigint
+      exit 0 if @highscore.empty?
+      @trapped_sigint = true
+    end
+
     def highscore
-      @highscore + "A"
+      @highscore + ["A"]
     end
   end
 end
