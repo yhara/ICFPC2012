@@ -28,6 +28,7 @@ class LambdaLifter
     def initialize(mine_description)
       @map = nil
       parse(mine_description)
+      @updated_map = @map.dup
     end
 
     # 内部データを返す。
