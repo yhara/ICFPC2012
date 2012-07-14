@@ -31,6 +31,7 @@ class LambdaLifter
       else
         x, y = arg1.x, arg1.y
       end
+      @map[@map.length - y][x - 1]
     end
 
     # マップを新規作成する。
