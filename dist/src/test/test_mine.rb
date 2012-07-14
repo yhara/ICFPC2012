@@ -29,6 +29,7 @@ class LambdaLifter
     end
 
     should "mine[x, y]でその座標にあるものを返すこと" do
+      pend
       assert_equal :wall, @mine[1, 1] 
       assert_equal :robot, @mine[2, 2] 
       assert_equal :lambda, @mine[3, 2] 
@@ -36,6 +37,7 @@ class LambdaLifter
 
     context "step!が呼ばれたとき" do
       should "ロボットを動かすこと" do
+        pend
         mine = Mine.new(<<-'EOD')
 ####
 #R #
