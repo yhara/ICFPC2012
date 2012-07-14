@@ -6,6 +6,7 @@ class LambdaLifter
   end
 end
 
+require_relative 'lambda_lifter/pos'
 require_relative 'lambda_lifter/solver'
 require_relative 'lambda_lifter/mine'
 
