@@ -13,49 +13,54 @@ class LambdaLifter
       # mine.robot_pos
       robot = Pos.new(2, 2)
       # mine.lambda_postions
-      lambdas = [Pos.new(10, 10), Pos.new(2, 10)]
+      lambdas = [Pos.new(5, 5), Pos.new(2, 5)]
       while !lambdas.empty?
-        next_lambda_idx = nearest_point_index(robot, lambdas)
-        break if next_goal_idx.nil?
-        next_lambda = lambdas.delete_at(goal_idx)
+        next_lambda_idx = nearest_point_index(lambdas, robot)
+        break if next_lambda_idx.nil?
+        next_lambda = lambdas.delete_at(next_lambda_idx)
 
-        next_pos = next_pos(robot, next_lambda)
+        robot = next_pos(robot, next_lambda)
         # TODO: limitを設ける
-        while next_pos != next_lambda
-          next_pos = next_pos(robot, next_lambda)
+        while robot != next_lambda
+          robot = next_pos(robot, next_lambda)
         end
       end
 
       return @sequence
     end
 
-    # return index
-    def nearest_point_index(cur, points)
+    private
+    # 指定位置への最短距離のポイントのindexを返す。
+    def nearest_point_index(points, goal)
       return nil if points.empty?
       return 0 if points.size == 1
       return points.map.with_index{|point, i|
-        [point.x - cur.x + point.y - cur.y, i]
+        [((goal.x - point.x).abs + (goal.y - point.y).abs), i]
       }.sort_by{|interval, _| interval }.first[1]
     end
 
-    def next_pos(robot, next_pos)
+    def next_pos(robot, goal)
       am = available_moves(robot)
-      next_move_idx = nearest_point_index(robot, am)
-      raise "You don't move anywhere." if next_move_idx.nil?
-      next_point = am.delete_at(next_move_idx)
-      @visited[next_position.to_s] = true
+      next_move_idx = nearest_point_index(am, goal)
+      if next_move_idx.nil?
+        raise "You don't move anywhere."
+      end
+      next_position = am.delete_at(next_move_idx)
+      @visited[next_position] = true
       @sequence << next_position
-      return next_point
+      return next_position
     end
 
     def available_moves(robot)
       # TODO: 壁、危険な位置、範囲による移動の制限
       am = [
-        [robot[0]+1, robot[1]],
-        [robot[0]-1, robot[0]],
-        [robot[0], robot[1]+1],
-        [robot[0], robot[1]-1],]
-      return am.select{|a| @visited[a.to_s].nil? }
+        Pos.new(robot.x+1, robot.y),
+        Pos.new(robot.x-1, robot.y),
+        Pos.new(robot.x, robot.y+1),
+        Pos.new(robot.x, robot.y-1),]
+      return am.select{|a| @visited[a].nil? }.
+        select{|a| a.x >= 1 && a.y >= 1 && a.x <= 5 && a.y <= 5 }
+        # TODO:暫定的な範囲
     end
   end
 end
