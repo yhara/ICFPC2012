@@ -6,6 +6,10 @@ class LambdaLifter
       @y = y
     end
 
+    def +(other)
+      return self.class.new(x + other.x, y + other.y)
+    end
+
     def <=>(other)
       [x, y] <=> [other.x, other.y]
     end
