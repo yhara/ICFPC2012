@@ -13,7 +13,12 @@ class LambdaLifter
     }
 
     def initialize(mine_description)
+      @map = nil
       parse(mine_description)
+    end
+
+    def raw_map
+      @map
     end
 
     # マップを新規作成する。
