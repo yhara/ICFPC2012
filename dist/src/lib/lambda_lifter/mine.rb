@@ -54,11 +54,11 @@ class LambdaLifter
     # マップを書き換える。
     def step!(command)
       @updated_map = @map.dup
-      command = COMMAND[command]
+      @command = COMMAND[command]
 
-      if @robot.movable?(command)
+      if @robot.movable?(@command)
         set(@robot.x, @robot.y, :empty)
-        case command
+        case @command
         when :left
           set(@robot.x - 1, @robot.y, :robot)
         when :right
@@ -110,11 +110,25 @@ class LambdaLifter
         width = 0
         height += 1
       end
+
+      result = finished?
+      @map = @updated_map
+      return result
     end
   
     def finished?
-     # TODO
      # :winning, :abort, :losing, falseのどれかを返す。
+     if self[@robot.x, @robot.y] == :open_lift
+       return :winning
+     end
+     if @command == :abort
+       return :abort
+     end
+     if self[@robot.x, @robot.y + 1] == :empty &&
+         get(@robot.x, @robot.y + 1) == :rock
+       return :losing
+     end
+     return false
     end
 
     def losing?
