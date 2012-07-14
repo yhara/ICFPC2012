@@ -13,11 +13,13 @@ class LambdaLifter
     end
 
     should "x, yを基にした比較が可能であること" do
-      a = LambdaLifter::Pos.new(1, 1)
-      b = LambdaLifter::Pos.new(1, 1)
+      pend
+      a = LambdaLifter::Pos.new(2, 5)
+      b = LambdaLifter::Pos.new(2, 5)
       c = LambdaLifter::Pos.new(1, 2)
       assert_equal a, b
       assert a == b
+      assert_equal false, a != b
       assert a != c
     end
 
