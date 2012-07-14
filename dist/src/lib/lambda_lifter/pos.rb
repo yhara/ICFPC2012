@@ -1,7 +1,5 @@
 class LambdaLifter
   class Pos
-    include Comparable
-
     attr_reader :x, :y
     def initialize(x, y)
       @x = x
@@ -9,11 +7,16 @@ class LambdaLifter
     end
 
     def <=>(other)
-      [other.y, other.x] <=> [x, y]
+      [x, y] <=> [other.y, other.x]
     end
+    include Comparable
 
     def inspect
       "(#{@x}, #{@y})"
+    end
+
+    def eql?(other)
+      hash.eql?(other.hash)
     end
 
     def hash
