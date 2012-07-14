@@ -20,5 +20,18 @@ class LambdaLifter
       assert_equal expected, mine.raw_map
     end
 
+    context "step!が呼ばれたとき" do
+      should "ロボットを動かすこと" do
+        mine = Mine.new(<<-'EOD')
+####
+#R #
+####
+        EOD
+        mine.step!("R")
+
+        assert_equal [:wall, :empty, :robot, :wall], mine.raw_map[1]
+      end
+    end
+
   end
 end

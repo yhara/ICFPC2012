@@ -17,6 +17,7 @@ class LambdaLifter
       parse(mine_description)
     end
 
+    # 内部データを返す。
     def raw_map
       @map
     end
