@@ -3,9 +3,9 @@
 class LambdaLifter
   class TestRobot < Test::Unit::TestCase
     should ".x, .yでアクセスできること" do
-      robot = LambdaLifter::Robot.new(nil, 1, 1)
-      assert_equal 1, robot.x
-      assert_equal 1, robot.y
+      robot = LambdaLifter::Robot.new(nil, 2, 3)
+      assert_equal 2, robot.x
+      assert_equal 3, robot.y
     end
 
     context "movable?が呼ばれたとき" do
