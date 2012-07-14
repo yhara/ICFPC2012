@@ -23,6 +23,7 @@ class LambdaLifter
     }
 
     attr_accessor :robot, :lambdas, :updated_map, :lift
+    attr_reader :width, :height
 
     def initialize(mine_description)
       @map = nil
@@ -153,6 +154,10 @@ class LambdaLifter
 
     private
 
+    def game_axis(ruby_x, ruby_y)
+      return ruby_x + 1, height - ruby_y
+    end
+
     def get(x, y)
       @updated_map[@updated_map.length - y][x - 1]
     end
@@ -164,6 +169,8 @@ class LambdaLifter
     def parse(mine_description)
       mine_description = mine_description.split("\n")
       @lambdas = 0
+      robot_ruby_x = nil
+      robot_ruby_y = nil
       grid = mine_description.each_with_object([]).with_index do |(line, g), y|
         g << line.each_char.map.with_index do |c, x|
           layout = LAYOUTS[c]
@@ -173,13 +180,16 @@ class LambdaLifter
           when :closed_lift
             @lift = [x, y]
           when :robot
-            @robot = Robot.new(self, x, y)
+            robot_ruby_x = x
+            robot_ruby_y = y
           end
           layout
         end
       end
       @width = grid.max {|m| m.length }.length
       @height = grid.length
+      @robot = Robot.new(self,
+                         *game_axis(robot_ruby_x, robot_ruby_y))
       # 最大幅より短い行は、文字数が足りない分だけ:emptyを持たせる。
       @map = grid.map do |line|
         if line.length < @width
