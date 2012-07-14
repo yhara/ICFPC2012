@@ -155,7 +155,7 @@ class LambdaLifter
         end
       end
       @width = grid.max {|m| m.length }.length
-      @height = gird.length
+      @height = grid.length
       # 最大幅より短い行は、文字数が足りない分だけ:emptyを持たせる。
       @map = grid.map do |line|
         if line.length < @width
