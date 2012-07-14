@@ -2,4 +2,5 @@ source 'http://rubygems.org'
 
 group :test do
   gem 'test-unit', '= 2.5.1'
+  gem 'shoulda-context', '= 1.0.0'
 end
