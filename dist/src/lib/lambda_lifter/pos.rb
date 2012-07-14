@@ -9,7 +9,15 @@ class LambdaLifter
     end
 
     def <=>(other)
-      [other.y, other.x] == [x, y]
+      [other.y, other.x] <=> [x, y]
+    end
+
+    def inspect
+      "(#{@x}, #{@y})"
+    end
+
+    def hash
+      [x, y].hash
     end
   end
 end
