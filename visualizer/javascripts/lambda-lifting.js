@@ -214,6 +214,11 @@ Object.extend(
       var mapConfig = this.parseMapDataString(mapDataStr);
       this.width = mapConfig.width;
       this.height = mapConfig.height;
+      this.steps = 0;
+      this.water = mapConfig.Water || 0;
+      this.flooding = mapConfig.Flooding || 0;
+      this.waterproof = mapConfig.Waterproof || 10;
+      this.diving = 0;
       this.canvas = document.createElement("canvas");
       this.canvas.width = this.width * ImageSize[0];
       this.canvas.height = this.height * ImageSize[1];
@@ -243,10 +248,22 @@ Object.extend(
     },
     
     parseMapDataString: function(dataStr) {
-      var dataStrAry = dataStr.split("\n");
-      dataStrAry.collect(function(e){ return e.replace(/\r?\n$/, "");});
-
       var res = {};
+      var dataStrAry =
+        dataStr.split("\n").collect(
+          function(e) {
+            if (e.match(/(Water|Flooding|Waterproof) (\d+)/)) {
+              res[RegExp.$1] = Number(RegExp.$2);
+              return "";
+            }
+            return e.replace(/\r?\n$/, "");
+          }
+        ).filter(
+          function(e) {
+            return e.length > 0;
+          }
+        );
+
       res.height = dataStrAry.length;
       res.width = 0;
       for (var m = 0; m < dataStrAry.length; m++) {
@@ -305,6 +322,15 @@ Object.extend(
           cell.setArroundCells(this, x, y);
         }
       }
+      this.drawWaterLevel();
+    },
+
+    drawWaterLevel: function() {
+      this.canvasCtx.fillStyle = "rgba(40, 80, 200, 0.4)";
+      this.canvasCtx.fillRect(0,
+                              this.canvas.height - this.water * ImageSize[1],
+                              this.canvas.width * ImageSize[0],
+                              this.water * ImageSize[1]);
     },
 
     update: function() {
@@ -314,8 +340,25 @@ Object.extend(
           cell.calcNewState(this.remainedLambdaNum);
         }
       }
+      this.steps++;
+      this.checkWeatherStatus();
     },
 
+    checkWeatherStatus: function() {
+      if (this.flooding && this.steps % this.flooding == 0) {
+        this.water++;
+      }
+      if (this.robot.y <= this.water) {
+        this.diving++; 
+        if (this.diving > this.waterproof) {
+          this.lost = true;
+        }
+      }
+      else {
+        this.diving = 0;
+      }     
+    },
+ 
     moveRobot: function(command) {
       if (command == "A") {
         this.aborted = true;
@@ -339,6 +382,7 @@ Object.extend(
       this.map = new Map(this.mapDataString);
       this.map.setCanvas("screen");
       this.map.drawCells();
+      this.displayMapWeatherStatus();
     },
 
     restart: function() {
@@ -350,6 +394,7 @@ Object.extend(
       this.map = new Map(this.mapDataString);
       this.map.setCanvas("screen");
       this.map.drawCells();
+      this.displayMapWeatherStatus();
     },
 
     pushCommands: function(str) {
@@ -362,6 +407,18 @@ Object.extend(
 
     selectCommandCharacter: function(str) {
       return str.replace(/[^WALRDU]*/gm, '');
+    },
+
+    displayInfo: function(){
+      this.displayCommands();
+      this.displayMapWeatherStatus();
+    },
+
+    displayMapWeatherStatus: function(){
+      $("water").innerHTML = "Water:" + this.map.water;
+      $("flooding").innerHTML = "Flooding:" + this.map.flooding;
+      $("waterproof").innerHTML = "Waterproof:" + this.map.waterproof;
+      $("diving").innerHTML = "Diving:" + this.map.diving;
     },
 
     displayCommands: function(){
@@ -382,7 +439,7 @@ Object.extend(
       this.map.update();
       this.map.drawCells();
       // 各種情報の表示
-      this.displayCommands();
+      this.displayInfo();
       // 3. 終了チェック
       this.checkWining();
       this.checkLosing();

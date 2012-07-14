@@ -82,6 +82,26 @@
         myWorld.mapDataString = MapData.sample10;
         myWorld.restart();
       };
+      $("setflood1").onclick = function(){
+        myWorld.mapDataString = MapData.flood1;
+        myWorld.restart();
+      };
+      $("setflood2").onclick = function(){
+        myWorld.mapDataString = MapData.flood2;
+        myWorld.restart();
+      };
+      $("setflood3").onclick = function(){
+        myWorld.mapDataString = MapData.flood3;
+        myWorld.restart();
+      };
+      $("setflood4").onclick = function(){
+        myWorld.mapDataString = MapData.flood4;
+        myWorld.restart();
+      };
+      $("setflood5").onclick = function(){
+        myWorld.mapDataString = MapData.flood5;
+        myWorld.restart();
+      };
       $("small").onclick = function(){
       ImageSize = [25, 25];
         myWorld.restart();
@@ -108,6 +128,14 @@
       </div>
       <div id="remained-lambda">
       </div>
+      <div id="water">
+      </div>
+      <div id="flooding">
+      </div>
+      <div id="waterproof">
+      </div>
+      <div id="diving">
+      </div>
       <input type="text" id="registered-command">
       </input>
       </div>
@@ -128,13 +156,18 @@
       <button id="setmap3">MAP 3</button>
       <button id="setmap4">MAP 4</button>
       <button id="setmap5">MAP 5</button>
-    </div>
-    <div id="button-row3">
       <button id="setmap6">MAP 6</button>
       <button id="setmap7">MAP 7</button>
       <button id="setmap8">MAP 8</button>
       <button id="setmap9">MAP 9</button>
       <button id="setmap10">MAP 10</button>
+    </div>
+    <div id="button-row3">
+      <button id="setflood1">FLOOD 1</button>
+      <button id="setflood2">FLOOD 2</button>
+      <button id="setflood3">FLOOD 3</button>
+      <button id="setflood4">FLOOD 4</button>
+      <button id="setflood5">FLOOD 5</button>
       <button id="small">small</button>
       <button id="middle">middle</button>
       <button id="large">large</button>
