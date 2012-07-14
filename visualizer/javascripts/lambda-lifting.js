@@ -1,14 +1,15 @@
 var ImageSize = [40, 40]; // [width, height]
 
 var ObjectsMapping = {
-  "L": "closed-lift",
-  ".": "earth",
-  " ": "empty",
-  "/": "lambda",
-  "O": "open-lift",
-  "R": "robot",
-  "*": "rock",
-  "#": "wall"
+  "L" : "closed-lift",
+  "." : "earth",
+  " " : "empty",
+  "\\": "lambda",
+  "/" : "lambda",
+  "O" : "open-lift",
+  "R" : "robot",
+  "*" : "rock",
+  "#" : "wall"
 };
 
 var ObjectNames = [];

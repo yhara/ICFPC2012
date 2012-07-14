@@ -117,6 +117,10 @@
       $("input-command").onclick = function(){
         myWorld.pushCommands($("action-command").value);
       };
+      $("input-map").onclick = function(){
+        myWorld.mapDataString = $("map-text").value;
+        myWorld.restart();
+      };
     }
   //-->
   </script>
@@ -173,9 +177,12 @@
       <button id="large">large</button>
     </div>
     <div id="button-row4">
-      <textarea id="action-command" cols="40" rows="2">
-      </textarea>
-      <button id="input-command">INPUT</button>
+      <textarea id="action-command" cols="40" rows="2"></textarea>
+      <button id="input-command">CMD INPUT</button>
+    </div>
+    <div id="button-row5">
+      <textarea id="map-text" cols="40" rows="10"></textarea>
+      <button id="input-map">MAP INPUT</button>
     </div>
   </body>
 </html>
