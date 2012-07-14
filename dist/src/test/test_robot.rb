@@ -8,7 +8,7 @@ class LambdaLifter
       assert_equal 1, robot.y
     end
 
-    context "mobable?が呼ばれたとき" do
+    context "movable?が呼ばれたとき" do
       should "移動先が空、地面、Lambda、Open Lambda Liftであれば移動可能であること" do
         mine = Mine.new(<<-'EOD')
 #####
@@ -57,9 +57,10 @@ class LambdaLifter
         assert_equal false, mine.robot.movable?(:left), "壁"
         assert_equal false, mine.robot.movable?(:right), "Closed Lambda Lift"
       end
+    end
 
-      should "移動可能なPosの配列を返せること" do
-        mine = Mine.new(<<-'EOD')
+    should "移動可能なPosの配列を返せること" do
+      mine = Mine.new(<<-'EOD')
 #######
 #     #
 #  #  #
@@ -67,9 +68,8 @@ class LambdaLifter
 #  .  #
 #     #
 #######
-        EOD
-        assert_equal [Pos.new(5, 4), Pos.new(4, 3)], mine.robot.movable_positions
-      end
+      EOD
+      assert_equal [Pos.new(5, 4), Pos.new(4, 3)], mine.robot.movable_positions
     end
   end
 end
