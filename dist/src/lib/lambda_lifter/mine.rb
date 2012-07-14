@@ -11,7 +11,7 @@ class LambdaLifter
       'O' => :open_lift,
       '.' => :earth,
       ' ' => :empty
-    }
+    }.freeze
 
     COMMANDS = {
       'L' => :left,
@@ -20,7 +20,7 @@ class LambdaLifter
       'D' => :down,
       'W' => :wait,
       'A' => :abort
-    }
+    }.freeze
 
     attr_accessor :robot, :lambdas, :lift
     attr_reader :width, :height

@@ -44,7 +44,7 @@ class LambdaLifter
       right: Pos.new(+1,  0),
       up:    Pos.new( 0, +1),
       down:  Pos.new( 0, -1),
-    }
+    }.freeze
 
     h = DIRECTION_TO_DELTA.merge(wait: Pos.new(0, 0))
     DELTA_TO_COMMAND = h.each_with_object({}) do |(dir, delta), o|
