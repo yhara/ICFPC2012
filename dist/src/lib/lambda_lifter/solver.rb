@@ -59,7 +59,7 @@ class LambdaLifter
     # 指定位置への最短距離のポイントを返す。
     def nearest_point(points, goal)
       return nil if points.empty?
-      return 0 if points.size == 1
+      return points.first if points.size == 1
       index = points.map.with_index{|point, i|
         [((goal.x - point.x).abs + (goal.y - point.y).abs), i]
       }.sort_by{|interval, _| interval }.first[1]
