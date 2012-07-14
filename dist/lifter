@@ -1,0 +1,4 @@
+#! /bin/sh
+
+cd `dirname $0`
+exec ./ruby/bin/ruby -I ruby/lib/ruby/1.9.1 -I ruby/lib/ruby/1.9.1/i686-linux src/bin/lambda_lifter

@@ -1,0 +1,4 @@
+#! /usr/bin/env ruby
+
+# TODO: LambdaLifter.run
+puts("A")

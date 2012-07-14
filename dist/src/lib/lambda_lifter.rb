@@ -10,8 +10,3 @@ require_relative 'lambda_lifter/pos'
 require_relative 'lambda_lifter/solver'
 require_relative 'lambda_lifter/mine'
 require_relative 'lambda_lifter/robot'
-
-if $0 == __FILE__
-  # TODO: LambdaLifter.run
-  puts("A")
-end
