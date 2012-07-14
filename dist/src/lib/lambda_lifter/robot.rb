@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+require 'forwardable'
+
 class LambdaLifter
   class Robot
     extend Forwardable
