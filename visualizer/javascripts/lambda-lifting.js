@@ -376,6 +376,7 @@ Object.extend(
       this.map = null;
       this.mapDataString = MapData.sample1;
       this.robotCommandQueue = [];
+      this.executedCommands = [];
       this.score = 0;
     },
 
@@ -429,6 +430,7 @@ Object.extend(
       if (this.robotCommandQueue.length >= 0) {
         $("registered-command").value = this.robotCommandQueue.join(",");
       }
+      $("executed-command").value = this.executedCommands.join("");
     },
 
     step: function() {
@@ -437,8 +439,10 @@ Object.extend(
         return;
       }
       // 1. Robot の行動
-      this.map.moveRobot(this.robotCommandQueue.shift());
+      var cmd = this.robotCommandQueue.shift();
+      this.map.moveRobot(cmd);
       this.map.drawCells();
+      this.executedCommands.push(cmd);
       // 2. Map の更新
       this.map.update();
       this.map.drawCells();
