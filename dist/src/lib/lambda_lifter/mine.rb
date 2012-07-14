@@ -39,9 +39,8 @@ class LambdaLifter
     private
 
     def parse(mine_description)
-      mine_description = mine_description.split
-      # マップを1行目から始まるように引数へ空配列を持つ配列を指定している。
-      grid = mine_description.each_with_object([[]]) do |line, g|
+      mine_description = mine_description.split("\n")
+      grid = mine_description.each_with_object([]) do |line, g|
         g << line.each_char.map {|c| LAYOUTS[c] }
       end
       longest_line_length = grid.max {|m| m.length }.length
