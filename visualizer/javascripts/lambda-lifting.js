@@ -417,9 +417,12 @@ Object.extend(
 
     displayMapWeatherStatus: function(){
       $("water").innerHTML = "Water:" + this.map.water;
-      $("flooding").innerHTML = "Flooding:" + this.map.flooding;
-      $("waterproof").innerHTML = "Waterproof:" + this.map.waterproof;
-      $("diving").innerHTML = "Diving:" + this.map.diving;
+      var floodCount = this.map.steps % this.map.flooding;
+      floodCount = isNaN(floodCount) ? 0 : floodCount;
+      $("flooding").innerHTML = "Flooding:" + this.map.flooding +
+                                "/" + floodCount;
+      $("waterproof").innerHTML = "Waterproof:" + this.map.waterproof +
+                                  "/" + this.map.diving;
     },
 
     displayCommands: function(){
