@@ -3,14 +3,15 @@ class LambdaLifter
   class Solver
     def initialize(mine)
       @mine = mine
-      @started_at = Time.now
       @cmdqueue = []
       # TODO: メモリサイズの懸念。ある程度のサイズになったらtruncateすべき。
       @cmd_mine_cache = {}
       @dead_cmd_route = {}
+      @checkpoint_watermarks = []
+      @checkpoint_route = []
       @dead_checkpoint_route = {}
       # TODO: ハイスコアを一緒に覚えておきSIGINTが送られたらその命令列
-      # を送る
+      # を送る。"A"が必要なものか、それ以外のものかを区別。
       @highscore = []
       @trapped_sigint = false
       Signal.trap(:INT){ @trapped_sigint = true }
@@ -19,42 +20,55 @@ class LambdaLifter
     # コマンドの列を文字列で返す。
     # 例："DLLRA"
     def solve
-      while checkpoint = find_checkpoint
-        next_pos = nil
-        while next_pos != checkpoint
-          return @highscore + "A" if @trapped_sigint
-          cmd = judge_next_command(checkpoint)
-          if cmd
-            @cmdqueue << cmd
-            if m = cached_mine(@cmdqueue)
-              @mine = m
-            else
-              @mine.step!(cmd)
-            end
-            if @mine.losing?
-              @dead_cmd_route[@cmdqueue] = true
-              rollback!
-            else
-              cache_mine(@cmdqueue, @mine)
-            end
-          else
-            # 実行可能なコマンドがない
-            rollback!
-          end
-          next_pos = @mine.robot.pos
-        end
+      loop do
+        # TODO: finished?になってもよりよいスコアを求める
+        return @cmdqueue.join if @mine.finished?
+        checkpoint = find_checkpoint
+        return highscore if not checkpoint
+        is_solved = solve_to_checkpoint(checkpoint)
+        checkpoint!(checkpoint) if is_solved
       end
-      return @cmdqueue.join
     end
 
     private
+    # checkpointまでの経路を解く
+    def solve_to_checkpoint(checkpoint)
+      next_pos = nil
+      while next_pos != checkpoint
+        return highscore if @trapped_sigint
+        cmd = judge_next_command(checkpoint)
+        if cmd
+          @cmdqueue << cmd
+          if m = cached_mine(@cmdqueue)
+            @mine = m
+          else
+            @mine.step!(cmd)
+          end
+          if @mine.losing?
+            rollback!
+            if not possible_checkpoint?(@checkpoint_route)
+              return false
+            end
+          else
+            cache_mine(@cmdqueue, @mine)
+          end
+        else
+          # 実行可能なコマンドがない
+          rollback!
+          if not possible_checkpoint?(@checkpoint_route)
+            return false
+          end
+        end
+        next_pos = @mine.robot.pos
+      end
+      return true
+    end
+
     # 次の目的地を探す
     # TODO: すでに試した場所だったら異なるcheckpointを設定
     # TODO: 簡単わかる無理そうなlambdaを検出する
     #       (たとえば岩にふさがっているものなど）
-    # TODO: finished?になってもよりよいスコアを求める
     def find_checkpoint
-      return nil if @mine.finished?
       checkpoint = nearest_point(@mine.lambdas, @mine.robot.pos)
       checkpoint = @mine.lift if checkpoint.nil?
       return checkpoint
@@ -90,12 +104,26 @@ class LambdaLifter
 
     # 1つ前のmineにロールバック
     def rollback!
-      @cmdqueue.pop
+      @dead_cmd_route[@cmdqueue] = true
+      cmd = @cmdqueue.pop
+      # 成功のケースがないcheckpointを記録
+      if !@checkpoint_watermarks.empty? &&
+          @cmdqueue.size < @checkpoint_watermarks.last
+        @dead_cmd_route[@checkpoint_route] = true
+        @checkpoint_watermarks.pop
+      end
       @mine = cached_mine(@cmdqueue)
     end
 
+    # 可能性のあるrouteか？
     def possible_route?(cmdqueue)
       return false if @dead_cmd_route[cmdqueue]
+      return true
+    end
+
+    # 可能性のあるcheckpointか？
+    def possible_checkpoint?(check_route)
+      return false if @dead_checkpoint_route[check_route]
       return true
     end
 
@@ -105,6 +133,15 @@ class LambdaLifter
 
     def cache_mine(cmdqueue, mine)
       @cmd_mine_cache[cmdqueue] = mine.dup
+    end
+
+    def checkpoint!(point)
+      @checkpoint_watermarks << @cmdqueue.size
+      @checkpoint_route << point
+    end
+
+    def highscore
+      @highscore + "A"
     end
   end
 end
