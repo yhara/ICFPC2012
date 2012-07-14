@@ -22,6 +22,11 @@ class LambdaLifter
       @map
     end
 
+    # ゲーム座標の(x, y)にあるものをシンボルで返す。左下が(1, 1)
+    def [](x, y)
+      # TODO
+    end
+
     # マップを新規作成する。
     def step(command)
       # TODO
