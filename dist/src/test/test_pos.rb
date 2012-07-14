@@ -14,6 +14,12 @@ class LambdaLifter
       assert_equal 6, pos.y
     end
 
+    should "-は引数のPos分減算した場所を返すこと" do
+      pos = LambdaLifter::Pos.new(2, 5) - LambdaLifter::Pos.new(1, 3)
+      assert_equal 1, pos.x
+      assert_equal 2, pos.y
+    end
+
     should "inspectは(x, y)の文字列を返すこと" do
       assert_equal "(1, 2)", LambdaLifter::Pos.new(1, 2).inspect
     end
