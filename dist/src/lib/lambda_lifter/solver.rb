@@ -6,7 +6,9 @@ class LambdaLifter
       @started_at = Time.now
       @cmdqueue = []
       # TODO: メモリサイズの懸念。ある程度のサイズになったらtruncateすべき。
-      @memo = {}
+      @cmd_mine_cache = {}
+      @dead_cmd_route = {}
+      @dead_checkpoint_route = {}
       # TODO: ハイスコアを一緒に覚えておきSIGINTが送られたらその命令列
       # を送る
       @highscore = []
@@ -17,11 +19,11 @@ class LambdaLifter
     # コマンドの列を文字列で返す。
     # 例："DLLRA"
     def solve
-      while next_goal = find_next_goal
+      while checkpoint = find_checkpoint
         next_pos = nil
-        while next_pos != next_goal
+        while next_pos != checkpoint
           return @highscore + "A" if @trapped_sigint
-          cmd = judge_next_command(next_goal)
+          cmd = judge_next_command(checkpoint)
           if cmd
             @cmdqueue << cmd
             if m = cached_mine(@cmdqueue)
@@ -30,10 +32,10 @@ class LambdaLifter
               @mine.step!(cmd)
             end
             if @mine.losing?
-              @memo[@cmdqueue] = false
+              @dead_cmd_route[@cmdqueue] = true
               rollback!
             else
-              @memo[@cmdqueue] = @mine.dup
+              cache_mine(@cmdqueue, @mine)
             end
           else
             # 実行可能なコマンドがない
@@ -47,21 +49,21 @@ class LambdaLifter
 
     private
     # 次の目的地を探す
-    # TODO: すでに試した場所だったら異なるnext_goalを設定
+    # TODO: すでに試した場所だったら異なるcheckpointを設定
     # TODO: 簡単わかる無理そうなlambdaを検出する
     #       (たとえば岩にふさがっているものなど）
     # TODO: finished?になってもよりよいスコアを求める
-    def find_next_goal
+    def find_checkpoint
       return nil if @mine.finished?
-      next_goal = nearest_point(@mine.lambdas, @mine.robot.pos)
-      next_goal = @mine.lift if next_goal.nil?
-      return next_goal
+      checkpoint = nearest_point(@mine.lambdas, @mine.robot.pos)
+      checkpoint = @mine.lift if checkpoint.nil?
+      return checkpoint
     end
 
     # 次のrobotの命令を判断
     # 今のところ直線の最短距離のみ
-    # TODO: 障害物も考慮した最短距離にしたい
-    #       命令が制限を超えるようなケース
+    # TODO: 命令が制限を超えるようなケース
+    #       道中で取れるラムダがあれば取っておく
     def judge_next_command(goal)
       next_position = nearest_point(movable_positions(@mine.robot), goal)
       return nil if next_position.nil?
@@ -69,6 +71,7 @@ class LambdaLifter
     end
 
     # 指定位置への最短距離のポイントを返す。
+    # TODO: 障害物も考慮した最短距離にしたい
     def nearest_point(points, goal)
       return nil if points.empty?
       return points.first if points.size == 1
@@ -92,12 +95,16 @@ class LambdaLifter
     end
 
     def possible_route?(cmdqueue)
-      return false if cached_mine(cmdqueue) == false
+      return false if @dead_cmd_route[cmdqueue]
       return true
     end
 
     def cached_mine(cmdqueue)
-      @memo[cmdqueue]
+      @cmd_mine_cache[cmdqueue]
+    end
+
+    def cache_mine(cmdqueue, mine)
+      @cmd_mine_cache[cmdqueue] = mine.dup
     end
   end
 end
