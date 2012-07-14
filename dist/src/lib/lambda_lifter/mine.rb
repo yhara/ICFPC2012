@@ -126,7 +126,7 @@ class LambdaLifter
               set(width + 1, height - 1, :rock)
             end
           when :closed_lift
-            if @lambdas == 0
+            if @lambdas == []
              set(width, height, :open_lift)
             end
           end
@@ -186,7 +186,7 @@ class LambdaLifter
 
     def parse(mine_description)
       mine_description = mine_description.split("\n")
-      @lambdas = 0
+      @lambdas = []
       robot_ruby_x = nil
       robot_ruby_y = nil
       grid = mine_description.each_with_object([]).with_index do |(line, g), y|
@@ -194,9 +194,9 @@ class LambdaLifter
           layout = LAYOUTS[c]
           case layout
           when :lambda
-            @lambdas += 1
+            @lambdas << Pos.new(x, y)
           when :closed_lift
-            @lift = [x, y]
+            @lift = Pos.new(x, y)
           when :robot
             robot_ruby_x = x
             robot_ruby_y = y
