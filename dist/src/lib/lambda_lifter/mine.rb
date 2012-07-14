@@ -172,6 +172,8 @@ class LambdaLifter
             @lambdas += 1
           when :closed_lift
             @lift = [x, y]
+          when :robot
+            @robot = Robot.new(self, x, y)
           end
           layout
         end
