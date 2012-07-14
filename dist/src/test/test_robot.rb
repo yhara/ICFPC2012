@@ -71,5 +71,16 @@ class LambdaLifter
       EOD
       assert_equal [Pos.new(5, 4), Pos.new(4, 3)], mine.robot.movable_positions
     end
+
+    should "command_toは移動に使うコマンドを返せること" do
+      x = 2
+      y = 3
+      robot = LambdaLifter::Robot.new(nil, x, y)
+      assert_equal 'L', robot.command_to(Pos.new(x - 1, y    ))
+      assert_equal 'R', robot.command_to(Pos.new(x + 1, y    ))
+      assert_equal 'U', robot.command_to(Pos.new(x    , y + 1))
+      assert_equal 'D', robot.command_to(Pos.new(x    , y - 1))
+      assert_equal 'W', robot.command_to(Pos.new(x    , y    ))
+    end
   end
 end

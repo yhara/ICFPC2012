@@ -32,6 +32,10 @@ class LambdaLifter
       end
     end
 
+    def command_to(position)
+      return DELTA_TO_COMMAND[position - pos]
+    end
+
     private
 
     DIRECTION_TO_DELTA = {
@@ -40,5 +44,10 @@ class LambdaLifter
       up:    Pos.new( 0, +1),
       down:  Pos.new( 0, -1),
     }
+
+    h = DIRECTION_TO_DELTA.merge(wait: Pos.new(0, 0))
+    DELTA_TO_COMMAND = h.each_with_object({}) do |(dir, delta), o|
+      o[delta] = Mine::COMMANDS.rassoc(dir).first
+    end.freeze
   end
 end
