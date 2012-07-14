@@ -39,7 +39,7 @@ class LambdaLifter
         cmd = judge_next_command(checkpoint)
         if cmd
           @cmdqueue << cmd
-          if m = cached_mine(@cmdqueue)
+          if m = cached_mine(@checkpoint_route, @cmdqueue)
             @mine = m
           else
             @mine.step!(cmd)
@@ -50,7 +50,7 @@ class LambdaLifter
               return false
             end
           else
-            cache_mine(@cmdqueue, @mine)
+            cache_mine(@checkpoint_route, @cmdqueue, @mine)
           end
         else
           # 実行可能なコマンドがない
@@ -111,8 +111,10 @@ class LambdaLifter
           @cmdqueue.size < @checkpoint_watermarks.last
         @dead_cmd_route[@checkpoint_route] = true
         @checkpoint_watermarks.pop
+        expire_cache_mine(@checkpoint_route)
+        @checkpoint_route.pop
       end
-      @mine = cached_mine(@cmdqueue)
+      @mine = cached_mine(@checkpoint_route, @cmdqueue)
     end
 
     # 可能性のあるrouteか？
@@ -127,12 +129,18 @@ class LambdaLifter
       return true
     end
 
-    def cached_mine(cmdqueue)
-      @cmd_mine_cache[cmdqueue]
+    def cached_mine(checkpoint_route, cmdqueue)
+      cache = (@cmd_mine_cache[checkpoint_route] ||= {})
+      return cache[cmdqueue]
     end
 
-    def cache_mine(cmdqueue, mine)
-      @cmd_mine_cache[cmdqueue] = mine.dup
+    def cache_mine(checkpoint_route, cmdqueue, mine)
+      cache = (@cmd_mine_cache[checkpoint_route] ||= {})
+      cache[cmdqueue] = mine.dup
+    end
+
+    def expire_cache_mine(checkpoint_route)
+      @cmd_mine_cache.delete(checkpoint_route)
     end
 
     def checkpoint!(point)
