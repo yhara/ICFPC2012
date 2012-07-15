@@ -44,9 +44,8 @@ RL
   end
 end
 
-def sdl(mine, sleeptime=nil)
+def sdl(mine)
   LambdaLifter::SdlVisualizer.instance.mine = mine
-  sleep sleeptime if sleeptime
 end
 
 if __FILE__==$0

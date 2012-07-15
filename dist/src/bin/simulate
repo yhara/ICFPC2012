@@ -9,9 +9,9 @@ require_relative "../lib/lambda_lifter"
 #  Solver = MySolver
 #end
 
-def solve!(maptxt)
+def solve!(maptxt, opts)
   mine = LambdaLifter::Mine.new(maptxt)
-  sdl(mine) if defined?(sdl)
+  sdl(mine) if opts[:sdl]
   puts "solving..."
   route = LambdaLifter::Solver.new(mine.dup).solve
   puts "route: #{route}"
@@ -21,10 +21,10 @@ def solve!(maptxt)
     puts mine.ascii_map
     puts "score: #{mine.score}  next command: #{cmd}"
 
-    sleep 0.5
+    sleep opts[:wait]
 
     mine.step!(cmd)
-    sdl(mine) if defined?(sdl)
+    sdl(mine) if opts[:sdl]
   end
   puts 
   puts "result: #{mine.finished?}"
@@ -35,6 +35,7 @@ opts = Trollop.options do
   banner "usage: #$0 mapfile"
 
   opt :sdl, "SDLによる描画を行う", default: false
+  opt :wait, "ウェイト(デフォルト: 0.5秒)", default: 0.5
   opt :help, "ヘルプ"
 end
 Trollop.die "missing filename" if ARGV.size == 0
@@ -44,9 +45,9 @@ if opts[:sdl]
   require_relative "../../../mygame/sdlview.rb"
 
   Thread.start{
-    solve!(ARGF.read)
+    solve!(ARGF.read, opts)
   }
   LambdaLifter::SdlVisualizer.instance.run
 else
-  solve!(ARGF.read)
+  solve!(ARGF.read, opts)
 end
