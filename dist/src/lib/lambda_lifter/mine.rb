@@ -69,7 +69,7 @@ class LambdaLifter
         @number_of_waterproof = 0
         @trampolines = []
         @targets = []
-        @trampoline_relationships = []
+        @trampoline_relationships = {}
         parse(mine_description)
         @updated_map = @map.dup
         @commands = []
@@ -362,46 +362,20 @@ class LambdaLifter
       end
     end
 
-    def parse_flood(mine_description)
-      if /Water / =~ mine_description ||
-         /Flooding / =~ mine_description ||
-         /Waterproof / =~ mine_description
-        _mine_description = mine_description.dup
-        if /Water / =~ mine_description
-          @water = _mine_description.scan(/^Water (\d*)/)[0][0].to_i
-          _mine_description.sub!(/^Water .*/, '')
-        end
-        if /Flooding / =~ mine_description
-          @flooding = _mine_description.scan(/^Flooding (\d*)/)[0][0].to_i
-          _mine_description.sub!(/^Flooding .*/, '')
-        end
-        if /Waterproof / =~ mine_description
-          @waterproof = _mine_description.scan(/^Waterproof (\d*)/)[0][0].to_i
-          _mine_description.sub!(/^Waterproof .*/, '')
-        end
-        _mine_description.strip!
-        return _mine_description 
+    def parse_mine_params(line)
+      if line.match(/^(Water|Flooding|Waterproof) (\d+)/)
+        self.instance_variable_set("@" + $1.downcase, $2.to_i)
+        return true
+      elsif line.match(/^Trampoline (\w) targets (\d)/)
+        @trampoline_relationships[LAYOUTS[$1]] = LAYOUTS[$2]
+        return true
+      else
+        return false
       end
-      return mine_description
-    end
-
-    def parse_trampoline(mine_description)
-      if /Trampoline / =~ mine_description
-        _mine_description = mine_description.dup
-        rel = _mine_description.scan(/^Trampoline (\w) targets (\d)/)
-        @trampoline_relationships = rel.each_with_object({}) {|(tra, tar), h|
-          h.merge!(LAYOUTS[tra] => LAYOUTS[tar]) }
-        _mine_description.gsub!(/^Trampoline .*/, '')
-        _mine_description.strip!
-        return _mine_description 
-      end
-      return mine_description
     end
 
     def parse(mine_description)
-      remaining_text_and_options = parse_flood(mine_description)
-      remaining_text = parse_trampoline(remaining_text_and_options)
-      _mine_description = remaining_text.split("\n")
+      _mine_description = mine_description.split("\n")
       _lambdas = []
       _lift = []
       _rocks = []
@@ -410,6 +384,8 @@ class LambdaLifter
       robot_ruby_x = nil
       robot_ruby_y = nil
       grid = _mine_description.each_with_object([]).with_index do |(line, g), y|
+        got_param = parse_mine_params(line)
+        next if got_param || line.strip.chomp.empty?
         g << line.each_char.map.with_index do |c, x|
           layout = LAYOUTS[c]
           case layout
