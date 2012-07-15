@@ -1,9 +1,14 @@
 #! /usr/bin/env ruby
 
+require "logger"
 require "pathname"
 require "timeout"
 
-t = 100 + rand(100)
+to_sigint_timeout = 100 + rand(100)
+to_sigkill_timeout = 10
+
+#to_sigint_timeout = 2
+#to_sigkill_timeout = 0.0001
 
 map_path = Pathname.glob("*.map").first
 if !map_path
@@ -11,25 +16,43 @@ if !map_path
   exit(EXIT_FAILURE)
 end
 
-puts("set timeout #{t}.")
-pid = spawn("./lifter", in: map_path.to_s)
+l = Logger.new(STDOUT)
+l.info("timeout is #{to_sigint_timeout} seconds.")
+out_r, out_w = *IO.pipe
+err_r, err_w = *IO.pipe
+pid = spawn("./lifter", in: map_path.to_s, out: out_w, err: err_w)
 begin
-  timeout(t) do
+  timeout(to_sigint_timeout) do
     Process.wait(pid)
-    puts
-    puts("lifter is finished.")
+    l.info("lifter is finished.")
   end
 rescue Timeout::Error
-  puts("timeout #{t} sec and sending SIGINT to lifter...")
+  l.info("timeout #{to_sigint_timeout} seconds and sending SIGINT to lifter...")
   Process.kill(:INT, pid)
   begin
-    timeout(10) do
-      puts("sent SIGINT and waiting lifter to exit or 10 seconds...")
+    timeout(to_sigkill_timeout) do
+      l.info("sent SIGINT and waiting lifter to exit or #{to_sigkill_timeout} seconds...")
       Process.wait(pid)
-      puts("lifter is finished.")
+      l.info("lifter is finished.")
     end
   rescue Timeout::Error
-    puts("timeout 10 sec and sending SIGKILL to lifter...")
+    l.warn("timeout #{to_sigkill_timeout} seconds and sending SIGKILL to lifter...")
     Process.kill(:KILL, pid)
+  end
+ensure
+  out_w.close
+  err_w.close
+
+  l.info(<<EOS)
+lifter stdout:
+#{out_r.read}
+EOS
+
+  s = err_r.read
+  if s.length > 0
+    l.warn(<<EOS)
+lifter stderr:
+#{s}
+EOS
   end
 end
