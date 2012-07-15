@@ -261,6 +261,7 @@ class LambdaLifter
           @rocks << Pos[rock.x + 1, rock.y - 1]
         end
       end
+      @rocks.uniq!
 
       if @lift && @lambdas.length == 0 && self[@lift.x, @lift.y] == :closed_lift
         set(@lift.x, @lift.y, :open_lift)

@@ -389,8 +389,6 @@ R#####
       end
 
       should "先にupdateされたlayoutが後のupdateに影響されないこと" do
-        # 2.3 Map Update の Note: の記述参考
-        pend # rocks に重複したPosが含まれるバグで通らない
         mine = Mine.new(<<-'EOD')
 R####
 #* *#
