@@ -356,12 +356,11 @@ R###
           mine.step!("D")
           assert_equal :losing, mine.finished?
 
-          pend
           mine = Mine.new(<<-'EOD')
 #####
 #*  #
-#.  #
-#  R#
+#*  #
+#. R#
 #####
           EOD
           mine.step!("L")
