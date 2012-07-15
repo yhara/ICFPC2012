@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # シミュレータ
 class LambdaLifter
+  class RobotUnmovableError < StandardError; end
+
   class Mine
     LAYOUTS = {
       'R' => :robot,
@@ -23,13 +25,14 @@ class LambdaLifter
     }.freeze
 
     attr_accessor :robot, :lambdas, :lift
-    attr_reader :width, :height
+    attr_reader :width, :height, :commands
 
     def initialize(mine_description)
       unless mine_description.nil?
         @map = nil
         parse(mine_description)
         @updated_map = @map.dup
+        @commands = []
       end
     end
 
@@ -60,6 +63,7 @@ class LambdaLifter
       mine.instance_variable_set(:@width, @width)
       mine.instance_variable_set(:@height, @height)
       mine.instance_variable_set(:@lift, @lift)
+      mine.instance_variable_set(:@commands, @commands)
       return mine
     end
 
@@ -80,6 +84,12 @@ class LambdaLifter
     def step!(command)
       @updated_map = @map.dup
       @command = COMMANDS[command]
+
+      if @command
+        @commands << @command
+      else
+        raise RobotUnmovableError
+      end
 
       if @robot.movable?(@command)
         set(@robot.x, @robot.y, :empty)

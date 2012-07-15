@@ -98,6 +98,13 @@ class LambdaLifter
         mine.step!("L")
         assert_equal [:wall, :empty, :robot, :empty, :wall], mine.raw_map[2]
       end
+
+      should "存在しないコマンドは例外が発生すること" do
+        mine = Mine.new(ROBOT_CENTERED_MAP)
+        assert_raise(RobotUnmovableError) do
+          mine.step!("(")
+        end
+      end
     end
 
     context "dupが呼ばれたとき" do
@@ -128,6 +135,7 @@ class LambdaLifter
         assert_equal @mine.width, mine2.width
         assert_equal @mine.height, mine2.height
         assert_equal @mine.lift, mine2.lift
+        assert_equal @mine.commands, mine2.commands
         assert_not_equal @mine.lambdas.object_id, mine2.lambdas.object_id
       end
     end
