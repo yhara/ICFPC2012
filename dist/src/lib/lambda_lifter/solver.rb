@@ -55,9 +55,9 @@ class LambdaLifter
           rollback!
           return false if cur_check_route != @check_route
         end
-        #debugger
-        #p [:solve, @commands.join]
-        #puts @mine.ascii_map
+        debugger
+        p [:solve, @commands.join]
+        puts @mine.ascii_map
         next_pos = @mine.robot.pos
       end
       return true
@@ -85,9 +85,11 @@ class LambdaLifter
       cmd = next_position.nil? ? nil : @mine.robot.command_to(next_position)
       return false if cmd.nil?
       @commands << cmd
+      #p [:exe_commands, @commands.join]
       if m = cached_mine(@commands)
         @mine = m
       else
+        @mine = @mine.dup
         @mine.step!(cmd)
         cache_mine(@commands, @mine)
         if @highscore[:score] < @mine.score
@@ -95,6 +97,7 @@ class LambdaLifter
           @highscore[:cmd] = @commands.join
         end
       end
+      #puts @mine.ascii_map
       if @mine.losing? || unchanged_mine?(@mine)
         return false
       end
@@ -121,8 +124,8 @@ class LambdaLifter
 
     # 1つ前のmineにロールバック
     def rollback!
-      p [:rollback!]
-      @dead_cmd_routes << @commands.join
+      #p [:rollback!]
+      @dead_cmd_route[@commands.join] = true
       cmd = @commands.pop
       # 成功のケースがないcheckpointを記録
       if !@checkpoint_watermarks.empty? &&
@@ -158,7 +161,7 @@ class LambdaLifter
 
     def cache_mine(commands, mine)
       cache = (@cmd_mine_cache[check_route_to_key(@check_route)] ||= {})
-      cache[commands.join] = (mine.dup)
+      cache[commands.join] = mine
     end
 
     def expire_cache_mine(check_route)
