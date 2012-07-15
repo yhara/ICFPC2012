@@ -109,6 +109,8 @@ class LambdaLifter
   
     # マップを書き換える。
     def step!(command)
+      raise "This mine is already finished" if finished?
+
       @command = COMMANDS[command]
       raise UnknownCommandError if @command.nil?
       @commands << command
