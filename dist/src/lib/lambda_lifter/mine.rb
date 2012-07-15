@@ -176,52 +176,7 @@ class LambdaLifter
 
       # 岩を更新する
       @updated_map = Marshal.load(Marshal.dump(@map))
-      width = 1
-      height = 1
-      while height <= @height
-        while width <= @width
-          layout = self[width, height]
-          case layout
-          when :rock
-            if self[width, height - 1] == :empty
-              set(width, height, :empty)
-              set(width, height - 1, :rock)
-              @rocks.delete(Pos[width, height])
-              @rocks << Pos[width, height - 1]
-            elsif self[width,     height - 1] == :rock  &&
-                  self[width + 1, height    ] == :empty &&
-                  self[width + 1, height - 1] == :empty
-              set(width, height, :empty)
-              set(width + 1, height - 1, :rock)
-              @rocks.delete(Pos[width, height])
-              @rocks << Pos[width + 1, height - 1]
-            elsif self[width,     height - 1] == :rock       &&
-                  (self[width + 1, height    ] != :empty ||
-                   self[width + 1, height - 1] != :empty   ) &&
-                  self[width - 1, height    ] == :empty      &&
-                  self[width - 1, height - 1] == :empty
-              set(width, height, :empty)
-              set(width - 1, height - 1, :rock)
-              @rocks.delete(Pos[width, height])
-              @rocks << Pos[width - 1, height - 1]
-            elsif self[width,     height - 1] == :lambda &&
-                  self[width + 1, height    ] == :empty  &&
-                  self[width + 1, height - 1] == :empty
-              set(width, height, :empty)
-              set(width + 1, height - 1, :rock)
-              @rocks.delete(Pos[width, height])
-              @rocks << Pos[width + 1, height - 1]
-            end
-          when :closed_lift
-            if @lambdas.length == 0
-              set(width, height, :open_lift)
-            end
-          end
-          width += 1
-        end
-        width = 0
-        height += 1
-      end
+      process_map
 
       if @command == :abort
         @abort = true
@@ -269,6 +224,45 @@ class LambdaLifter
     end
 
     private
+
+    def process_map
+      _rocks = @rocks.dup
+      _rocks.each do |rock|
+        if self[rock.x, rock.y - 1] == :empty
+          set(rock.x, rock.y, :empty)
+          set(rock.x, rock.y - 1, :rock)
+          @rocks.delete(Pos[rock.x, rock.y])
+          @rocks << Pos[rock.x, rock.y - 1]
+        elsif self[rock.x,     rock.y - 1] == :rock  &&
+              self[rock.x + 1, rock.y    ] == :empty &&
+              self[rock.x + 1, rock.y - 1] == :empty
+          set(rock.x, rock.y, :empty)
+          set(rock.x + 1, rock.y - 1, :rock)
+          @rocks.delete(Pos[rock.x, rock.y])
+          @rocks << Pos[rock.x + 1, rock.y - 1]
+        elsif self[rock.x,     rock.y - 1] == :rock       &&
+              (self[rock.x + 1, rock.y    ] != :empty ||
+               self[rock.x + 1, rock.y - 1] != :empty)    &&
+              self[rock.x - 1, rock.y    ] == :empty      &&
+              self[rock.x - 1, rock.y - 1] == :empty
+          set(rock.x, rock.y, :empty)
+          set(rock.x - 1, rock.y - 1, :rock)
+          @rocks.delete(Pos[rock.x, rock.y])
+          @rocks << Pos[rock.x - 1, rock.y - 1]
+        elsif self[rock.x,     rock.y - 1] == :lambda &&
+              self[rock.x + 1, rock.y    ] == :empty  &&
+              self[rock.x + 1, rock.y - 1] == :empty
+          set(rock.x, rock.y, :empty)
+          set(rock.x + 1, rock.y - 1, :rock)
+          @rocks.delete(Pos[rock.x, rock.y])
+          @rocks << Pos[rock.x + 1, rock.y - 1]
+        end
+      end
+
+      if @lift && @lambdas.length == 0 && self[@lift.x, @lift.y] == :closed_lift
+        set(@lift.x, @lift.y, :open_lift)
+      end
+    end
 
     def process_rock(direction) 
       case direction
