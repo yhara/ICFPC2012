@@ -37,25 +37,14 @@ class LambdaLifter
       cur_check_route = @check_route.dup
       while next_pos != checkpoint
         return highscore if @trapped_sigint
-        cmd = judge_next_command(checkpoint)
-        if cmd
-          @cmdqueue << cmd
-          if m = cached_mine(@check_route, @cmdqueue)
-            @mine = m
-          else
-            @mine.step!(cmd)
-          end
-          if @mine.losing?
-            rollback!
-            return false if cur_check_route != @check_route
-          else
-            cache_mine(@check_route, @cmdqueue, @mine)
-          end
-        else
-          # 実行可能なコマンドがない
+        success = exec_next_command(checkpoint)
+        if not success
+          # コマンド実行失敗
           rollback!
           return false if cur_check_route != @check_route
         end
+        debugger if @cmdqueue.join == "LDLLDRRDRL"
+        puts @mine.ascii_map
         next_pos = @mine.robot.pos
       end
       return true
@@ -77,12 +66,26 @@ class LambdaLifter
 
     # 次のrobotの命令を判断
     # 今のところ直線の最短距離のみ
+    # 以前のmapと変化がない場合はnil
     # TODO: 命令が制限を超えるようなケース
     #       道中で取れるラムダがあれば取っておく
-    def judge_next_command(goal)
+    def exec_next_command(goal)
       next_position = nearest_point(movable_positions(@mine.robot), goal)
-      return nil if next_position.nil?
-      return @mine.robot.command_to(next_position)
+      cmd = next_position.nil? ? nil : @mine.robot.command_to(next_position)
+      if cmd
+        @cmdqueue << cmd
+        if m = cached_mine(@cmdqueue)
+          @mine = m
+        else
+          @mine.step!(cmd)
+        end
+        if @mine.losing? || unchanged_mine?(@mine)
+          return false
+        else
+          cache_mine(@cmdqueue, @mine)
+        end
+      end
+      return true
     end
 
     # 指定位置への最短距離のポイントを返す。
@@ -105,43 +108,47 @@ class LambdaLifter
 
     # 1つ前のmineにロールバック
     def rollback!
-      @dead_cmd_route[@cmdqueue] = true
+      @dead_cmd_route[@cmdqueue.join] = true
       cmd = @cmdqueue.pop
       # 成功のケースがないcheckpointを記録
       if !@checkpoint_watermarks.empty? &&
           @cmdqueue.size < @checkpoint_watermarks.last
-        @dead_cmd_route[@check_route] = true
+        @dead_check_route[check_route_to_key(@check_route)] = true
         @checkpoint_watermarks.pop
         expire_cache_mine(@check_route)
         @check_route.pop
       end
-      @mine = cached_mine(@check_route, @cmdqueue)
+      @mine = cached_mine(@cmdqueue)
     end
 
     # 可能性のあるrouteか？
     def possible_route?(cmdqueue)
-      return false if @dead_cmd_route[cmdqueue]
+      return false if @dead_cmd_route[cmdqueue.join]
       return true
     end
 
     # 可能性のあるcheckpointのrouteか？
     def possible_check_route?(check_route)
-      return false if @dead_check_route[check_route]
+      return false if @dead_check_route[check_route_to_key(check_route)]
       return true
     end
 
-    def cached_mine(check_route, cmdqueue)
-      cache = (@cmd_mine_cache[check_route] ||= {})
-      return cache[cmdqueue]
+    def cached_mine(cmdqueue)
+      (@check_route.size-1).downto(0) do |i|
+        cache = (@cmd_mine_cache[check_route_to_key(@check_route[0..i])] ||= {})
+        m = cache[cmdqueue.join]
+        return m if not m.nil?
+      end
+      return nil
     end
 
-    def cache_mine(check_route, cmdqueue, mine)
-      cache = (@cmd_mine_cache[check_route] ||= {})
-      cache[cmdqueue] = mine.dup
+    def cache_mine(cmdqueue, mine)
+      cache = (@cmd_mine_cache[check_route_to_key(@check_route)] ||= {})
+      cache[cmdqueue.join] = (mine.dup)
     end
 
     def expire_cache_mine(check_route)
-      @cmd_mine_cache.delete(check_route)
+      @cmd_mine_cache.delete(check_route_to_key(check_route))
     end
 
     def checkpoint!(point)
@@ -156,6 +163,17 @@ class LambdaLifter
 
     def highscore
       @highscore + ["A"]
+    end
+
+    def unchanged_mine?(cur)
+      return false if @cmdqueue.size <= 2
+      prev_mine = cached_mine(@cmdqueue[0..-2])
+      return false if prev_mine.nil?
+      return prev_mine.eql?(cur)
+    end
+
+    def check_route_to_key(route)
+      route.map(&:to_s).join("->")
     end
   end
 end
