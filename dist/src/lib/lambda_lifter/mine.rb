@@ -59,7 +59,7 @@ class LambdaLifter
     # 自分自身を複製したMineオブジェクトを返す。
     def dup
       mine = Mine.new(nil)
-      mine.instance_variable_set(:@map, @map.dup)
+      mine.instance_variable_set(:@map, Marshal.load(Marshal.dump(@map)))
       robot = Robot.new(mine, @robot.x, @robot.y)
       mine.instance_variable_set(:@robot, robot)
       mine.instance_variable_set(:@lambdas, @lambdas.dup)
@@ -86,7 +86,7 @@ class LambdaLifter
   
     # マップを書き換える。
     def step!(command)
-      @updated_map = @map.dup
+      @updated_map = Marshal.load(Marshal.dump(@map))
       @command = COMMANDS[command]
       raise UnknownCommandError if @command.nil?
       @commands << command
