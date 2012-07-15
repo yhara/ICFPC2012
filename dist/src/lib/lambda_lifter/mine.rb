@@ -81,17 +81,37 @@ class LambdaLifter
             # るため、@map を直接書き換える。
             set(@robot.x - 2, @robot.y, :rock)
           end
+          if self[@robot.x - 1, @robot.y] == :lambda
+            @lambdas.delete([@robot.x - 1, @robot.y])
+          end
           set(@robot.x - 1, @robot.y, :robot)
+          @robot = Robot.new(self,
+            @robot.x - 1, @robot.y)
         when :right
             # 同上。
           if self[@robot.x + 1, @robot.y] == :rock
             self[@robot.x + 2, @robot.y] = :rock
           end
+          if self[@robot.x + 1, @robot.y] == :lambda
+            @lambdas.delete([@robot.x + 1, @robot.y])
+          end
           set(@robot.x + 1, @robot.y, :robot)
+          @robot = Robot.new(self,
+            @robot.x + 1, @robot.y)
         when :up
+          if self[@robot.x, @robot.y + 1] == :lambda
+            @lambdas.delete([@robot.x, @robot.y + 1])
+          end
           set(@robot.x, @robot.y + 1, :robot)
+          @robot = Robot.new(self,
+            @robot.x, @robot.y + 1)
         when :down
+          if self[@robot.x, @robot.y - 1] == :lambda
+            @lambdas.delete([@robot.x, @robot.y - 1])
+          end
           set(@robot.x, @robot.y - 1, :robot)
+          @robot = Robot.new(self,
+            @robot.x, @robot.y - 1)
         end
       end
 
@@ -126,7 +146,11 @@ class LambdaLifter
               set(width + 1, height - 1, :rock)
             end
           when :closed_lift
+<<<<<<< HEAD
             if @lambdas == []
+=======
+            if @lambdas.length == 0
+>>>>>>> マップがLambdaの位置を把握できるように修正
              set(width, height, :open_lift)
             end
           end
@@ -186,7 +210,8 @@ class LambdaLifter
 
     def parse(mine_description)
       mine_description = mine_description.split("\n")
-      @lambdas = []
+      _lambdas = []
+      _lift = []
       robot_ruby_x = nil
       robot_ruby_y = nil
       grid = mine_description.each_with_object([]).with_index do |(line, g), y|
@@ -194,9 +219,9 @@ class LambdaLifter
           layout = LAYOUTS[c]
           case layout
           when :lambda
-            @lambdas << Pos.new(x, y)
+            _lambdas << [x, y]
           when :closed_lift
-            @lift = Pos.new(x, y)
+            _lift = [x, y]
           when :robot
             robot_ruby_x = x
             robot_ruby_y = y
@@ -206,6 +231,12 @@ class LambdaLifter
       end
       @width = grid.max {|m| m.length }.length
       @height = grid.length
+      if _lambdas.any?
+        @lambdas = _lambdas.map {|x, y| Pos.new(*game_axis(x, y)) }
+      end
+      if _lift.any?
+        @lift = Pos.new(*game_axis(_lift[0], _lift[1]))
+      end
       @robot = Robot.new(self,
                          *game_axis(robot_ruby_x, robot_ruby_y))
       # 最大幅より短い行は、文字数が足りない分だけ:emptyを持たせる。
