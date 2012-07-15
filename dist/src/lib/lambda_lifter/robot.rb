@@ -4,6 +4,7 @@ require 'forwardable'
 class LambdaLifter
   class Robot
     extend Forwardable
+    include Comparable
 
     attr_reader :pos
     def_delegators(:@pos, :x, :y, :<=>)
@@ -11,10 +12,6 @@ class LambdaLifter
     def initialize(mine, x, y)
       @mine = mine
       @pos = Pos.new(x, y)
-    end
-
-    def ==(other)
-      return (self <=> other).zero?
     end
 
     def movable_positions
