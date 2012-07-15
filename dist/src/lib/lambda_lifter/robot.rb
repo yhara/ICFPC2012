@@ -6,11 +6,15 @@ class LambdaLifter
     extend Forwardable
 
     attr_reader :pos
-    def_delegators(:@pos, :x, :y)
+    def_delegators(:@pos, :x, :y, :<=>)
 
     def initialize(mine, x, y)
       @mine = mine
       @pos = Pos.new(x, y)
+    end
+
+    def ==(other)
+      return (self <=> other).zero?
     end
 
     def movable_positions
