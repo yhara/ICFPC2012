@@ -382,8 +382,8 @@ class LambdaLifter
       if /Trampoline / =~ mine_description
         _mine_description = mine_description.dup
         rel = _mine_description.scan(/^Trampoline (\w) targets (\d)/)
-        @trampoline_relationships = rel.map {|r|
-          [LAYOUTS[r[0]], LAYOUTS[r[1]]] }
+        @trampoline_relationships = rel.each_with_object({}) {|(tra, tar), h|
+          h.merge!(LAYOUTS[tra] => LAYOUTS[tar]) }
         _mine_description.gsub!(/^Trampoline .*/, '')
         _mine_description.strip!
         return _mine_description 
@@ -433,12 +433,12 @@ class LambdaLifter
         @rocks = _rocks.map {|x, y| Pos.new(*game_axis(x, y)) }
       end
       if _trampolines.any?
-        @trampolines = _trampolines.map {|l, x, y|
-          [l, Pos.new(*game_axis(x, y))] }
+        @trampolines = _trampolines.each_with_object({}) {|(l, x, y), h|
+          h.merge!(l => Pos.new(*game_axis(x, y))) }
       end
       if _targets.any?
-        @targets = _targets.map {|l, x, y|
-          [l, Pos.new(*game_axis(x, y))] }
+        @targets = _targets.each_with_object({}) {|(l, x, y), h|
+          h.merge!(l => Pos.new(*game_axis(x, y))) }
       end
       @robot = Robot.new(self,
                          *game_axis(robot_ruby_x, robot_ruby_y))

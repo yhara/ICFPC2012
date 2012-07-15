@@ -168,12 +168,12 @@ Waterproof 42
 Trampoline A targets 1
 Trampoline B targets 2
         EOD
-        trampolines = [[:trampoline_a, Pos.new(4, 5)],
-                       [:trampoline_b, Pos.new(10, 2)]]
-        targets = [[:target_1, Pos.new(11, 5)],
-                   [:target_2, Pos.new(2, 2)]]
-        trampoline_relationships = [[:trampoline_a, :target_1],
-                                    [:trampoline_b, :target_2]]
+        trampolines = {:trampoline_a => Pos.new(4, 5),
+                       :trampoline_b => Pos.new(10, 2)}
+        targets = {:target_1 => Pos.new(11, 5),
+                   :target_2 => Pos.new(2, 2)}
+        trampoline_relationships = {:trampoline_a => :target_1,
+                                    :trampoline_b => :target_2}
         assert_equal trampolines, mine.trampolines
         assert_equal targets, mine.targets
         assert_equal trampoline_relationships, mine.trampoline_relationships
@@ -193,12 +193,12 @@ Trampoline A targets 1
 Waterproof 42
 Trampoline B targets 2
         EOD
-        trampolines = [[:trampoline_a, Pos.new(4, 5)],
-                       [:trampoline_b, Pos.new(10, 2)]]
-        targets = [[:target_1, Pos.new(11, 5)],
-                   [:target_2, Pos.new(2, 2)]]
-        trampoline_relationships = [[:trampoline_a, :target_1],
-                                    [:trampoline_b, :target_2]]
+        trampolines = {:trampoline_a => Pos.new(4, 5),
+                       :trampoline_b => Pos.new(10, 2)}
+        targets = {:target_1 => Pos.new(11, 5),
+                   :target_2 => Pos.new(2, 2)}
+        trampoline_relationships = {:trampoline_a => :target_1,
+                                    :trampoline_b => :target_2}
         assert_equal 42, mine.waterproof
         assert_equal trampolines, mine.trampolines
         assert_equal targets, mine.targets
