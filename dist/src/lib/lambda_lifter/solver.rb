@@ -137,8 +137,7 @@ class LambdaLifter
 
     # 可能性のあるrouteか？
     def possible_route?(commands)
-      return false if @dead_cmd_routes << commands.join
-      return true
+      return not @dead_cmd_routes.include?(commands.join)
     end
 
     # 可能性のあるcheckpointのrouteか？
