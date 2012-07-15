@@ -45,8 +45,9 @@ class LambdaLifter
         checkpoint = find_checkpoint
         # ルートがない？
         if checkpoint.nil?
+          log("solve: none route")
           # すべて探索しきった？
-          break (highscore) if @check_route.empty?
+          break highscore if @check_route.empty?
           @passed_check_routes << @check_route.dup
           next rollback_checkpoint!
         end
@@ -57,8 +58,6 @@ class LambdaLifter
         else
           # 失敗したcheckpointは探索済みとし
           @passed_check_routes << @check_route + [checkpoint]
-          # check寸前の状態に戻す
-          rollback!
         end
       end
       log("----------  stop  ----------")
@@ -111,7 +110,9 @@ class LambdaLifter
         possible_check_route?(@check_route + [l])
       end
       checkpoint = judge_next_point(possible_lambdas, @mine.robot.pos)
-      checkpoint = @mine.lift if checkpoint.nil? && @mine.lambdas.empty?
+      if checkpoint.nil? && @mine.lambdas.empty? && !unreachable?(@mine.lift)
+        checkpoint = @mine.lift
+      end
       log("find_checkpoint: possible_lambdas=<#{possible_lambdas}> checkpoint=<#{checkpoint}> check_route=<#{@check_route}>")
       return checkpoint
     end
@@ -193,12 +194,9 @@ class LambdaLifter
       @mine = m
     end
 
+    # 現在より1つ前のcheckpointへrollback
     def rollback_checkpoint!
-      if @checkpoint_watermarks.empty?
-        rollback_cnt = 0
-      else
-        rollback_cnt = @checkpoint_watermarks.last
-      end
+      rollback_cnt = @checkpoint_watermarks[-2].to_i
       log("rollback_checkpoint!: rollback_cnt=<#{rollback_cnt}>")
       (@commands.size - rollback_cnt + 1).times{ rollback! }
     end
@@ -326,6 +324,7 @@ class LambdaLifter
       # 確実にstaticなもので囲まれているかどうかを返す。
       def closed_with_static_objects?(mine, from, to)
         internal_space, boundary = space_bounded_by_rocks_and_walls(mine, from, to)
+        return false if internal_space.nil? || boundary.nil?
 
         static = {}
         # 空間の内部は、emptyを除き、staticであると仮定する
