@@ -22,8 +22,9 @@ RL
     end
 
     def run
-      MyGame.create_screen 800, 600
-      @scale ||= 1
+      screen_w = 800
+      screen_h = 600
+      MyGame.create_screen screen_w, screen_h
 
       here = File.dirname(__FILE__)
       @images = {
@@ -38,12 +39,13 @@ RL
       }
 
       MyGame.main_loop do
+        scale = @scale || [(screen_h.to_f/@mine.height)/47, 1].min
         @mine.raw_map.each.with_index do |raw_row, y|
           raw_row.each.with_index do |sym, x|
             img = @images[sym] or raise "unkown: #{sym}"
-            img.x = x * (47*@scale)
-            img.y = y * (47*@scale)
-            img.scale = @scale
+            img.x = x * (47*scale)
+            img.y = y * (47*scale)
+            img.scale = scale
             img.render
           end
         end
