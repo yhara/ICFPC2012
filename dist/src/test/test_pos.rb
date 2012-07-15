@@ -3,9 +3,15 @@
 class LambdaLifter
   class TestPos < Test::Unit::TestCase
     should ".x, .yでアクセスできること" do
-      pos = Pos.new(1, 1)
+      pos = Pos.new(1, 2)
       assert_equal 1, pos.x
-      assert_equal 1, pos.y
+      assert_equal 2, pos.y
+    end
+
+    should "Pos[]でインスタンスを作れること" do
+      pos = Pos[1, 2]
+      assert_equal 1, pos.x
+      assert_equal 2, pos.y
     end
 
     should "+は引数のPos分増加した場所を返すこと" do
