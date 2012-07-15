@@ -26,6 +26,7 @@ class LambdaLifter
     def inspect
       "(#{@x}, #{@y})"
     end
+    alias :to_s :inspect
 
     def hash
       [x, y].hash

@@ -20,8 +20,9 @@ class LambdaLifter
       assert_equal 2, pos.y
     end
 
-    should "inspectは(x, y)の文字列を返すこと" do
+    should "inspect,aliasは(x, y)の文字列を返すこと" do
       assert_equal "(1, 2)", LambdaLifter::Pos.new(1, 2).inspect
+      assert_equal "(1, 2)", LambdaLifter::Pos.new(1, 2).to_s
     end
 
     should "x, yを基にした比較が可能であること" do
