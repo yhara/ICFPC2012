@@ -58,7 +58,7 @@ class LambdaLifter
         end
         #debugger
         #p [:solve, @commands.join]
-        puts @mine.ascii_map
+        #puts @mine.ascii_map
         next_pos = @mine.robot.pos
       end
       return true
