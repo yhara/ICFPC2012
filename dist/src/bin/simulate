@@ -38,7 +38,7 @@ opts = Trollop.options do
   banner "usage: #$0 mapfile"
 
   opt :sdl, "SDLによる描画を行う", default: false
-  opt :scale, "SDLの拡大倍率(デフォルト: 1.0)", default: 1.0
+  opt :scale, "SDLの拡大倍率(デフォルト: 1.0)", default: nil, type: Float
   opt :wait, "ウェイト(デフォルト: 0.5秒)", default: 0.5
   opt :help, "ヘルプ"
 end
