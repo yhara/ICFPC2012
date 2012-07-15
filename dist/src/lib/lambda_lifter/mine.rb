@@ -285,7 +285,7 @@ class LambdaLifter
       @number_of_flooding += 1
       if @number_of_flooding >= @flooding 
         @water += 1
-        @number_of_flooding = 1
+        @number_of_flooding = 0
       end
     end
 
