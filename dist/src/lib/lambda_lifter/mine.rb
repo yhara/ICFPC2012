@@ -172,6 +172,9 @@ class LambdaLifter
           process_open_lift
         end
         process_robot(@command)
+        if /trampoline_\w/ =~ layout
+          process_trampoline(layout)
+        end
       end
 
       # 岩を更新する
@@ -314,6 +317,28 @@ class LambdaLifter
         @robot = Robot.new(self, @robot.x, @robot.y - 1)
       end
       @score += GIVEN_SCORES[:each_move]
+    end
+
+    def process_trampoline(layout)
+      target = @trampoline_relationships[layout]
+      pos = @targets[target]
+      self[@robot.x, @robot.y] = :empty
+
+      deleted_trampolines = @trampoline_relationships.select {|_, v|
+        v == target }
+      @trampoline_relationships.reject! {|k, _|
+        deleted_trampolines.keys.include?(k) }
+      deleted_trampolines.keys.uniq.each do |t|
+        set(@trampolines[t].x, @trampolines[t].y, :empty)
+        @trampolines.delete(t)
+      end
+      deleted_trampolines.values.uniq.each do |t|
+        set(@targets[t].x, @targets[t].y, :empty)
+        @targets.delete(t)
+      end
+
+      self[pos.x, pos.y] = :robot
+      @robot = Robot.new(self, pos.x, pos.y)
     end
 
     def []=(game_x, game_y, val)

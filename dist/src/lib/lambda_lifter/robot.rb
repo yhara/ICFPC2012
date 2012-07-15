@@ -25,7 +25,7 @@ class LambdaLifter
       return nil if !delta
       new_pos = pos + delta
       case @mine[new_pos]
-      when :empty, :earth, :lambda, :open_lift
+      when :empty, :earth, :lambda, :open_lift, /trampoline_\w/
         return true
       when :rock
         return delta.y.zero? && @mine[new_pos + delta] == :empty

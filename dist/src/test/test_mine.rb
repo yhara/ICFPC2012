@@ -534,6 +534,72 @@ Waterproof 5
       end
     end
 
+    should "ロボットがトランポリンの上に来たらターゲットへ移動すること" do
+      mine = Mine.new(<<-'EOD')
+#####
+#1B #
+#   #
+#2RA#
+#####
+
+Trampoline A targets 1
+Trampoline B targets 2
+      EOD
+      assert_equal 3, mine.robot.x
+      assert_equal 2, mine.robot.y
+      mine.step!("R")
+      assert_equal 2, mine.robot.x
+      assert_equal 4, mine.robot.y
+      mine.step!("R")
+      assert_equal 2, mine.robot.x
+      assert_equal 2, mine.robot.y
+    end
+
+    should "トランポリンの関連付けが複数の場合は移動後に複数クリアされること" do
+      mine = Mine.new(<<-'EOD')
+#####
+#1B #
+#   #
+# RA#
+#####
+
+Trampoline A targets 1
+Trampoline B targets 1
+      EOD
+      mine.step!("R")
+
+result_map = <<-EOD
+#####
+#R  #
+#   #
+#   #
+#####
+        EOD
+      assert_equal result_map, mine.ascii_map
+    end
+
+    should "ターゲットはトランポリンから飛ばないと壁なので移動できないこと" do
+      mine = Mine.new(<<-'EOD')
+#####
+#A  #
+#   #
+# R1#
+#####
+
+Trampoline A targets 1
+      EOD
+      mine.step!("R")
+
+result_map = <<-EOD
+#####
+#A  #
+#   #
+# R1#
+#####
+        EOD
+      assert_equal result_map, mine.ascii_map
+    end
+
     should "ラムダの上にRがきたらlamdasは消えること" do
       @mine = Mine.new(<<-'EOD')
 #######
