@@ -76,12 +76,7 @@ class LambdaLifter
     end
 
     def ascii_map
-      @@inverted_layouts ||= LAYOUTS.invert.freeze
-      return @map.map do |row|
-        row.map do |cell|
-          @@inverted_layouts[cell]
-        end.join + "\n"
-      end.join
+      return array_to_ascii_map(@map)
     end
 
     # マップを新規作成する。
@@ -231,6 +226,17 @@ class LambdaLifter
 
     def set(x, y, layout)
       @updated_map[@updated_map.length - y][x - 1] = layout
+    end
+
+    def array_to_ascii_map(ary)
+      # デバッグ時に@updated_mapを見るときのためにあえて、
+      # 引数に配列の配列を取るインスタンスメソッドを用意した。
+      @@inverted_layouts ||= LAYOUTS.invert.freeze
+      return ary.map do |row|
+        row.map do |cell|
+          @@inverted_layouts[cell]
+        end.join + "\n"
+      end.join
     end
 
     def parse(mine_description)
