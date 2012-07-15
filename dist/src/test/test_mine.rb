@@ -339,13 +339,16 @@ Razors 1
         EOD
         assert_equal [:wall, :empty, :rock, :robot, :rock, :empty, :wall],
                      mine.raw_map[1]
+        assert_equal [Pos[3, 2], Pos[5, 2]], mine.rocks.sort
         mine.step!("L")
         assert_equal [:wall, :rock, :robot, :empty, :rock, :empty, :wall],
                      mine.raw_map[1]
+        assert_equal [Pos[2, 2], Pos[5, 2]], mine.rocks.sort
         mine.step!("R")
         mine.step!("R")
         assert_equal [:wall, :rock, :empty, :empty, :robot, :rock, :wall],
                      mine.raw_map[1]
+        assert_equal [Pos[2, 2], Pos[6, 2]], mine.rocks.sort
       end
 
       should "岩が落下すること" do
@@ -356,9 +359,11 @@ R##
 ###
         EOD
         assert_equal [:wall, :rock,  :wall], mine.raw_map[1]
+        assert_equal [Pos[2, 3]], mine.rocks
         mine.step!("W")
         assert_equal [:wall, :empty, :wall], mine.raw_map[1]
         assert_equal [:wall, :rock,  :wall], mine.raw_map[2]
+        assert_equal [Pos[2, 2]], mine.rocks
       end
 
       should "岩が左右に崩落すること" do
@@ -372,15 +377,20 @@ R#####
                      mine.raw_map[1]
         assert_equal [:wall, :rock, :empty, :empty, :rock, :wall],
                      mine.raw_map[2]
+        assert_equal [Pos[2, 2], Pos[2, 3], Pos[5, 2], Pos[5, 3]],
+                     mine.rocks.sort
         mine.step!("W")
         assert_equal [:wall, :empty, :empty, :empty, :empty, :wall],
                      mine.raw_map[1]
         assert_equal [:wall, :rock,  :rock,  :rock,  :rock,  :wall],
                      mine.raw_map[2]
+        assert_equal [Pos[2, 2], Pos[3, 2], Pos[4, 2], Pos[5, 2]],
+                     mine.rocks.sort
       end
 
       should "先にupdateされたlayoutが後のupdateに影響されないこと" do
         # 2.3 Map Update の Note: の記述参考
+        pend # rocks に重複したPosが含まれるバグで通らない
         mine = Mine.new(<<-'EOD')
 R####
 #* *#
@@ -391,11 +401,15 @@ R####
                      mine.raw_map[1]
         assert_equal [:wall, :rock, :empty, :rock, :wall],
                      mine.raw_map[2]
+        assert_equal [Pos[2, 2], Pos[2, 3], Pos[4, 2], Pos[4, 3]],
+                     mine.rocks.sort
         mine.step!("W")
         assert_equal [:wall, :empty, :empty, :empty, :wall],
                      mine.raw_map[1]
         assert_equal [:wall, :rock,  :rock,  :rock,  :wall],
                      mine.raw_map[2]
+        assert_equal [Pos[2, 2], Pos[3, 2], Pos[4, 2]],
+                     mine.rocks.sort
       end
 
       should "ラムダの上の岩は右側に崩落すること" do
@@ -409,11 +423,13 @@ R####
                      mine.raw_map[1]
         assert_equal [:wall, :empty, :lambda, :empty, :wall],
                      mine.raw_map[2]
+        assert_equal [Pos[3, 3]], mine.rocks
         mine.step!("W")
         assert_equal [:wall, :empty, :empty,  :empty, :wall],
                      mine.raw_map[1]
         assert_equal [:wall, :empty, :lambda, :rock,  :wall],
                      mine.raw_map[2]
+        assert_equal [Pos[4, 2]], mine.rocks
       end
 
       should "ラムダの上の岩は左側に崩落しないこと" do
@@ -427,11 +443,13 @@ R###
                      mine.raw_map[1]
         assert_equal [:wall, :empty, :lambda, :wall],
                      mine.raw_map[2]
+        assert_equal [Pos[3, 3]], mine.rocks
         mine.step!("W")
         assert_equal [:wall, :empty, :rock,  :wall],
                      mine.raw_map[1]
         assert_equal [:wall, :empty, :lambda, :wall],
                      mine.raw_map[2]
+        assert_equal [Pos[3, 3]], mine.rocks
       end
 
       should "ロボットによる岩の移動と更新による岩の移動は区別されていること" do
@@ -445,11 +463,13 @@ R###
                      mine.raw_map[1]
         assert_equal [:wall, :empty, :rock,   :empty, :wall],
                      mine.raw_map[2]
+        assert_equal [Pos[3, 2], Pos[3, 3]], mine.rocks.sort
         mine.step!("R")
         assert_equal [:wall, :empty, :robot,  :empty, :wall],
                      mine.raw_map[1]
         assert_equal [:wall, :empty, :rock,   :rock,  :wall],
                      mine.raw_map[2]
+        assert_equal [Pos[3, 2], Pos[4, 2]], mine.rocks.sort
       end
 
       should "水位が上昇すること" do
