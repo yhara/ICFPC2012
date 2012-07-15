@@ -60,6 +60,7 @@ class LambdaLifter
       mine.instance_variable_set(:@width, @width)
       mine.instance_variable_set(:@height, @height)
       mine.instance_variable_set(:@lift, @lift)
+      return mine
     end
 
     # マップを新規作成する。
