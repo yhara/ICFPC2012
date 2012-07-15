@@ -102,39 +102,48 @@ class LambdaLifter
         self[@robot.x, @robot.y] = :empty
         case @command
         when :left
-          if self[@robot.x - 1, @robot.y] == :rock
+          case self[@robot.x - 1, @robot.y]
+          when :rock
             self[@robot.x - 2, @robot.y] = :rock
-          end
-          if self[@robot.x - 1, @robot.y] == :lambda
+          when :lambda
             @lambdas.delete(Pos.new(@robot.x - 1, @robot.y))
+          when :open_lift
+            @winning = true
           end
           self[@robot.x - 1, @robot.y] = :robot
           @robot = Robot.new(self,
             @robot.x - 1, @robot.y)
           @score -= 1
         when :right
-            # 同上。
-          if self[@robot.x + 1, @robot.y] == :rock
+          case self[@robot.x + 1, @robot.y]
+          when :rock
             self[@robot.x + 2, @robot.y] = :rock
-          end
-          if self[@robot.x + 1, @robot.y] == :lambda
+          when :lambda
             @lambdas.delete(Pos.new(@robot.x + 1, @robot.y))
+          when :open_lift
+            @winning = true
           end
           self[@robot.x + 1, @robot.y] = :robot
           @robot = Robot.new(self,
             @robot.x + 1, @robot.y)
           @score -= 1
         when :up
-          if self[@robot.x, @robot.y + 1] == :lambda
+          case self[@robot.x, @robot.y + 1]
+          when :lambda
             @lambdas.delete(Pos.new(@robot.x, @robot.y + 1))
+          when :open_lift
+            @winning = true
           end
           self[@robot.x, @robot.y + 1] = :robot
           @robot = Robot.new(self,
             @robot.x, @robot.y + 1)
           @score -= 1
         when :down
-          if self[@robot.x, @robot.y - 1] == :lambda
+          case self[@robot.x, @robot.y - 1]
+          when  :lambda
             @lambdas.delete(Pos.new(@robot.x, @robot.y - 1))
+          when :open_lift
+            @winning = true
           end
           self[@robot.x, @robot.y - 1] = :robot
           @robot = Robot.new(self,
@@ -184,9 +193,6 @@ class LambdaLifter
         height += 1
       end
 
-      if self[@robot.x, @robot.y] == :open_lift && @lambdas.length == 0
-        @winning = true
-      end
       if @command == :abort
         @abort = true
       end
