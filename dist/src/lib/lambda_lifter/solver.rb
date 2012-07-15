@@ -61,11 +61,12 @@ class LambdaLifter
         end
         next_pos = @mine.robot.pos
       end
+      return false if limit_commands_exceeded?
       return true
     end
 
     # 次の目的地を探す
-    # TODO: 簡単わかる無理そうなlambdaを検出する
+    # TODO: 簡単わかる無理そうなopen lambdaを検出する
     #       (たとえば岩にふさがっているものなど）
     def find_checkpoint
       possible_lambdas = @mine.lambdas.select do |l|
@@ -79,8 +80,7 @@ class LambdaLifter
     # 次のrobotの命令を判断
     # 今のところ直線の最短距離のみ
     # 以前のmapと変化がない場合はnil
-    # TODO: 命令が制限を超えるようなケース
-    #       道中で取れるラムダがあれば取っておく
+    # TODO: 道中で取れるラムダがあれば取っておく
     def exec_next_command(goal)
       next_position = nearest_point(movable_positions(@mine.robot), goal)
       cmd = next_position.nil? ? nil : @mine.robot.command_to(next_position)
@@ -211,6 +211,11 @@ class LambdaLifter
 
     def check_route_to_key(route)
       route.map(&:to_s).join("->")
+    end
+
+    def limit_commands_exceeded?
+      l = (@mine.width * @mine.height)
+      @commands.size > l
     end
   end
 end

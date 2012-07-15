@@ -27,6 +27,18 @@ L ..\#
       assert_equal "DLLLL", s.solve
     end
 
+    should "" do
+      desc = <<-'EOD'.freeze
+###
+LR#
+###
+      EOD
+      m = Mine.new(desc)
+      s = Solver.new(m)
+      s.instance_variable_set(:@commands, (0..(m.width * m.height+1)).map.to_a)
+      assert_equal true, s.send(:limit_commands_exceeded?)
+    end
+
     should "contest1.mapのsolve" do
       pend
       desc = <<-'EOD'.freeze
