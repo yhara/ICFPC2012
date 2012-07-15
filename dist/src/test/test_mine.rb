@@ -84,14 +84,12 @@ class LambdaLifter
       end
 
       should "コマンドWでロボットが動かないこと" do
-        pend
         mine = Mine.new(ROBOT_CENTERED_MAP)
         mine.step!("W")
         assert_equal [:wall, :empty, :robot, :empty, :wall], mine.raw_map[2]
       end
 
       should "コマンドRLでロボットが元の位置に戻ること" do
-        pend
         mine = Mine.new(ROBOT_CENTERED_MAP)
         mine.step!("R")
         assert_equal [:wall, :empty, :empty, :robot, :wall], mine.raw_map[2]
@@ -104,6 +102,75 @@ class LambdaLifter
         assert_raise(RobotUnmovableError) do
           mine.step!("(")
         end
+      end
+
+      should "ロボットの移動に伴い岩が移動すること" do
+        mine = Mine.new(<<-'EOD')
+#######
+# *R* #
+#######
+        EOD
+        assert_equal [:wall, :empty, :rock, :robot, :rock, :empty, :wall],
+                     mine.raw_map[1]
+        mine.step!("L")
+        assert_equal [:wall, :rock, :robot, :empty, :rock, :empty, :wall],
+                     mine.raw_map[1]
+        mine.step!("R")
+        mine.step!("R")
+        assert_equal [:wall, :rock, :empty, :empty, :robot, :rock, :wall],
+                     mine.raw_map[1]
+      end
+
+      should "岩が落下すること" do
+        mine = Mine.new(<<-'EOD')
+R##
+#*#
+# #
+###
+        EOD
+        assert_equal [:wall, :rock,  :wall], mine.raw_map[1]
+        mine.step!("W")
+        assert_equal [:wall, :empty, :wall], mine.raw_map[1]
+        assert_equal [:wall, :rock,  :wall], mine.raw_map[2]
+      end
+
+      should "岩が左右に崩落すること" do
+        mine = Mine.new(<<-'EOD')
+R#####
+#*  *#
+#*  *#
+######
+        EOD
+        assert_equal [:wall, :rock, :empty, :empty, :rock, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :rock, :empty, :empty, :rock, :wall],
+                     mine.raw_map[2]
+        mine.step!("W")
+        assert_equal [:wall, :empty, :empty, :empty, :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :rock,  :rock,  :rock,  :rock,  :wall],
+                     mine.raw_map[2]
+      end
+
+      should "先にupdateされたlayoutが後のupdateに影響されないこと" do
+        # 2.3 Map Update の Note: の記述参考
+        # 今は通らない
+        pend
+        mine = Mine.new(<<-'EOD')
+R####
+#* *#
+#* *#
+#####
+        EOD
+        assert_equal [:wall, :rock, :empty, :rock, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :rock, :empty, :rock, :wall],
+                     mine.raw_map[2]
+        mine.step!("W")
+        assert_equal [:wall, :empty, :empty, :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :rock,  :rock,  :rock,  :wall],
+                     mine.raw_map[2]
       end
     end
 
