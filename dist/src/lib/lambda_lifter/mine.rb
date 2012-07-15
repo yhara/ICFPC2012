@@ -282,12 +282,10 @@ class LambdaLifter
 
     def water_rising
       return if @flooding == 0
-
+      @number_of_flooding += 1
       if @number_of_flooding >= @flooding 
         @water += 1
-        @number_of_flooding = 0
-      else
-        @number_of_flooding += 1
+        @number_of_flooding = 1
       end
     end
 

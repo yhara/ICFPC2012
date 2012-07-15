@@ -375,13 +375,11 @@ Waterproof 5
         EOD
         assert_equal 0, mine.water
         mine.step!("L")
-        assert_equal 0, mine.water
-        mine.step!("R")
-        assert_equal 1, mine.water
-        mine.step!("L")
         assert_equal 1, mine.water
         mine.step!("R")
         assert_equal 2, mine.water
+        mine.step!("L")
+        assert_equal 3, mine.water
       end
 
       should "ロボットが水中に連続でいる回数を数えること" do
