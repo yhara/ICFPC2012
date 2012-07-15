@@ -133,10 +133,10 @@ class LambdaLifter
               set(width + 1, height - 1, :rock)
             elsif self[width, height - 1] == :rock &&
                   self[width + 1, height] != :empty &&
-                  self[width - 1, height - 1] = :empty ||
+                  self[width - 1, height - 1] == :empty ||
                   self[width, height - 1] == :rock &&
                   self[width + 1, height - 1] != :empty &&
-                  self[width - 1, height - 1] = :empty
+                  self[width - 1, height - 1] == :empty
               set(width, height, :empty)
               set(width - 1, height - 1, :rock)
             elsif self[width, height - 1] == :lambda &&
