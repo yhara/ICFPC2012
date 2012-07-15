@@ -87,36 +87,33 @@ class LambdaLifter
   
     # マップを書き換える。
     def step!(command)
-      @updated_map = Marshal.load(Marshal.dump(@map))
       @command = COMMANDS[command]
       raise UnknownCommandError if @command.nil?
       @commands << command
 
       if @robot.movable?(@command)
-        set(@robot.x, @robot.y, :empty)
+        self[@robot.x, @robot.y] = :empty
         case @command
         when :left
           if self[@robot.x - 1, @robot.y] == :rock
-            # このフェイズでの岩の動きは直後の更新時に影響するものであ
-            # るため、@map を直接書き換える。
-            set(@robot.x - 2, @robot.y, :rock)
+            self[@robot.x - 2, @robot.y] = :rock
           end
           if self[@robot.x - 1, @robot.y] == :lambda
             @lambdas.delete(Pos.new(@robot.x - 1, @robot.y))
           end
-          set(@robot.x - 1, @robot.y, :robot)
+          self[@robot.x - 1, @robot.y] = :robot
           @robot = Robot.new(self,
             @robot.x - 1, @robot.y)
           @score -= 1
         when :right
             # 同上。
           if self[@robot.x + 1, @robot.y] == :rock
-            set(@robot.x + 2, @robot.y, :rock)
+            self[@robot.x + 2, @robot.y] = :rock
           end
           if self[@robot.x + 1, @robot.y] == :lambda
             @lambdas.delete(Pos.new(@robot.x + 1, @robot.y))
           end
-          set(@robot.x + 1, @robot.y, :robot)
+          self[@robot.x + 1, @robot.y] = :robot
           @robot = Robot.new(self,
             @robot.x + 1, @robot.y)
           @score -= 1
@@ -124,7 +121,7 @@ class LambdaLifter
           if self[@robot.x, @robot.y + 1] == :lambda
             @lambdas.delete(Pos.new(@robot.x, @robot.y + 1))
           end
-          set(@robot.x, @robot.y + 1, :robot)
+          self[@robot.x, @robot.y + 1] = :robot
           @robot = Robot.new(self,
             @robot.x, @robot.y + 1)
           @score -= 1
@@ -132,7 +129,7 @@ class LambdaLifter
           if self[@robot.x, @robot.y - 1] == :lambda
             @lambdas.delete(Pos.new(@robot.x, @robot.y - 1))
           end
-          set(@robot.x, @robot.y - 1, :robot)
+          self[@robot.x, @robot.y - 1] = :robot
           @robot = Robot.new(self,
             @robot.x, @robot.y - 1)
           @score -= 1
@@ -140,6 +137,7 @@ class LambdaLifter
       end
 
       # 岩を更新する
+      @updated_map = Marshal.load(Marshal.dump(@map))
       width = 1
       height = 1
       while height <= @height
@@ -220,6 +218,15 @@ class LambdaLifter
     end
 
     private
+
+    def []=(game_x, game_y, val)
+      ruby_x, ruby_y = ruby_axis(game_x, game_y)
+      @map[ruby_y][ruby_x] = val
+    end
+
+    def ruby_axis(game_x, game_y)
+      return game_x - 1, @map.length - game_y
+    end
 
     def game_axis(ruby_x, ruby_y)
       return ruby_x + 1, height - ruby_y
