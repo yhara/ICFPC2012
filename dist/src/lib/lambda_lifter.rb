@@ -1,6 +1,6 @@
 class LambdaLifter
   def self.run
-    mine = Mine.new_from_string(ARGF.read)
+    mine = Mine.new(ARGF.read)
     solver = Solver.new(mine)
     print solver.solve
   end
