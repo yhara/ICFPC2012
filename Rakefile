@@ -21,10 +21,17 @@ task :package do
   sh "./tools/pack.sh"
 end
 
+desc "環境変数の確認"
+task :check_env do
+  if !ENV['map']
+    raise "must specify map: rake run map=./sample/contest1.map"
+  end
+end
+
 desc "実行環境で実行する"
-task :run => [:package] do
+task :run => [:check_env, :package] do
   map_file = ENV['map']
-  raise "must be specified map." if !map_file
+  raise "must specify map." if !map_file
   map_path = Pathname(map_file)
   current_path = Pathname(Dir.pwd)
   ssh_id_path = current_path + "deploy/id"
