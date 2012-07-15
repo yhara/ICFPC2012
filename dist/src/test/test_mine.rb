@@ -219,6 +219,24 @@ R###
         assert_equal [:wall, :rock,  :lambda, :wall],
                      mine.raw_map[2]
       end
+
+      should "ロボットによる岩の移動と更新による岩の移動は区別されていること" do
+        mine = Mine.new(<<-'EOD')
+#####
+#R* #
+# * #
+#####
+        EOD
+        assert_equal [:wall, :robot, :rock,   :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :empty, :rock,   :empty, :wall],
+                     mine.raw_map[2]
+        mine.step!("R")
+        assert_equal [:wall, :empty, :robot,  :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :empty, :rock,   :rock,  :wall],
+                     mine.raw_map[2]
+      end
     end
 
     should "ラムダの上にRがきたらlamdasは消えること" do
