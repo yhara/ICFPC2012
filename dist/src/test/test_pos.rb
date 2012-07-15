@@ -43,13 +43,11 @@ class LambdaLifter
 
     should "hashのkeyとして指定できること" do
       h = {}
-      a = Pos.new(1, 2)
-      b =  Pos.new(1, 2)
+      a = [Pos[1, 2], Pos[3, 4]]
+      b = [Pos[1, 2], Pos[3, 4]]
       h[a] = true
       h[b] = true
-      assert a.eql?(b)
-      assert_equal a.hash, b.hash
-      assert_equal 1, h.keys.size
+      assert_equal 1, h.size
     end
   end
 end
