@@ -246,6 +246,7 @@ Razors 1
       assert_equal :wall, @mine[1, 1] 
       assert_equal :robot, @mine[2, 2] 
       assert_equal :lambda, @mine[3, 2] 
+      assert_equal :out_of_map, @mine[0, 0]
     end
 
     should "hashのkeyとして指定できること" do

@@ -92,12 +92,15 @@ class LambdaLifter
     # 引数はPosか、整数2つを渡す
     # 例： mine[pos], mine[1, 2]
     def [](arg1, arg2=nil)
-      if arg2
-        x, y = arg1, arg2
-      else
-        x, y = arg1.x, arg1.y
+      if arg2 then x, y = arg1, arg2
+      else         x, y = arg1.x, arg1.y
       end
-      @map[@map.length - y][x - 1]
+
+      if valid_pos?(x, y)
+        @map[@map.length - y][x - 1]
+      else
+        :out_of_map
+      end
     end
 
     # 自分自身を複製したMineオブジェクトを返す。
@@ -140,8 +143,12 @@ class LambdaLifter
     end
 
     # posがマップの範囲内におさまっているとき真を返す。
-    def valid_pos?(pos)
-      1 <= pos.x && pos.x <= @width && 1 <= pos.y && pos.y <= @height
+    def valid_pos?(arg1, arg2=nil)
+      if arg2 then x, y = arg1, arg2
+      else         x, y = arg1.x, arg1.y
+      end
+
+      return 1 <= x && x <= @width && 1 <= y && y <= @height
     end
 
     # マップを新規作成する。
