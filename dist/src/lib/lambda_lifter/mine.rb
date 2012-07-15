@@ -165,10 +165,10 @@ class LambdaLifter
             end
           when :closed_lift
             if @lambdas.length == 0
-             set(width, height, :open_lift)
+              set(width, height, :open_lift)
             end
           end
-        width += 1
+          width += 1
         end
         width = 0
         height += 1
@@ -189,17 +189,17 @@ class LambdaLifter
     end
   
     def finished?
-     # :winning, :abort, :losing, falseのどれかを返す。
-     if @winning
-       return :winning
-     end
-     if @abort
-       return :abort
-     end
-     if @losing
-       return :losing
-     end
-     return false
+      # :winning, :abort, :losing, falseのどれかを返す。
+      if @winning
+        return :winning
+      end
+      if @abort
+        return :abort
+      end
+      if @losing
+        return :losing
+      end
+      return false
     end
 
     def losing?
