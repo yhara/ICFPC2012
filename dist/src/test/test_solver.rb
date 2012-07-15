@@ -67,5 +67,23 @@ L  .\#
       s = Solver.new(m)
       assert_equal true, s.send(:solve_to_checkpoint, Pos.new(5, 2))
     end
+
+    context "確実に到達不可能な地点を見つけるとき" do
+      include Solver::FindUnreachable
+
+      should "壁と岩を単純に境界として、区切られているかを判定できる" do
+        m = Mine.new(<<-'EOD')
+####  
+#L #  
+#  #  
+# *###
+#    R
+######
+        EOD
+#        assert_equal false, separated_by_rocks_and_walls?(m, m.lambdas.first, m.robot.pos)
+#        m.step!
+#        assert_equal true, separated_by_rocks_and_walls?(m, m.lambdas.first, m.robot.pos)
+      end
+    end
   end
 end

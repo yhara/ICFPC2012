@@ -218,5 +218,28 @@ class LambdaLifter
       l = (@mine.width * @mine.height)
       @commands.size > l
     end
+
+    # 確実に到達不可能な地点を見つける
+    module FindUnreachable
+      def certainly_unreachable?(pos)
+        return separated_by_rocks_and_walls?(@mine, pos, @mine.robot.pos) &&
+               closed_with_static_objects?(@mine, pos)
+      end
+
+      # rockとwallが不動だとしたとき、toまでたどり着けるかどうかを返す
+      # これがtrueを返すようなら、確実に到達不可能であるとは(一概には)言えない
+      def separated_by_rocks_and_walls?(mine, to, from)
+        #visited = Set.new
+      end
+
+      # ある地点がstaticだと仮定して、staticなもので囲まれているかどうかを
+      # 返す。
+      # このとき自動で動かないもの(empty, earthなど)のある地点は
+      # unreachableであると仮定する
+      def closed_with_static_objects?(mine, pos)
+
+      end
+    end
+    include FindUnreachable
   end
 end
