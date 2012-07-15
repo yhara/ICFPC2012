@@ -167,7 +167,6 @@ R#####
       should "先にupdateされたlayoutが後のupdateに影響されないこと" do
         # 2.3 Map Update の Note: の記述参考
         # 今は通らない
-        pend
         mine = Mine.new(<<-'EOD')
 R####
 #* *#
