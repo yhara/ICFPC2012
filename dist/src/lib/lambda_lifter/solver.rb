@@ -223,55 +223,84 @@ class LambdaLifter
 
     # 確実に到達不可能な地点を見つける
     module FindUnreachable
+      DIRECTIONS = [Pos[1, 0], Pos[-1, 0], Pos[0, 1], Pos[0, -1]]
+
       def certainly_unreachable?(pos)
         return separated_by_rocks_and_walls?(@mine, pos, @mine.robot.pos) &&
                closed_with_static_objects?(@mine, pos)
       end
 
-      # rockとwallが不動だとしたとき、toまでたどり着けるかどうかを返す
-      # これがtrueを返すようなら、確実に到達不可能であるとは(一概には)言えない
-      def separated_by_rocks_and_walls?(mine, to, from)
-        return !reachable_with_boundary?(mine, from, to){|pos|
+      # 壁と岩を単純に境界として、区切られている空間を
+      # Posの配列で返す。区切られていない場合はnilを返す。
+      def space_bounded_by_rocks_and_walls(mine, from, to)
+        is_boundary = lambda{|pos|
           [:rock, :wall].include? mine[pos]
         }
-      end
-
-      # ある地点がstaticだと仮定して、staticなもので囲まれているかどうかを
-      # 返す。
-      # このとき自動で動かないもの(empty, earthなど)のある地点は
-      # unreachableであると仮定する
-      def closed_with_static_objects?(mine, pos)
-        return reachable_with_boundary?(mine, from, to) do |pos|
-          case mine[pos]
-          when :wall
-            true
-          when :rock
-            # TODO
-          else
-            false
-          end
-        end
-      end
-
-      DIRECTIONS = [Pos[1, 0], Pos[-1, 0], Pos[0, 1], Pos[0, -1]]
-      def reachable_with_boundary?(mine, from, to, &block)
+        boundary = Set.new
+        internal_space = Set.new
         visited = Set.new
         queue = [from]
         until queue.empty?
-          #p [queue: queue, visited: visited]
           pos = queue.shift
-          return true if pos == to
+          return nil if pos == to  # 区切られてなかった
           visited << pos
+          internal_space << pos
           DIRECTIONS.each do |diff|
             newpos = pos + diff
-            if !visited.include?(newpos) &&
-               mine.valid_pos?(newpos) &&
-               !yield(newpos)
-              queue.push(newpos)
+            if is_boundary[newpos]
+              boundary << newpos
+            else
+              if !visited.include?(newpos) && mine.valid_pos?(newpos) 
+                queue.push(newpos)
+              end
             end
           end
         end
-        return false
+        return [internal_space, boundary]
+      end
+
+      # ある岩と壁で囲まれた地点に対し、
+      # 確実にstaticなもので囲まれているかどうかを返す。
+      def closed_with_static_objects?(mine, from, to)
+        internal_space, boundary = space_bounded_by_rocks_and_walls(mine, from, to)
+
+        static = {}
+        # 空間の内部は、emptyを除き、staticであると仮定する
+        internal_space.each{|pos|
+          static[pos] = true unless mine[pos] == :empty
+        }
+        # デバッグ用
+        dump = lambda{
+          mine.each_pos_from_top_left do |pos|
+            print Mine::LAYOUTS.invert[mine[pos]]
+            print(if static.key?(pos) then static[pos] ? '!' : '.'
+                  else " " end)
+          end
+        }
+        is_static = lambda{|pos|
+          if static.key?(pos)
+            true
+          else
+            ret = case mine[pos]
+                  when :wall, :out_of_space 
+                    true
+                  when :rock
+                    never_fall = (is_static[pos + [-1, -1]] || is_static[pos + [-1, 0]]) &&  # 左下・左のいずれか
+                                  is_static[pos + [ 0, -1]] &&                              # 真下
+                                 (is_static[pos + [+1, -1]] || is_static[pos + [+1, 0]])     # 右下・右のいずれか
+                    never_pushed = is_static[pos + [-1, 0]] || is_static[pos + [+1, 0]]  # 左右いずれか
+                    never_fall && never_pushed
+                  else
+                    false
+                  end
+            static[pos] = ret; ret
+          end
+        }
+
+        # Note: 下から順に調べた方がいいのでsortしている
+        return boundary.sort.all?{|pos|
+          is_static[pos] #.tap{|ret| dump[] if !ret}
+        }
       end
     end
     include FindUnreachable
