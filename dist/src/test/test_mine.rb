@@ -37,6 +37,18 @@ class LambdaLifter
       assert_equal expected, mine.raw_map
     end
 
+    context "newが呼ばれたとき" do
+      should "岩の位置を知っていること" do
+        @mine = Mine.new(<<-'EOD')
+####
+# *#
+#R*#
+####
+        EOD
+        assert_equal [Pos.new(3, 3), Pos.new(3, 2)], @mine.rocks
+      end
+    end
+
     should "mine[x, y]でその座標にあるものを返すこと" do
       assert_equal :wall, @mine[1, 1] 
       assert_equal :robot, @mine[2, 2] 
@@ -213,6 +225,7 @@ R####
         assert_equal @mine.height, mine2.height
         assert_equal @mine.lift, mine2.lift
         assert_equal @mine.commands, mine2.commands
+        assert_equal @mine.rocks, mine2.rocks
         assert_not_equal @mine.lambdas.object_id, mine2.lambdas.object_id
       end
     end

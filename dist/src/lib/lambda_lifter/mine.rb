@@ -26,12 +26,13 @@ class LambdaLifter
       'A' => :abort
     }.freeze
 
-    attr_accessor :robot, :lambdas, :lift
+    attr_accessor :robot, :lambdas, :lift, :rocks
     attr_reader :width, :height, :commands
 
     def initialize(mine_description)
       unless mine_description.nil?
         @map = nil
+        @rocks = []
         parse(mine_description)
         @updated_map = @map.dup
         @commands = []
@@ -66,6 +67,7 @@ class LambdaLifter
       mine.instance_variable_set(:@height, @height)
       mine.instance_variable_set(:@lift, @lift)
       mine.instance_variable_set(:@commands, @commands)
+      mine.instance_variable_set(:@rocks, @rocks)
       return mine
     end
 
@@ -231,12 +233,15 @@ class LambdaLifter
       mine_description = mine_description.split("\n")
       _lambdas = []
       _lift = []
+      _rocks = []
       robot_ruby_x = nil
       robot_ruby_y = nil
       grid = mine_description.each_with_object([]).with_index do |(line, g), y|
         g << line.each_char.map.with_index do |c, x|
           layout = LAYOUTS[c]
           case layout
+          when :rock
+            _rocks << [x, y]
           when :lambda
             _lambdas << [x, y]
           when :closed_lift
@@ -255,6 +260,9 @@ class LambdaLifter
       end
       if _lift.any?
         @lift = Pos.new(*game_axis(_lift[0], _lift[1]))
+      end
+      if _rocks.any?
+        @rocks = _rocks.map {|x, y| Pos.new(*game_axis(x, y)) }
       end
       @robot = Robot.new(self,
                          *game_axis(robot_ruby_x, robot_ruby_y))
