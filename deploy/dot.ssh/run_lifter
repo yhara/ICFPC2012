@@ -1,0 +1,35 @@
+#! /usr/bin/env ruby
+
+require "pathname"
+require "timeout"
+
+t = 100 + rand(100)
+
+map_path = Pathname.glob("*.map").first
+if !map_path
+  puts("no map!")
+  exit(EXIT_FAILURE)
+end
+
+puts("set timeout #{t}.")
+pid = spawn("./lifter", in: map_path.to_s)
+begin
+  timeout(t) do
+    Process.wait(pid)
+    puts
+    puts("lifter is finished.")
+  end
+rescue Timeout::Error
+  puts("timeout #{t} sec and sending SIGINT to lifter...")
+  Process.kill(:INT, pid)
+  begin
+    timeout(10) do
+      puts("sent SIGINT and waiting lifter to exit or 10 seconds...")
+      Process.wait(pid)
+      puts("lifter is finished.")
+    end
+  rescue Timeout::Error
+    puts("timeout 10 sec and sending SIGKILL to lifter...")
+    Process.kill(:KILL, pid)
+  end
+end

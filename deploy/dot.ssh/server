@@ -29,7 +29,7 @@ $run './install'
 echo
 
 echo running lifter...
-$run 'cat *.map | ./lifter'
+$run 'cat *.map | ./ruby/bin/ruby -I ruby/lib/ruby/1.9.1 -I ruby/lib/ruby/1.9.1/i686-linux /home/icfp-run/.ssh/run_lifter'
 echo
 echo
 
