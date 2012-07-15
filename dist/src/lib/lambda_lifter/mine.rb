@@ -54,7 +54,8 @@ class LambdaLifter
     attr_accessor :robot, :lambdas, :lift, :rocks
     attr_reader :width, :height, :commands, :score, :water, :flooding,
       :number_of_flooding, :waterproof, :number_of_waterproof,
-      :trampolines, :targets, :trampoline_relationships
+      :trampolines, :targets, :trampoline_relationships,
+      :growth, :razors
 
     def initialize(mine_description)
       unless mine_description.nil?
@@ -70,6 +71,8 @@ class LambdaLifter
         @trampolines = []
         @targets = []
         @trampoline_relationships = {}
+        @growth = 0
+        @razors = 0
         parse(mine_description)
         @updated_map = @map.dup
         @commands = []
@@ -120,6 +123,8 @@ class LambdaLifter
         Marshal.load(Marshal.dump(@targets)))
       mine.instance_variable_set(:@trampoline_relationships,
         Marshal.load(Marshal.dump(@trampoline_relationships)))
+      mine.instance_variable_set(:@growth, @growth)
+      mine.instance_variable_set(:@razors, @razors)
       return mine
     end
 
@@ -363,7 +368,7 @@ class LambdaLifter
     end
 
     def parse_mine_params(line)
-      if line.match(/^(Water|Flooding|Waterproof) (\d+)/)
+      if line.match(/^(Water|Flooding|Waterproof|Growth|Razors) (\d+)/)
         self.instance_variable_set("@" + $1.downcase, $2.to_i)
         return true
       elsif line.match(/^Trampoline (\w) targets (\d)/)

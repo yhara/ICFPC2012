@@ -204,6 +204,21 @@ Trampoline B targets 2
         assert_equal targets, mine.targets
         assert_equal trampoline_relationships, mine.trampoline_relationships
       end
+
+      should "ヒゲ、カミソリに関する情報を取得すること" do
+        mine = Mine.new(<<-'EOD')
+########
+#.R..  #
+#!   .!#
+#\\.W. L
+########
+
+Growth 15
+Razors 1
+        EOD
+        assert_equal 15, mine.growth
+        assert_equal 1, mine.razors
+      end
     end
 
     should "mine[x, y]でその座標にあるものを返すこと" do
