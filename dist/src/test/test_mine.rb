@@ -107,6 +107,16 @@ class LambdaLifter
       end
     end
 
+    should "ラムダの上にRがきたらlamdasは消えること" do
+      @mine = Mine.new(<<-'EOD')
+#######
+#R\*. #
+#####L#
+      EOD
+      @mine.step!("R")
+      assert_equal true, @mine.lambdas.empty?
+    end
+
     context "dupが呼ばれたとき" do
       should "内部のmapを複製すること" do
         mine2 = @mine.dup

@@ -99,7 +99,7 @@ class LambdaLifter
             set(@robot.x - 2, @robot.y, :rock)
           end
           if self[@robot.x - 1, @robot.y] == :lambda
-            @lambdas.delete([@robot.x - 1, @robot.y])
+            @lambdas.delete(Pos.new(@robot.x - 1, @robot.y))
           end
           set(@robot.x - 1, @robot.y, :robot)
           @robot = Robot.new(self,
@@ -110,21 +110,21 @@ class LambdaLifter
             self[@robot.x + 2, @robot.y] = :rock
           end
           if self[@robot.x + 1, @robot.y] == :lambda
-            @lambdas.delete([@robot.x + 1, @robot.y])
+            @lambdas.delete(Pos.new(@robot.x + 1, @robot.y))
           end
           set(@robot.x + 1, @robot.y, :robot)
           @robot = Robot.new(self,
             @robot.x + 1, @robot.y)
         when :up
           if self[@robot.x, @robot.y + 1] == :lambda
-            @lambdas.delete([@robot.x, @robot.y + 1])
+            @lambdas.delete(Pos.new(@robot.x, @robot.y + 1))
           end
           set(@robot.x, @robot.y + 1, :robot)
           @robot = Robot.new(self,
             @robot.x, @robot.y + 1)
         when :down
           if self[@robot.x, @robot.y - 1] == :lambda
-            @lambdas.delete([@robot.x, @robot.y - 1])
+            @lambdas.delete(Pos.new(@robot.x, @robot.y - 1))
           end
           set(@robot.x, @robot.y - 1, :robot)
           @robot = Robot.new(self,
