@@ -9,9 +9,11 @@ class LambdaLifter
 
   def self.logger
     if debug?
-      @@logger ||= Logger.new(nil)
+      @@logger ||= Logger.new(
+        File.expand_path("debug.log",
+          File.join(File.dirname(__FILE__), "../log")))
     else
-      @@logger ||= Logger.new("log/debug.log")
+      @@logger ||= Logger.new(nil)
     end
     return @@logger
   end
