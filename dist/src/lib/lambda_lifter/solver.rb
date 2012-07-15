@@ -225,9 +225,8 @@ class LambdaLifter
     module FindUnreachable
       DIRECTIONS = [Pos[1, 0], Pos[-1, 0], Pos[0, 1], Pos[0, -1]]
 
-      def certainly_unreachable?(pos)
-        return separated_by_rocks_and_walls?(@mine, pos, @mine.robot.pos) &&
-               closed_with_static_objects?(@mine, pos)
+      def unreachable?(pos)
+        return closed_with_static_objects?(@mine, pos, @mine.robot.pos)
       end
 
       # 壁と岩を単純に境界として、区切られている空間を
