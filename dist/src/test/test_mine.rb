@@ -781,6 +781,28 @@ R ****#
         assert_equal -1, mine.score
       end
 
+      should "Waitしたときに1点減ること" do
+        pend
+        mine = Mine.new(<<-'EOD')
+#####
+#R L#
+#####
+        EOD
+        mine.step!("W")
+        assert_equal -1, mine.score
+      end
+
+      should "無理な方向に移動しようとしたきに1点減ること" do
+        pend
+        mine = Mine.new(<<-'EOD')
+#####
+#R L#
+#####
+        EOD
+        mine.step!("L")
+        assert_equal -1, mine.score
+      end
+
       should "ラムダ1つにつき25点が入ること" do
         mine = Mine.new(<<-'EOD')
 #####
