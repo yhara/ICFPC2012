@@ -356,15 +356,16 @@ R###
           mine.step!("D")
           assert_equal :losing, mine.finished?
 
-#          mine = Mine.new(<<-'EOD')
-######
-##*  #
-##.  #
-##  R#
-######
-#          EOD
-#          mine.step!("L")
-#          assert_equal :losing, mine.finished?
+          pend
+          mine = Mine.new(<<-'EOD')
+#####
+#*  #
+#.  #
+#  R#
+#####
+          EOD
+          mine.step!("L")
+          assert_equal :losing, mine.finished?
         end
 
         should "ロボットが移動してマップ更新後、ロボットの頭上に岩があってもその岩が移動していない場合はfalse" do
