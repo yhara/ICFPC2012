@@ -25,6 +25,8 @@ class LambdaLifter
       # ハイスコア
       @highscore = {score: 0, cmd: ""}
       @trapped_sigint = false
+      # 通ったマスセット（変化が起きるとクリアされる）
+      @visited_poss = Set.new
       Signal.trap(:INT){ handle_sigint }
     end
 
@@ -50,14 +52,13 @@ class LambdaLifter
       while next_pos != checkpoint
         return highscore if @trapped_sigint
         success = exec_next_command(checkpoint)
+        # p [:solve, @commands.join]
+        # puts @mine.ascii_map
         if not success
           # コマンド実行失敗
           rollback!
           return false if cur_check_route != @check_route
         end
-        debugger
-        p [:solve, @commands.join]
-        puts @mine.ascii_map
         next_pos = @mine.robot.pos
       end
       return true
@@ -89,16 +90,20 @@ class LambdaLifter
       if m = cached_mine(@commands)
         @mine = m
       else
+        cache_mine(@commands[0..-2], @mine)
+        @visited_poss << @mine.robot.pos
+        prev = @mine
         @mine = @mine.dup
         @mine.step!(cmd)
-        cache_mine(@commands, @mine)
+        @visited_poss.clear if changed_mine?(@mine, prev)
+        
         if @highscore[:score] < @mine.score
           @highscore[:score] = @mine.score
           @highscore[:cmd] = @commands.join
         end
       end
       #puts @mine.ascii_map
-      if @mine.losing? || unchanged_mine?(@mine)
+      if @mine.losing? || @visited_poss.include?(@mine.robot.pos)
         return false
       end
       return true
@@ -124,7 +129,7 @@ class LambdaLifter
 
     # 1つ前のmineにロールバック
     def rollback!
-      #p [:rollback!]
+      # p [:rollback!]
       @dead_cmd_routes << @commands.join
       cmd = @commands.pop
       # 成功のケースがないcheckpointを記録
@@ -135,7 +140,13 @@ class LambdaLifter
         expire_cache_mine(@check_route)
         @check_route.pop
       end
-      @mine = cached_mine(@commands)
+      m = cached_mine(@commands)
+      if m.nil?
+        raise "cached mine not found: key => #{@commands.join}," +
+          " checkroute => #{check_route_to_key(@check_route)}"
+      end
+      @visited_poss.clear if changed_mine?(m, @mine)
+      @mine = m
     end
 
     # 可能性のあるrouteか？
@@ -151,10 +162,15 @@ class LambdaLifter
     end
 
     def cached_mine(commands)
-      (@check_route.size-1).downto(0) do |i|
-        cache = (@cmd_mine_cache[check_route_to_key(@check_route[0..i])] ||= {})
+      (@check_route.size).downto(1) do |i|
+        cache = @cmd_mine_cache[check_route_to_key(@check_route[0..(i-1)])] || {}
         m = cache[commands.join]
         return m if not m.nil?
+      end
+      if @check_route.empty?
+        cache = @cmd_mine_cache[""] || {}
+        m = cache[commands.join]
+        return m
       end
       return nil
     end
@@ -182,11 +198,15 @@ class LambdaLifter
       @highscore[:cmd] + "A"
     end
 
-    def unchanged_mine?(cur)
-      return false if @commands.size <= 2
-      prev_mine = cached_mine(@commands[0..-2])
-      return false if prev_mine.nil?
-      return prev_mine.eql?(cur)
+    def changed_mine?(cur, prev)
+      # p [:lambdas, prev.lambdas, cur.lambdas]
+      # p [:rocks, prev.rocks, cur.rocks]
+      # p [:here]
+      # puts prev.ascii_map
+      # puts cur.ascii_map
+      # p [:end, prev, cur]
+      return prev.lambdas != cur.lambdas ||
+        prev.rocks != cur.rocks
     end
 
     def check_route_to_key(route)

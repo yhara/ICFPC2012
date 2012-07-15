@@ -1,9 +1,30 @@
 # coding: utf-8
 class LambdaLifter
   class TestSolver < Test::Unit::TestCase
+    should "小さいマップのsolve(解けないマップ)" do
+      desc = <<-'EOD'.freeze
+######
+#. *R#
+L *.\#
+######
+      EOD
+      m = Mine.new(desc)
+      s = Solver.new(m)
+      # ハイスコア状態でabort
+      assert_equal "DA", s.solve
+    end
+
     should "contest1.mapのsolve" do
       pend
-      m = Mine.new(File.read(fixture_path("contest1.map")))
+      desc = <<-'EOD'.freeze
+######
+#. *R#
+#  \.#
+#\ * #
+L  .\#
+######
+      EOD
+      m = Mine.new(map)
       s = Solver.new(m)
       p s.solve
     end
