@@ -398,15 +398,15 @@ R#####
                      mine.raw_map[1]
         assert_equal [:wall, :rock, :empty, :empty, :rock, :wall],
                      mine.raw_map[2]
-        assert_equal [Pos[2, 2], Pos[2, 3], Pos[5, 2], Pos[5, 3]],
-                     mine.rocks.sort
+        assert_equal Set[Pos[2, 2], Pos[2, 3], Pos[5, 2], Pos[5, 3]],
+                     Set[*mine.rocks]
         mine.step!("W")
         assert_equal [:wall, :empty, :empty, :empty, :empty, :wall],
                      mine.raw_map[1]
         assert_equal [:wall, :rock,  :rock,  :rock,  :rock,  :wall],
                      mine.raw_map[2]
-        assert_equal [Pos[2, 2], Pos[3, 2], Pos[4, 2], Pos[5, 2]],
-                     mine.rocks.sort
+        assert_equal Set[Pos[2, 2], Pos[3, 2], Pos[4, 2], Pos[5, 2]],
+                     Set[*mine.rocks]
       end
 
       should "先にupdateされたlayoutが後のupdateに影響されないこと" do
@@ -420,15 +420,15 @@ R####
                      mine.raw_map[1]
         assert_equal [:wall, :rock, :empty, :rock, :wall],
                      mine.raw_map[2]
-        assert_equal [Pos[2, 2], Pos[2, 3], Pos[4, 2], Pos[4, 3]],
-                     mine.rocks.sort
+        assert_equal Set[Pos[2, 2], Pos[2, 3], Pos[4, 2], Pos[4, 3]],
+                     Set[*mine.rocks]
         mine.step!("W")
         assert_equal [:wall, :empty, :empty, :empty, :wall],
                      mine.raw_map[1]
         assert_equal [:wall, :rock,  :rock,  :rock,  :wall],
                      mine.raw_map[2]
-        assert_equal [Pos[2, 2], Pos[3, 2], Pos[4, 2]],
-                     mine.rocks.sort
+        assert_equal Set[Pos[2, 2], Pos[3, 2], Pos[4, 2]],
+                     Set[*mine.rocks]
       end
 
       should "ラムダの上の岩は右側に崩落すること" do

@@ -22,8 +22,10 @@ class LambdaLifter
       return self.class.new(x - other.x, y - other.y)
     end
 
+    # Note: ソートしたときに、bottom to top・left to rightになってほしいため、
+    # [y, x]としている
     def <=>(other)
-      [x, y] <=> [other.x, other.y]
+      [y, x] <=> [other.y, other.x]
     end
     include Comparable
 
