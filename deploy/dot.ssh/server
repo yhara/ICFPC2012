@@ -12,7 +12,25 @@ do
   i=`expr $i + 1`
 done
 u=icfp-run-$i
-
 sudo adduser --disabled-password --gecos icfp $u
-sudo -u $u sh -c "cd /home/$u && tar xf - && tar xf icfp-$n.tgz && ./install && cat *.map | ./lifter"
 echo
+
+cd /home/$u
+
+run="sudo -u $u sh -c"
+
+echo extracting...
+$run 'tar xf -'
+$run "tar xf icfp-$n.tgz"
+echo
+
+echo running install...
+$run './install'
+echo
+
+echo running lifter...
+$run 'cat *.map | ./lifter'
+echo
+echo
+
+echo all done.
