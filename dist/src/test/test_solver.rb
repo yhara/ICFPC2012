@@ -1,10 +1,10 @@
 # coding: utf-8
 class LambdaLifter
   class TestSolver < Test::Unit::TestCase
-    should "回答不可能な小さいマップがハイスコアでabortすること" do
+    should "mini1.mapという回答不可能な小さいマップがハイスコアでabortすること" do
       desc = <<-'EOD'.freeze
 ######
-#. *R#
+#  *R#
 L* .\#
 ######
       EOD
@@ -15,7 +15,7 @@ L* .\#
       assert_equal "DA", s.solve
     end
 
-    should "回答可能な小さいマップが解けること" do
+    should "mini2.mapという回答可能な小さいマップが解けること" do
       desc = <<-'EOD'.freeze
 ######
 #.* R#
@@ -66,6 +66,22 @@ L  .\#
       m = Mine.new(desc)
       s = Solver.new(m)
       assert_equal true, s.send(:solve_to_checkpoint, Pos.new(5, 2))
+    end
+
+    should "contest2.mapのsolve" do
+      pend
+      desc = <<-'EOD'.freeze
+#######
+#..***#
+#..\\\#
+#...**#
+#.*.*\#
+LR....#
+#######
+      EOD
+      m = Mine.new(desc)
+      s = Solver.new(m)
+      assert_equal "LDLLDRRDRLULLDL", s.solve
     end
 
     context "確実に到達不可能な地点を見つけるとき" do

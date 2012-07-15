@@ -3,6 +3,9 @@ require "set"
 
 class LambdaLifter
   class Solver
+    # 探索する深さのMAX係数
+    GIVEUP_DEPTH_FACTOR = 5
+
     def initialize(mine)
       @mine = mine
       # ["L", "R"] など
@@ -29,35 +32,70 @@ class LambdaLifter
       @visited_poss = Set.new
       Signal.trap(:INT){ handle_sigint }
     end
-
     # コマンドの列を文字列で返す。
     # 例："DLLRA"
     def solve
-      loop do
+      res = "A"
+      log("---------- start ----------")
+      res = loop do
         # TODO: finished?になってもよりよいスコアを求める
-        return highscore if @trapped_sigint
-        return @commands.join if @mine.finished?
+        break highscore if @trapped_sigint
+        break @commands.join if @mine.finished?
+        sleep 0.1 if LambdaLifter.debug?
         checkpoint = find_checkpoint
-        return highscore if not checkpoint
+        # ルートがない？
+        if checkpoint.nil?
+          # すべて探索しきった？
+          break (highscore) if @check_route.empty?
+          @passed_check_routes << @check_route.dup
+          next rollback_checkpoint!
+        end
         is_solved = solve_to_checkpoint(checkpoint)
-        checkpoint!(checkpoint) if is_solved
+        if is_solved
+          checkpoint!(checkpoint)
+          @passed_check_routes << @check_route.dup
+        else
+          # 失敗したcheckpointは探索済みとし
+          @passed_check_routes << @check_route + [checkpoint]
+          # check寸前の状態に戻す
+          rollback!
+        end
       end
+      log("----------  stop  ----------")
+      log("commands: #{res}")
+      return res
     end
 
     private
     # checkpointまでの経路を解く
     def solve_to_checkpoint(checkpoint)
+      log("solve_to_checkpoint: #{checkpoint}")
       next_pos = nil
-      cur_check_route = @check_route.dup
+      depth = 0
+      start_pos = @mine.robot.pos
+      start_cmd_size = @commands.join.size
+      limit = solve_depth_limit(checkpoint)
       while next_pos != checkpoint
-        return highscore if @trapped_sigint
-        success = exec_next_command(checkpoint)
-        p [:solve, @commands.join] if $DEBUG
-        puts @mine.ascii_map if $DEBUG
+        depth = (@commands.join.size - start_cmd_size)
+        return false if @trapped_sigint
+        if depth <= limit
+          success = exec_next_command(checkpoint)
+          log(
+            "cmd: #{@commands.join}\n" +
+            "route: #{check_route_to_key(@check_route + [checkpoint])}\n" +
+            "passed_check_routes: #{@passed_check_routes.inspect}\n" +
+            "depth <= limit: #{depth} < #{limit}\n" +
+            "next_pos == checkpoint: #{@mine.robot.pos} == #{checkpoint}\n" +
+            @mine.ascii_map)
+        else
+          log("solve_to_checkpoint: too deep")
+          success = nil
+        end
+        # 実行可能コマンドなし
         if not success
-          # コマンド実行失敗
+          return false if start_pos == @mine.robot.pos
           rollback!
-          return false if cur_check_route != @check_route
+          depth-=1
         end
         next_pos = @mine.robot.pos
       end
@@ -67,12 +105,14 @@ class LambdaLifter
     # 次の目的地を探す
     # TODO: 簡単わかる無理そうなopen lambdaを検出する
     #       (たとえば岩にふさがっているものなど）
+    # TODO: チェックポイントを戻るが未実装
     def find_checkpoint
       possible_lambdas = @mine.lambdas.select do |l|
         possible_check_route?(@check_route + [l])
       end
       checkpoint = judge_next_point(possible_lambdas, @mine.robot.pos)
       checkpoint = @mine.lift if checkpoint.nil? && @mine.lambdas.empty?
+      log("find_checkpoint: possible_lambdas=<#{possible_lambdas}> checkpoint=<#{checkpoint}> check_route=<#{@check_route}>")
       return checkpoint
     end
 
@@ -80,7 +120,8 @@ class LambdaLifter
     # 今のところ直線の最短距離のみ
     # 以前のmapと変化がない場合はnil
     def exec_next_command(goal)
-      sdl(@mine) if $DEBUG
+      sdl(@mine) if defined? sdl
+      sleep 0.1 if LambdaLifter.debug?
       next_position = judge_next_point(movable_positions(@mine.robot), goal)
       return false if limit_commands_exceeded?
       cmd = next_position.nil? ? nil : @mine.robot.command_to(next_position)
@@ -115,9 +156,11 @@ class LambdaLifter
       return points.first if points.size == 1
       neary_lambda = points.find{|pos| @mine[pos] == :lambda }
       return neary_lambda if neary_lambda
+      # TODO: 最短距離はマンハッタン距離で試し
+      #       各方位の4個の実際の距離をシュミレート、障害物がない想定で計算。
       index = points.map.with_index{|point, i|
-        [((goal.x - point.x).abs + (goal.y - point.y).abs), i]
-      }.sort_by{|interval, _| interval }.first[1]
+        [manhattan_distance(point, goal), i]
+      }.sort_by{|distance, _| distance }.first[1]
       return nil if index.nil?
       return points[index]
     end
@@ -130,13 +173,13 @@ class LambdaLifter
 
     # 1つ前のmineにロールバック
     def rollback!
-      # p [:rollback!]
+      log("rollback!: cmd=<#{@commands.join}> wts=<#{@checkpoint_watermarks}>")
       @dead_cmd_routes << @commands.join
       cmd = @commands.pop
       # 成功のケースがないcheckpointを記録
       if !@checkpoint_watermarks.empty? &&
           @commands.size < @checkpoint_watermarks.last
-        @passed_check_routes << check_route_to_key(@check_route)
+        log("rollback!: with checkpoint, cmd=<#{@commands.join}> wt=<#{@checkpoint_watermarks.last}>")
         @checkpoint_watermarks.pop
         expire_cache_mine(@check_route)
         @check_route.pop
@@ -150,6 +193,16 @@ class LambdaLifter
       @mine = m
     end
 
+    def rollback_checkpoint!
+      if @checkpoint_watermarks.empty?
+        rollback_cnt = 0
+      else
+        rollback_cnt = @checkpoint_watermarks.last
+      end
+      log("rollback_checkpoint!: rollback_cnt=<#{rollback_cnt}>")
+      (@commands.size - rollback_cnt + 1).times{ rollback! }
+    end
+
     # 可能性のあるrouteか？
     def possible_route?(commands)
       return !@dead_cmd_routes.include?(commands.join)
@@ -158,7 +211,7 @@ class LambdaLifter
     # 可能性のあるcheckpointのrouteか？
     def possible_check_route?(check_route)
       # すでに通過したroute
-      return false if @passed_check_routes.include?(check_route_to_key(check_route))
+      return false if @passed_check_routes.include?(check_route)
       # return false if unreachable_pos(check_route.last)
       return true
     end
@@ -187,8 +240,8 @@ class LambdaLifter
     end
 
     def checkpoint!(point)
+      log("checkpoint!: point=<#{point}>, current_route=<#{@check_route}>")
       @checkpoint_watermarks << @commands.size
-      @passed_check_routes << check_route_to_key(@check_route)
       @check_route << point
     end
 
@@ -201,12 +254,6 @@ class LambdaLifter
     end
 
     def changed_mine?(cur, prev)
-      # p [:lambdas, prev.lambdas, cur.lambdas]
-      # p [:rocks, prev.rocks, cur.rocks]
-      # p [:here]
-      # puts prev.ascii_map
-      # puts cur.ascii_map
-      # p [:end, prev, cur]
       return prev.lambdas != cur.lambdas ||
         prev.rocks != cur.rocks ||
         prev[cur.robot.pos] == :earth
@@ -219,6 +266,23 @@ class LambdaLifter
     def limit_commands_exceeded?
       l = (@mine.width * @mine.height)
       @commands.size > l
+    end
+
+    def manhattan_distance(from, to)
+      return ((to.x - from.x).abs + (to.y - from.y).abs)
+    end
+
+    def solve_depth_limit(checkpoint)
+      normal = manhattan_distance(@mine.robot.pos, checkpoint) * GIVEUP_DEPTH_FACTOR
+      if @mine.lift.eql?(checkpoint)
+        return normal * 2
+      else
+        return normal
+      end
+    end
+
+    def log(msg)
+      LambdaLifter.logger.info(msg)
     end
 
     # 確実に到達不可能な地点を見つける
