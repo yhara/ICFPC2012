@@ -71,7 +71,7 @@ class LambdaLifter
       possible_lambdas = @mine.lambdas.select do |l|
         possible_check_route?(@check_route + [l])
       end
-      checkpoint = nearest_point(possible_lambdas, @mine.robot.pos)
+      checkpoint = judge_next_point(possible_lambdas, @mine.robot.pos)
       checkpoint = @mine.lift if checkpoint.nil? && @mine.lambdas.empty?
       return checkpoint
     end
@@ -79,9 +79,9 @@ class LambdaLifter
     # 次のrobotの命令を判断
     # 今のところ直線の最短距離のみ
     # 以前のmapと変化がない場合はnil
-    # TODO: 道中で取れるラムダがあれば取っておく
     def exec_next_command(goal)
-      next_position = nearest_point(movable_positions(@mine.robot), goal)
+      sdl(@mine) if $DEBUG
+      next_position = judge_next_point(movable_positions(@mine.robot), goal)
       return false if limit_commands_exceeded?
       cmd = next_position.nil? ? nil : @mine.robot.command_to(next_position)
       return false if cmd.nil?
@@ -109,11 +109,12 @@ class LambdaLifter
       return true
     end
 
-    # 指定位置への最短距離のポイントを返す。
-    # TODO: 障害物も考慮した最短距離にしたい
-    def nearest_point(points, goal)
+    # ポイントの内、次に移動するポイントを決定
+    def judge_next_point(points, goal)
       return nil if points.empty?
       return points.first if points.size == 1
+      neary_lambda = points.find{|pos| @mine[pos] == :lambda }
+      return neary_lambda if neary_lambda
       index = points.map.with_index{|point, i|
         [((goal.x - point.x).abs + (goal.y - point.y).abs), i]
       }.sort_by{|interval, _| interval }.first[1]
@@ -158,6 +159,7 @@ class LambdaLifter
     def possible_check_route?(check_route)
       # すでに通過したroute
       return false if @passed_check_routes.include?(check_route_to_key(check_route))
+      # return false if unreachable_pos(check_route.last)
       return true
     end
 
