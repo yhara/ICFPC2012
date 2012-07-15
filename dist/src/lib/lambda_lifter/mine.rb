@@ -241,33 +241,21 @@ class LambdaLifter
       _rocks = @rocks.dup
       _rocks.each do |rock|
         if self[rock.x, rock.y - 1] == :empty
-          set(rock.x, rock.y, :empty)
-          set(rock.x, rock.y - 1, :rock)
-          @rocks.delete(Pos[rock.x, rock.y])
-          @rocks << Pos[rock.x, rock.y - 1]
+          move_rock(Pos[rock.x, rock.y], Pos[rock.x, rock.y - 1])
         elsif self[rock.x,     rock.y - 1] == :rock  &&
               self[rock.x + 1, rock.y    ] == :empty &&
               self[rock.x + 1, rock.y - 1] == :empty
-          set(rock.x, rock.y, :empty)
-          set(rock.x + 1, rock.y - 1, :rock)
-          @rocks.delete(Pos[rock.x, rock.y])
-          @rocks << Pos[rock.x + 1, rock.y - 1]
+          move_rock(Pos[rock.x, rock.y], Pos[rock.x + 1, rock.y - 1])
         elsif self[rock.x,     rock.y - 1] == :rock       &&
               (self[rock.x + 1, rock.y    ] != :empty ||
                self[rock.x + 1, rock.y - 1] != :empty)    &&
               self[rock.x - 1, rock.y    ] == :empty      &&
               self[rock.x - 1, rock.y - 1] == :empty
-          set(rock.x, rock.y, :empty)
-          set(rock.x - 1, rock.y - 1, :rock)
-          @rocks.delete(Pos[rock.x, rock.y])
-          @rocks << Pos[rock.x - 1, rock.y - 1]
+          move_rock(Pos[rock.x, rock.y], Pos[rock.x - 1, rock.y - 1])
         elsif self[rock.x,     rock.y - 1] == :lambda &&
               self[rock.x + 1, rock.y    ] == :empty  &&
               self[rock.x + 1, rock.y - 1] == :empty
-          set(rock.x, rock.y, :empty)
-          set(rock.x + 1, rock.y - 1, :rock)
-          @rocks.delete(Pos[rock.x, rock.y])
-          @rocks << Pos[rock.x + 1, rock.y - 1]
+          move_rock(Pos[rock.x, rock.y], Pos[rock.x + 1, rock.y - 1])
         end
       end
       @rocks.uniq!
@@ -275,6 +263,13 @@ class LambdaLifter
       if @lift && @lambdas.length == 0 && self[@lift.x, @lift.y] == :closed_lift
         set(@lift.x, @lift.y, :open_lift)
       end
+    end
+
+    def move_rock(from, to)
+      set(from.x, from.y, :empty)
+      set(to.x, to.y, :rock)
+      @rocks.delete(from)
+      @rocks << to
     end
 
     def process_rock(direction) 
