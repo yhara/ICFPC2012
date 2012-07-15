@@ -206,7 +206,8 @@ class LambdaLifter
       # puts cur.ascii_map
       # p [:end, prev, cur]
       return prev.lambdas != cur.lambdas ||
-        prev.rocks != cur.rocks
+        prev.rocks != cur.rocks ||
+        prev[cur.robot.pos] == :earth
     end
 
     def check_route_to_key(route)
