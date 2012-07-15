@@ -1,16 +1,29 @@
 # -*- coding: utf-8 -*-
+require "set"
+
 class LambdaLifter
   class Solver
     def initialize(mine)
       @mine = mine
-      @cmdqueue = []
+      # ["L", "R"] など
+      @commands = []
+      # コマンド実行時のmineのキャッシュ
+      # {"(1, 1)" => {"L" => mine}, "(1, 1)->(2, 1)" => {"LL" => mine}}
       @cmd_mine_cache = {}
+      # コマンド実行時に失敗したもの
+      # {"LLD" => true}
+      # TODO: Setにする
       @dead_cmd_route = {}
+      # commandsのcheckpointに到達した地点のindex
+      # [1, 5, 10, 12]
       @checkpoint_watermarks = []
+      # すでに通ったcheckpointの配列
+      # [(1, 2), (2, 3)]
       @check_route = []
+      # 探索し尽くしたcheck_route
+      # {"(1, 2)->(2, 3)" => true}
       @passed_check_route = {}
-      # TODO: ハイスコアを一緒に覚えておきSIGINTが送られたらその命令列
-      # を送る。"A"が必要なものか、それ以外のものかを区別。
+      # ハイスコア
       @highscore = {score: 0, cmd: ""}
       @trapped_sigint = false
       Signal.trap(:INT){ handle_sigint }
@@ -22,7 +35,7 @@ class LambdaLifter
       loop do
         # TODO: finished?になってもよりよいスコアを求める
         return highscore if @trapped_sigint
-        return @cmdqueue.join if @mine.finished?
+        return @commands.join if @mine.finished?
         checkpoint = find_checkpoint
         return highscore if not checkpoint
         is_solved = solve_to_checkpoint(checkpoint)
@@ -43,6 +56,9 @@ class LambdaLifter
           rollback!
           return false if cur_check_route != @check_route
         end
+        debugger
+        p [:solve, @commands.join]
+        puts @mine.ascii_map
         next_pos = @mine.robot.pos
       end
       return true
@@ -68,22 +84,20 @@ class LambdaLifter
     def exec_next_command(goal)
       next_position = nearest_point(movable_positions(@mine.robot), goal)
       cmd = next_position.nil? ? nil : @mine.robot.command_to(next_position)
-      if cmd
-        @cmdqueue << cmd
-        if m = cached_mine(@cmdqueue)
-          @mine = m
-        else
-          @mine.step!(cmd)
-          if @highscore[:score] < @mine.score
-            @highscore[:score] = @mine.score
-            @highscore[:cmd] = @cmdqueue.join
-          end
+      return false if cmd.nil?
+      @commands << cmd
+      if m = cached_mine(@commands)
+        @mine = m
+      else
+        @mine.step!(cmd)
+        cache_mine(@commands, @mine)
+        if @highscore[:score] < @mine.score
+          @highscore[:score] = @mine.score
+          @highscore[:cmd] = @commands.join
         end
-        if @mine.losing? || unchanged_mine?(@mine)
-          return false
-        else
-          cache_mine(@cmdqueue, @mine)
-        end
+      end
+      if @mine.losing? || unchanged_mine?(@mine)
+        return false
       end
       return true
     end
@@ -103,27 +117,28 @@ class LambdaLifter
     # 移動可能な位置
     def movable_positions(robot)
       return (robot.movable_positions + [robot.pos]).
-        select{|a| possible_route?(@cmdqueue + [robot.command_to(a)]) }
+        select{|a| possible_route?(@commands + [robot.command_to(a)]) }
     end
 
     # 1つ前のmineにロールバック
     def rollback!
-      @dead_cmd_route[@cmdqueue.join] = true
-      cmd = @cmdqueue.pop
+      p [:rollback!]
+      @dead_cmd_route[@commands.join] = true
+      cmd = @commands.pop
       # 成功のケースがないcheckpointを記録
       if !@checkpoint_watermarks.empty? &&
-          @cmdqueue.size < @checkpoint_watermarks.last
+          @commands.size < @checkpoint_watermarks.last
         @passed_check_route[check_route_to_key(@check_route)] = true
         @checkpoint_watermarks.pop
         expire_cache_mine(@check_route)
         @check_route.pop
       end
-      @mine = cached_mine(@cmdqueue)
+      @mine = cached_mine(@commands)
     end
 
     # 可能性のあるrouteか？
-    def possible_route?(cmdqueue)
-      return false if @dead_cmd_route[cmdqueue.join]
+    def possible_route?(commands)
+      return false if @dead_cmd_route[commands.join]
       return true
     end
 
@@ -134,18 +149,18 @@ class LambdaLifter
       return true
     end
 
-    def cached_mine(cmdqueue)
+    def cached_mine(commands)
       (@check_route.size-1).downto(0) do |i|
         cache = (@cmd_mine_cache[check_route_to_key(@check_route[0..i])] ||= {})
-        m = cache[cmdqueue.join]
+        m = cache[commands.join]
         return m if not m.nil?
       end
       return nil
     end
 
-    def cache_mine(cmdqueue, mine)
+    def cache_mine(commands, mine)
       cache = (@cmd_mine_cache[check_route_to_key(@check_route)] ||= {})
-      cache[cmdqueue.join] = (mine.dup)
+      cache[commands.join] = (mine.dup)
     end
 
     def expire_cache_mine(check_route)
@@ -153,7 +168,7 @@ class LambdaLifter
     end
 
     def checkpoint!(point)
-      @checkpoint_watermarks << @cmdqueue.size
+      @checkpoint_watermarks << @commands.size
       @passed_check_route[check_route_to_key(@check_route)] = true
       @check_route << point
     end
@@ -167,8 +182,8 @@ class LambdaLifter
     end
 
     def unchanged_mine?(cur)
-      return false if @cmdqueue.size <= 2
-      prev_mine = cached_mine(@cmdqueue[0..-2])
+      return false if @commands.size <= 2
+      prev_mine = cached_mine(@commands[0..-2])
       return false if prev_mine.nil?
       return prev_mine.eql?(cur)
     end
