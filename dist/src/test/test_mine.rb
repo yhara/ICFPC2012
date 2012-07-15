@@ -12,11 +12,12 @@ class LambdaLifter
         EOD
 
     setup do
-      @mine = Mine.new(<<-'EOD')
+      @original_map = <<-'EOD'.freeze
 #######
 #R\*. #
 #####L#
       EOD
+      @mine = Mine.new(@original_map)
     end
 
     should "マップ定義からシンボルの２次元配列を作れること" do
@@ -68,6 +69,18 @@ class LambdaLifter
       h[@mine] = true
       h[mine2] = true
       assert_equal 1, h.size
+    end
+
+    should "ascii_mapでマップの文字列表現を返すこと" do
+      assert_equal @original_map, @mine.ascii_map
+
+      original_map_2 = <<-'EOD'.freeze
+####
+#RO#
+####
+      EOD
+      mine_2 = Mine.new(original_map_2)
+      assert_equal original_map_2, mine_2.ascii_map, "Open Lambda Lift確認"
     end
 
     context "step!が呼ばれたとき" do

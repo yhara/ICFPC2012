@@ -75,6 +75,15 @@ class LambdaLifter
       raw_map.hash
     end
 
+    def ascii_map
+      @@inverted_layouts ||= LAYOUTS.invert.freeze
+      return @map.map do |row|
+        row.map do |cell|
+          @@inverted_layouts[cell]
+        end.join + "\n"
+      end.join
+    end
+
     # マップを新規作成する。
     def step(command)
       # TODO
