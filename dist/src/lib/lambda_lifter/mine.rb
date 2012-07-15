@@ -34,7 +34,8 @@ class LambdaLifter
       '8' => :target_8,
       '9' => :target_9,
       'W' => :beard,
-      '!' => :razors
+      '!' => :razors,
+      '@' => :higher_order_rock
     }.freeze
 
     COMMANDS = {
@@ -57,7 +58,7 @@ class LambdaLifter
     attr_reader :width, :height, :commands, :score, :water, :flooding,
       :number_of_flooding, :waterproof, :number_of_waterproof,
       :trampolines, :targets, :trampoline_relationships,
-      :growth, :razors
+      :growth, :razors, :higher_order_rocks
 
     def initialize(mine_description)
       unless mine_description.nil?
@@ -412,6 +413,7 @@ class LambdaLifter
       _lambdas = []
       _lift = []
       _rocks = []
+      _higher_order_rocks = []
       _trampolines = []
       _targets = []
       robot_ruby_x = nil
@@ -435,6 +437,8 @@ class LambdaLifter
             _trampolines << [layout, x, y]
           when /target_\d/
             _targets << [layout, x, y]
+          when :higher_order_rock
+            _higher_order_rocks << [x, y]
           end
           layout
         end
@@ -455,6 +459,10 @@ class LambdaLifter
       if _targets.any?
         @targets = _targets.each_with_object({}) {|(l, x, y), h|
           h.merge!(l => Pos.new(*game_axis(x, y))) }
+      end
+      if _higher_order_rocks.any?
+        @higher_order_rocks = _higher_order_rocks.map {|x, y|
+          Pos.new(*game_axis(x, y)) }
       end
       @robot = Robot.new(self,
                          *game_axis(robot_ruby_x, robot_ruby_y))

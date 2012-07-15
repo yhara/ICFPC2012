@@ -66,6 +66,16 @@ class LambdaLifter
         assert_equal [Pos.new(3, 3), Pos.new(3, 2)], @mine.rocks
       end
 
+      should "ラムダ入りの岩の位置を知っていること" do
+        @mine = Mine.new(<<-'EOD')
+####
+# @#
+#R@#
+####
+        EOD
+        assert_equal [Pos.new(3, 3), Pos.new(3, 2)], @mine.higher_order_rocks
+      end
+
       should "無指定の場合も洪水に関する情報を取得すること" do
         mine = Mine.new(<<-'EOD')
 #####
