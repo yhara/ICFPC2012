@@ -146,72 +146,27 @@ class LambdaLifter
 
       if @robot.movable?(@command)
         self[@robot.x, @robot.y] = :empty
-        case @command
-        when :left
-          case self[@robot.x - 1, @robot.y]
-          when :rock
-            self[@robot.x - 2, @robot.y] = :rock
-            @rocks.delete(Pos[@robot.x - 1, @robot.y])
-            @rocks << Pos[@robot.x - 2, @robot.y]
-          when :lambda
-            @lambdas.delete(Pos.new(@robot.x - 1, @robot.y))
-            @number_of_collected_lambdas += 1
-            @score += GIVEN_SCORES[:collect_lambda]
-          when :open_lift
-            @winning = true
-            @score += GIVEN_SCORES[:collected_lambda_win] * @number_of_collected_lambdas
-          end
-          self[@robot.x - 1, @robot.y] = :robot
-          @robot = Robot.new(self,
-            @robot.x - 1, @robot.y)
-          @score += GIVEN_SCORES[:each_move]
-        when :right
-          case self[@robot.x + 1, @robot.y]
-          when :rock
-            self[@robot.x + 2, @robot.y] = :rock
-            @rocks.delete(Pos[@robot.x + 1, @robot.y])
-            @rocks << Pos[@robot.x + 2, @robot.y]
-          when :lambda
-            @lambdas.delete(Pos.new(@robot.x + 1, @robot.y))
-            @number_of_collected_lambdas += 1
-            @score += GIVEN_SCORES[:collect_lambda]
-          when :open_lift
-            @winning = true
-            @score += GIVEN_SCORES[:collected_lambda_win] * @number_of_collected_lambdas
-          end
-          self[@robot.x + 1, @robot.y] = :robot
-          @robot = Robot.new(self,
-            @robot.x + 1, @robot.y)
-          @score += GIVEN_SCORES[:each_move]
-        when :up
-          case self[@robot.x, @robot.y + 1]
-          when :lambda
-            @lambdas.delete(Pos.new(@robot.x, @robot.y + 1))
-            @number_of_collected_lambdas += 1
-            @score += GIVEN_SCORES[:collect_lambda]
-          when :open_lift
-            @winning = true
-            @score += GIVEN_SCORES[:collected_lambda_win] * @number_of_collected_lambdas
-          end
-          self[@robot.x, @robot.y + 1] = :robot
-          @robot = Robot.new(self,
-            @robot.x, @robot.y + 1)
-          @score += GIVEN_SCORES[:each_move]
-        when :down
-          case self[@robot.x, @robot.y - 1]
-          when  :lambda
-            @lambdas.delete(Pos.new(@robot.x, @robot.y - 1))
-            @number_of_collected_lambdas += 1
-            @score += GIVEN_SCORES[:collect_lambda]
-          when :open_lift
-            @winning = true
-            @score += GIVEN_SCORES[:collected_lambda_win] * @number_of_collected_lambdas
-          end
-          self[@robot.x, @robot.y - 1] = :robot
-          @robot = Robot.new(self,
-            @robot.x, @robot.y - 1)
-          @score += GIVEN_SCORES[:each_move]
+
+        layout = case @command
+                 when :left
+                   self[@robot.x - 1, @robot.y]
+                 when :right
+                   self[@robot.x + 1, @robot.y]
+                 when :up
+                   self[@robot.x, @robot.y + 1]
+                 when :down
+                   self[@robot.x, @robot.y - 1]
+                 end
+
+        case layout
+        when :rock
+          process_rock(@command)
+        when :lambda
+          process_lambda(@command)
+        when :open_lift
+          process_open_lift
         end
+        process_robot(@command)
       end
 
       # 岩を更新する
@@ -309,6 +264,58 @@ class LambdaLifter
     end
 
     private
+
+    def process_rock(direction) 
+      case direction
+      when :left
+        self[@robot.x - 2, @robot.y] = :rock
+        @rocks.delete(Pos[@robot.x - 1, @robot.y])
+        @rocks << Pos[@robot.x - 2, @robot.y]
+      when :right
+        self[@robot.x + 2, @robot.y] = :rock
+        @rocks.delete(Pos[@robot.x + 1, @robot.y])
+        @rocks << Pos[@robot.x + 2, @robot.y]
+      end
+    end
+
+    def process_lambda(direction)
+      case direction
+      when :left
+        @lambdas.delete(Pos.new(@robot.x - 1, @robot.y))
+      when :right
+        @lambdas.delete(Pos.new(@robot.x + 1, @robot.y))
+      when :up
+        @lambdas.delete(Pos.new(@robot.x, @robot.y + 1))
+      when :down
+        @lambdas.delete(Pos.new(@robot.x, @robot.y - 1))
+      end
+      @number_of_collected_lambdas += 1
+      @score += GIVEN_SCORES[:collect_lambda]
+    end
+
+    def process_open_lift
+      @winning = true
+      @score += GIVEN_SCORES[:collected_lambda_win] *
+                @number_of_collected_lambdas
+    end
+
+    def process_robot(direction)
+      case direction
+      when :left
+        self[@robot.x - 1, @robot.y] = :robot
+        @robot = Robot.new(self, @robot.x - 1, @robot.y)
+      when :right
+        self[@robot.x + 1, @robot.y] = :robot
+        @robot = Robot.new(self, @robot.x + 1, @robot.y)
+      when :up
+        self[@robot.x, @robot.y + 1] = :robot
+        @robot = Robot.new(self, @robot.x, @robot.y + 1)
+      when :down
+        self[@robot.x, @robot.y - 1] = :robot
+        @robot = Robot.new(self, @robot.x, @robot.y - 1)
+      end
+      @score += GIVEN_SCORES[:each_move]
+    end
 
     def []=(game_x, game_y, val)
       ruby_x, ruby_y = ruby_axis(game_x, game_y)
