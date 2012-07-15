@@ -98,8 +98,8 @@ class LambdaLifter
       # 岩を更新する
       width = 1
       height = 1
-      while @height <= height
-        while @width <= width
+      while height <= @height
+        while width <= @width
           layout = self[width, height]
           case layout
           when :rock
