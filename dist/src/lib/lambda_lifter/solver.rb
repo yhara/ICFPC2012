@@ -11,7 +11,7 @@ class LambdaLifter
       # {"(1, 1)" => {"L" => mine}, "(1, 1)->(2, 1)" => {"LL" => mine}}
       @cmd_mine_cache = {}
       # コマンド実行時に失敗したもの
-      # {"LLD" => true}
+      # Set["LLD", ...]
       @dead_cmd_routes = Set.new
       # commandsのcheckpointに到達した地点のindex
       # [1, 5, 10, 12]
@@ -20,8 +20,8 @@ class LambdaLifter
       # [(1, 2), (2, 3)]
       @check_route = []
       # 探索し尽くしたcheck_route
-      # {"(1, 2)->(2, 3)" => true}
-      @passed_check_route = {}
+      # Set["(1, 2)->(2, 3)", ...]
+      @passed_check_routes = Set.new
       # ハイスコア
       @highscore = {score: 0, cmd: ""}
       @trapped_sigint = false
@@ -127,7 +127,7 @@ class LambdaLifter
       # 成功のケースがないcheckpointを記録
       if !@checkpoint_watermarks.empty? &&
           @commands.size < @checkpoint_watermarks.last
-        @passed_check_route[check_route_to_key(@check_route)] = true
+        @passed_check_routes << check_route_to_key(@check_route)
         @checkpoint_watermarks.pop
         expire_cache_mine(@check_route)
         @check_route.pop
@@ -144,7 +144,7 @@ class LambdaLifter
     # 可能性のあるcheckpointのrouteか？
     def possible_check_route?(check_route)
       # すでに通過したroute
-      return false if @passed_check_route[check_route_to_key(check_route)]
+      return false if @passed_check_routes.include?(check_route_to_key(check_route))
       return true
     end
 
@@ -168,7 +168,7 @@ class LambdaLifter
 
     def checkpoint!(point)
       @checkpoint_watermarks << @commands.size
-      @passed_check_route[check_route_to_key(@check_route)] = true
+      @passed_check_routes << check_route_to_key(@check_route)
       @check_route << point
     end
 
