@@ -9,26 +9,26 @@ class LambdaLifter
     end
 
     should "+は引数のPos分増加した場所を返すこと" do
-      pos = LambdaLifter::Pos.new(2, 5) + LambdaLifter::Pos.new(2, 1)
+      pos = Pos.new(2, 5) + Pos.new(2, 1)
       assert_equal 4, pos.x
       assert_equal 6, pos.y
     end
 
     should "-は引数のPos分減算した場所を返すこと" do
-      pos = LambdaLifter::Pos.new(2, 5) - LambdaLifter::Pos.new(1, 3)
+      pos = Pos.new(2, 5) - Pos.new(1, 3)
       assert_equal 1, pos.x
       assert_equal 2, pos.y
     end
 
     should "inspect,aliasは(x, y)の文字列を返すこと" do
-      assert_equal "(1, 2)", LambdaLifter::Pos.new(1, 2).inspect
-      assert_equal "(1, 2)", LambdaLifter::Pos.new(1, 2).to_s
+      assert_equal "(1, 2)", Pos.new(1, 2).inspect
+      assert_equal "(1, 2)", Pos.new(1, 2).to_s
     end
 
     should "x, yを基にした比較が可能であること" do
-      a = LambdaLifter::Pos.new(2, 5)
-      b = LambdaLifter::Pos.new(2, 5)
-      c = LambdaLifter::Pos.new(1, 2)
+      a = Pos.new(2, 5)
+      b = Pos.new(2, 5)
+      c = Pos.new(1, 2)
       assert_equal a, b
       assert a == b
       assert_equal false, a != b
@@ -37,8 +37,8 @@ class LambdaLifter
 
     should "hashのkeyとして指定できること" do
       h = {}
-      a = LambdaLifter::Pos.new(1, 2)
-      b =  LambdaLifter::Pos.new(1, 2)
+      a = Pos.new(1, 2)
+      b =  Pos.new(1, 2)
       h[a] = true
       h[b] = true
       assert a.eql?(b)
