@@ -76,6 +76,11 @@ class LambdaLifter
       mine.instance_variable_set(:@commands, @commands.dup)
       mine.instance_variable_set(:@rocks, @rocks.dup)
       mine.instance_variable_set(:@score, @score)
+      mine.instance_variable_set(:@water, @water)
+      mine.instance_variable_set(:@flooding, @flooding)
+      mine.instance_variable_set(:@number_of_flooding, @number_of_flooding)
+      mine.instance_variable_set(:@waterproof, @waterproof)
+      mine.instance_variable_set(:@number_of_waterproof, @number_of_waterproof)
       return mine
     end
 
