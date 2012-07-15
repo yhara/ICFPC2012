@@ -138,6 +138,11 @@ class LambdaLifter
       return array_to_ascii_map(@map)
     end
 
+    # posがマップの範囲内におさまっているとき真を返す。
+    def valid_pos?(pos)
+      1 <= pos.x && pos.x <= @width && 1 <= pos.y && pos.y <= @height
+    end
+
     # マップを新規作成する。
     def step(command)
       # TODO

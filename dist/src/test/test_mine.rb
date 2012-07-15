@@ -20,6 +20,14 @@ class LambdaLifter
       @mine = Mine.new(@original_map)
     end
 
+    should "valid_pos?が呼ばれたとき、マップ範囲内なら真を返す" do
+      assert @mine.valid_pos?(Pos[1, 1])
+      assert !@mine.valid_pos?(Pos[0, 0])
+      assert @mine.valid_pos?(Pos[1, 3])
+      assert !@mine.valid_pos?(Pos[1, 4])
+      assert !@mine.valid_pos?(Pos[10, 1])
+    end
+
     # 冗長だが、スコアの計算全てに使用する定数なので前提が間違っていな
     # いことを確認。
     should "加算される各スコアがルール通りであること" do
