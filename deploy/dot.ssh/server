@@ -1,0 +1,17 @@
+#! /bin/sh
+
+set -e
+
+# submit number
+n=95754150
+
+
+i=0
+while test -e /home/icfp-run-$i
+do
+  i=`expr $i + 1`
+done
+u=icfp-run-$i
+
+sudo adduser --disabled-password --gecos icfp $u
+sudo -u $u sh -c "cd /home/$u && tar xf - && tar xf icfp-$n.tgz && ./install && cat *.map | ./lifter"
