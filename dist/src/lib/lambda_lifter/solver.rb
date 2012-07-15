@@ -125,7 +125,7 @@ class LambdaLifter
     # 1つ前のmineにロールバック
     def rollback!
       #p [:rollback!]
-      @dead_cmd_route[@commands.join] = true
+      @dead_cmd_routes << @commands.join
       cmd = @commands.pop
       # 成功のケースがないcheckpointを記録
       if !@checkpoint_watermarks.empty? &&
