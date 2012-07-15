@@ -4,7 +4,7 @@ require "pathname"
 require "tmpdir"
 
 # 実行環境の指定
-deploy_to = "icfp-run@192.168.1.113"
+deploy_to = "192.168.1.113"
 submit_number = "95754150"
 
 task :default => :test
@@ -33,9 +33,14 @@ task :run => [:package] do
     cp [deploy_file, map_path], d, preserve: true
     Dir.chdir(d) do
       sh "chmod go= #{ssh_id_path}"
-      sh "tar cf - #{deploy_file} #{map_path.basename} | ssh -i #{ssh_id_path} #{deploy_to}"
+      sh "tar cf - #{deploy_file} #{map_path.basename} | ssh -i #{ssh_id_path} icfp-run@#{deploy_to}"
     end
   end
+end
+
+desc "実行環境を整備する"
+task :run_setup do
+  sh "tar cf - -C deploy dot.ssh | ssh icfp@#{deploy_to} 'sudo userdel -r icfp-run; sudo adduser --disabled-password --gecos icfp icfp-run && sudo adduser icfp-run sudo && cd /home/icfp-run && sudo tar xf - && sudo -u icfp-run cp -a dot.ssh .ssh'"
 end
 
 desc "やるねぇ〜"
