@@ -514,42 +514,6 @@ Waterproof 5
           assert_equal :winning, mine.finished?
         end
 
-        should "ラムダを1つ回収していた場合、スコアが50加算されること" do
-          mine = Mine.new(<<-'EOD')
-#####
-#R\L#
-#####
-        EOD
-          mine.step!("R")
-          mine.step!("R")
-          before_finished_score = mine.score
-          assert_equal :winning, mine.finished?
-          expected_score = Mine::GIVEN_SCORES[:each_move] * 2 +
-                           Mine::GIVEN_SCORES[:collect_lambda] +
-                           Mine::GIVEN_SCORES[:collected_lambda_win]
-          assert_equal expected_score, mine.score
-          assert_equal mine.score - before_finished_score,
-                       Mine::GIVEN_SCORES[:collected_lambda_win]
-        end
-
-        should "ラムダを2つ回収していた場合、スコアが100加算されること" do
-          mine = Mine.new(<<-'EOD')
-######
-#R\\L#
-######
-        EOD
-          mine.step!("R")
-          mine.step!("R")
-          mine.step!("R")
-          before_finished_score = mine.score
-          assert_equal :winning, mine.finished?
-          expected_score = Mine::GIVEN_SCORES[:each_move] * 3 +
-                           Mine::GIVEN_SCORES[:collect_lambda] * 2 +
-                           Mine::GIVEN_SCORES[:collected_lambda_win] * 2
-          assert_equal expected_score, mine.score
-          assert_equal mine.score - before_finished_score,
-                       Mine::GIVEN_SCORES[:collected_lambda_win] * 2
-        end
       end
 
       context ":abortについて" do
@@ -694,6 +658,59 @@ R ****#
       assert_equal result_map, mine.ascii_map
       assert_equal 281, mine.score
       # TODO: 勝利条件の判定
+    end
+
+    context "scoreが呼ばれたとき" do
+      should "初期状態では0点であること" do
+        mine = Mine.new(<<-'EOD')
+#####
+#R\L#
+#####
+        EOD
+        assert_equal 0, mine.score
+      end
+
+      should "1手動くごとに1点減ること" do
+        mine = Mine.new(<<-'EOD')
+#####
+#R L#
+#####
+        EOD
+        mine.step!("R")
+        assert_equal -1, mine.score
+      end
+
+      should "ラムダ1つにつき25点が入ること" do
+        mine = Mine.new(<<-'EOD')
+#####
+#R\L#
+#####
+        EOD
+        mine.step!("R")
+        assert_equal 25 - 1, mine.score
+      end
+
+      should "Abort時、ラムダ1つにつき25点が入ること" do
+        mine = Mine.new(<<-'EOD')
+#####
+#R\L#
+#####
+        EOD
+        mine.step!("R")
+        mine.step!("A")
+        assert_equal (25 - 1) + 25, mine.score
+      end
+
+      should "winning時、ラムダ1つにつき50点が入ること" do
+        mine = Mine.new(<<-'EOD')
+#####
+#R\L#
+#####
+        EOD
+        mine.step!("R")
+        mine.step!("R")
+        assert_equal (25 - 1 - 1) + 50, mine.score
+      end
     end
   end
 end

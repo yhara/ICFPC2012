@@ -126,6 +126,7 @@ class LambdaLifter
             @score += GIVEN_SCORES[:collect_lambda]
           when :open_lift
             @winning = true
+            @score += GIVEN_SCORES[:collected_lambda_win] * @number_of_collected_lambdas
           end
           self[@robot.x - 1, @robot.y] = :robot
           @robot = Robot.new(self,
@@ -141,6 +142,7 @@ class LambdaLifter
             @score += GIVEN_SCORES[:collect_lambda]
           when :open_lift
             @winning = true
+            @score += GIVEN_SCORES[:collected_lambda_win] * @number_of_collected_lambdas
           end
           self[@robot.x + 1, @robot.y] = :robot
           @robot = Robot.new(self,
@@ -154,6 +156,7 @@ class LambdaLifter
             @score += GIVEN_SCORES[:collect_lambda]
           when :open_lift
             @winning = true
+            @score += GIVEN_SCORES[:collected_lambda_win] * @number_of_collected_lambdas
           end
           self[@robot.x, @robot.y + 1] = :robot
           @robot = Robot.new(self,
@@ -167,6 +170,7 @@ class LambdaLifter
             @score += GIVEN_SCORES[:collect_lambda]
           when :open_lift
             @winning = true
+            @score += GIVEN_SCORES[:collected_lambda_win] * @number_of_collected_lambdas
           end
           self[@robot.x, @robot.y - 1] = :robot
           @robot = Robot.new(self,
@@ -218,6 +222,7 @@ class LambdaLifter
 
       if @command == :abort
         @abort = true
+        @score += GIVEN_SCORES[:collected_lambda_abort] * @number_of_collected_lambdas
       end
       if self[@robot.x, @robot.y + 1] == :empty &&
          get(@robot.x, @robot.y + 1) == :rock
@@ -237,13 +242,9 @@ class LambdaLifter
     def finished?
       # :winning, :abort, :losing, falseのどれかを返す。
       if @winning
-        @score +=
-          GIVEN_SCORES[:collected_lambda_win] * @number_of_collected_lambdas
         return :winning
       end
       if @abort
-        @score +=
-          GIVEN_SCORES[:collected_lambda_abort] * @number_of_collected_lambdas
         return :abort
       end
       if @losing
@@ -360,15 +361,11 @@ class LambdaLifter
       end
       @width = grid.max {|m| m.length }.length
       @height = grid.length
-      if _lambdas.any?
-        @lambdas = _lambdas.map {|x, y| Pos.new(*game_axis(x, y)) }
-      end
+      @lambdas = _lambdas.map {|x, y| Pos.new(*game_axis(x, y)) }
       if _lift.any?
         @lift = Pos.new(*game_axis(_lift[0], _lift[1]))
       end
-      if _rocks.any?
-        @rocks = _rocks.map {|x, y| Pos.new(*game_axis(x, y)) }
-      end
+      @rocks = _rocks.map {|x, y| Pos.new(*game_axis(x, y)) }
       @robot = Robot.new(self,
                          *game_axis(robot_ruby_x, robot_ruby_y))
       # 最大幅より短い行は、文字数が足りない分だけ:emptyを持たせる。
