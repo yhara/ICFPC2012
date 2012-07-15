@@ -559,5 +559,33 @@ Waterproof 5
         assert_equal false, mine.finished?
       end
     end
+
+    should "サンプルのmap2の正答手順実施後のレイアウトが問題ないこと" do
+      mine = Mine.new(<<-'EOD')
+#######
+#..***#
+#..\\\#
+#...**#
+#.*.*\#
+LR....#
+#######
+        EOD
+
+      "RRUDRRULURULLLLDDDL".each_char do |cmd|
+        mine.step!(cmd)
+      end
+
+result_map = <<-EOD
+#######
+#..   #
+#  *  #
+# ..  #
+#   **#
+R ****#
+#######
+        EOD
+      assert_equal result_map, mine.ascii_map
+      # TODO: 勝利条件の判定
+    end
   end
 end
