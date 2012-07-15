@@ -44,16 +44,19 @@ RL
   end
 end
 
-def sdl(mine)
+def sdl(mine, sleeptime=nil)
   LambdaLifter::SdlVisualizer.instance.mine = mine
+  sleep sleeptime if sleeptime
 end
 
-if ARGV.size == 0
-  puts "usage: #$0 sample/contest1.map"
-  exit
-else
-  Thread.start{
-    LambdaLifter.run
-  }
-  LambdaLifter::SdlVisualizer.instance.run
+if __FILE__==$0
+  if ARGV.size == 0
+    puts "usage: #$0 sample/contest1.map [sample/contest1.route]"
+    exit
+  else
+    Thread.start{
+      LambdaLifter.run
+    }
+    LambdaLifter::SdlVisualizer.instance.run
+  end
 end
