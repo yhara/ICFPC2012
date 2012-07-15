@@ -231,7 +231,9 @@ class LambdaLifter
       # rockとwallが不動だとしたとき、toまでたどり着けるかどうかを返す
       # これがtrueを返すようなら、確実に到達不可能であるとは(一概には)言えない
       def separated_by_rocks_and_walls?(mine, to, from)
-        #visited = Set.new
+        return !reachable_with_boundary?(mine, from, to){|pos|
+          [:rock, :wall].include? mine[pos]
+        }
       end
 
       # ある地点がstaticだと仮定して、staticなもので囲まれているかどうかを
@@ -239,7 +241,37 @@ class LambdaLifter
       # このとき自動で動かないもの(empty, earthなど)のある地点は
       # unreachableであると仮定する
       def closed_with_static_objects?(mine, pos)
+        return reachable_with_boundary?(mine, from, to) do |pos|
+          case mine[pos]
+          when :wall
+            true
+          when :rock
+            # TODO
+          else
+            false
+          end
+        end
+      end
 
+      DIRECTIONS = [Pos[1, 0], Pos[-1, 0], Pos[0, 1], Pos[0, -1]]
+      def reachable_with_boundary?(mine, from, to, &block)
+        visited = Set.new
+        queue = [from]
+        until queue.empty?
+          #p [queue: queue, visited: visited]
+          pos = queue.shift
+          return true if pos == to
+          visited << pos
+          DIRECTIONS.each do |diff|
+            newpos = pos + diff
+            if !visited.include?(newpos) &&
+               mine.valid_pos?(newpos) &&
+               !yield(newpos)
+              queue.push(newpos)
+            end
+          end
+        end
+        return false
       end
     end
     include FindUnreachable
