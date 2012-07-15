@@ -9,6 +9,11 @@ task :test do
   end
 end
 
+desc "パッケージングを行う"
+task :package do
+  sh "./tools/pack.sh"
+end
+
 desc "やるねぇ〜"
 task :yarunee do
   puts "やるねぇ〜"
