@@ -103,6 +103,26 @@ class LambdaLifter
       end
     end
 
+    # 必要なら定義する
+    # def each_pos(&block)
+    #   (1..@height).each do |y|
+    #     (1..@width).each do |x|
+    #       yield Pos[x, y]
+    #     end
+    #   end
+    # end
+
+    # マップ内の各座標について繰り返す。
+    # Posをyieldする。
+    # ただしこのメソッドは出力しやすいように左上から列挙を開始する。
+    def each_pos_from_top_left(&block)
+      @height.downto(1) do |y|
+        (1..@width).each do |x|
+          yield Pos[x, y]
+        end
+      end
+    end
+
     # 自分自身を複製したMineオブジェクトを返す。
     def dup
       mine = Mine.new(nil)
