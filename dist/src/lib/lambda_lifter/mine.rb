@@ -32,7 +32,9 @@ class LambdaLifter
       '6' => :target_6,
       '7' => :target_7,
       '8' => :target_8,
-      '9' => :target_9
+      '9' => :target_9,
+      'W' => :beard,
+      '!' => :razors
     }.freeze
 
     COMMANDS = {
@@ -168,6 +170,8 @@ class LambdaLifter
           process_rock(@command)
         when :lambda
           process_lambda(@command)
+        when :razors
+          process_razors
         when :open_lift
           process_open_lift
         end
@@ -294,6 +298,10 @@ class LambdaLifter
       end
       @number_of_collected_lambdas += 1
       @score += GIVEN_SCORES[:collect_lambda]
+    end
+
+    def process_razors
+      @razors += 1
     end
 
     def process_open_lift

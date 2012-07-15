@@ -206,18 +206,21 @@ Trampoline B targets 2
       end
 
       should "ヒゲ、カミソリに関する情報を取得すること" do
-        mine = Mine.new(<<-'EOD')
+        map = <<-'EOD'
 ########
 #.R..  #
 #!   .!#
 #\\.W. L
 ########
+EOD
+        param = <<-'EOD'
 
 Growth 15
 Razors 1
         EOD
+        mine = Mine.new(map + param)
         assert_equal 15, mine.growth
-        assert_equal 1, mine.razors
+        assert_equal map, mine.ascii_map
       end
     end
 
@@ -606,6 +609,60 @@ result_map = <<-EOD
       EOD
       @mine.step!("R")
       assert_equal true, @mine.lambdas.empty?
+    end
+
+    context "カミソリについて" do
+      setup do 
+        @mine = Mine.new(<<-'EOD')
+#####
+#R! #
+###\L
+
+Growth 10
+Razors 0
+        EOD
+      end
+
+      should "シンボルの２次元配列が作られること" do
+        expected = [:wall, :robot, :razors, :empty, :wall]
+        assert_equal expected, @mine.raw_map[1]
+      end
+
+      context "Robotが重なった場合" do
+        should "@map.razorsが1加算されること" do
+          assert_equal 0, @mine.razors
+          @mine.step!('R')
+          assert_equal 1, @mine.razors
+        end
+
+        should "Robotの通過後emptyになること" do
+          @mine.step!('R')
+          @mine.step!('R')
+          expected = [:wall, :empty, :empty, :robot, :wall]
+          assert_equal expected, @mine.raw_map[1]
+          assert_equal 1, @mine.razors
+        end
+      end
+
+      context "岩との関係性" do
+      setup do
+        @mine = Mine.new(<<-'EOD')
+R####
+# * #
+# ! #
+###\L
+
+Growth 10
+Razors 0
+        EOD
+        end
+
+        should "カミソリの上の岩は動かないこと" do
+          @mine.step!('W')
+          expected = [:wall, :empty, :rock, :empty, :wall]
+          assert_equal expected, @mine.raw_map[1]
+        end
+      end
     end
 
     context "dupが呼ばれたとき" do
