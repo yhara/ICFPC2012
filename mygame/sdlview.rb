@@ -1,42 +1,33 @@
+# coding: utf-8
 require_relative "../dist/src/lib/lambda_lifter"
+$LOAD_PATH.unshift "#{File.dirname(__FILE__)}/lib/"
 require 'mygame/boot'
+require 'singleton'
 
 class LambdaLifter
   class SdlVisualizer
+    include Singleton
+
     def initialize
+      here = File.dirname(__FILE__)
       @images = {
-        closed_lift: Image.new("../visualizer/images/closed-lift.png"),
-        earth: Image.new("../visualizer/images/earth.png"),
-        empty: Image.new("../visualizer/images/empty.png"),
-        lambda: Image.new("../visualizer/images/lambda.png"),
-        open_lift: Image.new("../visualizer/images/open-lift.png"),
-        robot: Image.new("../visualizer/images/robot.png"),
-        rock: Image.new("../visualizer/images/rock.png"),
-        wall: Image.new("../visualizer/images/wall.png"),
+        closed_lift: Image.new("#{here}/../visualizer/images/closed-lift.png"),
+        earth: Image.new("#{here}/../visualizer/images/earth.png"),
+        empty: Image.new("#{here}/../visualizer/images/empty.png"),
+        lambda: Image.new("#{here}/../visualizer/images/lambda.png"),
+        open_lift: Image.new("#{here}/../visualizer/images/open-lift.png"),
+        robot: Image.new("#{here}/../visualizer/images/robot.png"),
+        rock: Image.new("#{here}/../visualizer/images/rock.png"),
+        wall: Image.new("#{here}/../visualizer/images/wall.png"),
       }
 
       @mine = Mine.new(<<-'EOD')
-######
-#. *R#
-#  \.#
-#\ * #
-L  .\#
-######
+RL
       EOD
     end
+    attr_accessor :mine
 
     def run
-      lmd = Image.new "../visualizer/images/lambda.png"
-      #lmd.scale = 0.5
-
-      i = 0
-      Thread.start{
-        loop do
-          p i+=1
-          sleep 1
-        end
-      }
-
       main_loop do
         @mine.raw_map.each.with_index do |raw_row, y|
           raw_row.each.with_index do |sym, x|
@@ -53,5 +44,16 @@ L  .\#
   end
 end
 
+def sdl(mine)
+  LambdaLifter::SdlVisualizer.instance.mine = mine
+end
 
-LambdaLifter::SdlVisualizer.new.run
+if ARGV.size == 0
+  puts "usage: #$0 sample/contest1.map"
+  exit
+else
+  Thread.start{
+    LambdaLifter.run
+  }
+  LambdaLifter::SdlVisualizer.instance.run
+end
