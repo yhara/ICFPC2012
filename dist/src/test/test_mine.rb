@@ -334,18 +334,69 @@ R###
         assert_equal :abort, mine.finished?
       end
 
-      should ":losingを返すこと" do
-        pend
-        mine = Mine.new(<<-'EOD')
+      context ":losingについて" do
+        should "ロボットが移動してマップ更新後、ロボットの頭上にある岩が移動していた場合は:losing" do
+          mine = Mine.new(<<-'EOD')
+###
+#*#
+# #
+#R#
+###
+          EOD
+          mine.step!("W")
+          assert_equal :losing, mine.finished?
+
+          mine = Mine.new(<<-'EOD')
+###
+#*#
+#R#
+# #
+###
+          EOD
+          mine.step!("D")
+          assert_equal :losing, mine.finished?
+
+#          mine = Mine.new(<<-'EOD')
+######
+##*  #
+##.  #
+##  R#
+######
+#          EOD
+#          mine.step!("L")
+#          assert_equal :losing, mine.finished?
+        end
+
+        should "ロボットが移動してマップ更新後、ロボットの頭上に岩があってもその岩が移動していない場合はfalse" do
+          mine = Mine.new(<<-'EOD')
+###
+#*#
+# #
+#R#
+###
+          EOD
+          mine.step!("U")
+          assert_equal false, mine.finished?
+
+          mine = Mine.new(<<-'EOD')
+###
+#*#
+#R#
+# #
+###
+          EOD
+          mine.step!("W")
+          assert_equal false, mine.finished?
+
+          mine = Mine.new(<<-'EOD')
 #####
 #*  #
-#   #
-#  R#
+#. R#
 #####
-        EOD
-        mine.step!("L")
-
-        assert_equal :losing, mine.finished?
+          EOD
+          mine.step!("L")
+          assert_equal false, mine.finished?
+        end
       end
 
       should "falseを返すこと" do
