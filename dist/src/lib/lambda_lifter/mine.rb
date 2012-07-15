@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # シミュレータ
 class LambdaLifter
-  class RobotUnmovableError < StandardError; end
+  class UnknownCommandError < StandardError; end
 
   class Mine
     include HashEqlable
@@ -66,8 +66,8 @@ class LambdaLifter
       mine.instance_variable_set(:@width, @width)
       mine.instance_variable_set(:@height, @height)
       mine.instance_variable_set(:@lift, @lift)
-      mine.instance_variable_set(:@commands, @commands)
-      mine.instance_variable_set(:@rocks, @rocks)
+      mine.instance_variable_set(:@commands, @commands.dup)
+      mine.instance_variable_set(:@rocks, @rocks.dup)
       return mine
     end
 
@@ -93,12 +93,8 @@ class LambdaLifter
     def step!(command)
       @updated_map = @map.dup
       @command = COMMANDS[command]
-
-      if @command
-        @commands << @command
-      else
-        raise RobotUnmovableError
-      end
+      raise UnknownCommandError if @command.nil?
+      @commands << command
 
       if @robot.movable?(@command)
         set(@robot.x, @robot.y, :empty)

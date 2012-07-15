@@ -124,7 +124,7 @@ class LambdaLifter
 
       should "存在しないコマンドは例外が発生すること" do
         mine = Mine.new(ROBOT_CENTERED_MAP)
-        assert_raise(RobotUnmovableError) do
+        assert_raise(UnknownCommandError) do
           mine.step!("(")
         end
       end
@@ -291,6 +291,8 @@ R###
         assert_equal @mine.lift, mine2.lift
         assert_equal @mine.commands, mine2.commands
         assert_equal @mine.rocks, mine2.rocks
+        assert_not_equal @mine.commands.object_id, mine2.commands.object_id
+        assert_not_equal @mine.rocks.object_id, mine2.rocks.object_id
         assert_not_equal @mine.lambdas.object_id, mine2.lambdas.object_id
       end
     end
