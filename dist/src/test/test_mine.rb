@@ -387,15 +387,6 @@ R###
           EOD
           mine.step!("W")
           assert_equal false, mine.finished?
-
-          mine = Mine.new(<<-'EOD')
-#####
-#*  #
-#. R#
-#####
-          EOD
-          mine.step!("L")
-          assert_equal false, mine.finished?
         end
       end
 
