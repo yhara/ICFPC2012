@@ -9,26 +9,29 @@ require_relative "../lib/lambda_lifter"
 #  Solver = MySolver
 #end
 
-def solve!(maptxt, opts)
-  mine = LambdaLifter::Mine.new(maptxt)
-  sdl(mine) if opts[:sdl]
-  puts "solving..."
-  route = LambdaLifter::Solver.new(mine.dup).solve
-  puts "route: #{route}"
+class LambdaLifter
+  def self.solve!(maptxt, opts)
+    mine = Mine.new(maptxt)
+    sdl(mine)
+    puts "solving..."
+    route = Solver.new(mine.dup).solve
+    puts "route: #{route}"
+    SdlVisualizer.instance.background_color = [255, 255, 255] if opts[:sdl]
 
-  route.each_char do |cmd|
-    break if mine.finished?
-    puts mine.ascii_map
-    puts "score: #{mine.score}  next command: #{cmd}"
+    route.each_char do |cmd|
+      break if mine.finished?
+      puts mine.ascii_map
+      puts "score: #{mine.score}  next command: #{cmd}"
 
-    sleep opts[:wait]
+      sleep opts[:wait]
 
-    mine.step!(cmd)
-    sdl(mine) if opts[:sdl]
+      mine.step!(cmd)
+      sdl(mine)
+    end
+    puts 
+    puts "result: #{mine.finished?}"
+    puts "score: #{mine.score}"
   end
-  puts 
-  puts "result: #{mine.finished?}"
-  puts "score: #{mine.score}"
 end
 
 opts = Trollop.options do
@@ -45,9 +48,11 @@ if opts[:sdl]
   require_relative "../../../mygame/sdlview.rb"
 
   Thread.start{
-    solve!(ARGF.read, opts)
+    LambdaLifter.solve!(ARGF.read, opts)
   }
   LambdaLifter::SdlVisualizer.instance.run
 else
-  solve!(ARGF.read, opts)
+  def sdl(*args); end
+
+  LambdaLifter.solve!(ARGF.read, opts)
 end

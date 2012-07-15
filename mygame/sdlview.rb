@@ -5,6 +5,10 @@ require 'mygame/boot'
 require 'singleton'
 
 class LambdaLifter
+  class DummySdlVisualizer
+
+  end
+
   class SdlVisualizer
     include Singleton
 
@@ -26,6 +30,10 @@ RL
       EOD
     end
     attr_accessor :mine
+
+    def background_color=(col)
+      MyGame.background_color = col
+    end
 
     def run
       main_loop do
