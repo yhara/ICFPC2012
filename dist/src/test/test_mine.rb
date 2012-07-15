@@ -183,6 +183,42 @@ R####
         assert_equal [:wall, :rock,  :rock,  :rock,  :wall],
                      mine.raw_map[2]
       end
+
+      should "ラムダの上の岩は右側に崩落すること" do
+        mine = Mine.new(<<-'EOD')
+R####
+# * #
+# \ #
+#####
+        EOD
+        assert_equal [:wall, :empty, :rock,   :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :empty, :lambda, :empty, :wall],
+                     mine.raw_map[2]
+        mine.step!("W")
+        assert_equal [:wall, :empty, :empty,  :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :empty, :lambda, :rock,  :wall],
+                     mine.raw_map[2]
+      end
+
+      should "ラムダの上の岩は左側に崩落しないこと" do
+        mine = Mine.new(<<-'EOD')
+R###
+# *#
+# \#
+####
+        EOD
+        assert_equal [:wall, :empty, :rock,   :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :empty, :lambda, :wall],
+                     mine.raw_map[2]
+        mine.step!("W")
+        assert_equal [:wall, :empty, :empty,  :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :rock,  :lambda, :wall],
+                     mine.raw_map[2]
+      end
     end
 
     should "ラムダの上にRがきたらlamdasは消えること" do
