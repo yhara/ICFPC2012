@@ -4,6 +4,8 @@ class LambdaLifter
   class RobotUnmovableError < StandardError; end
 
   class Mine
+    include HashEqlable
+
     LAYOUTS = {
       'R' => :robot,
       '#' => :wall,
@@ -65,10 +67,6 @@ class LambdaLifter
       mine.instance_variable_set(:@lift, @lift)
       mine.instance_variable_set(:@commands, @commands)
       return mine
-    end
-
-    def eql?(other)
-      hash.eql?(other.hash)
     end
 
     def hash

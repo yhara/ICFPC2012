@@ -1,5 +1,9 @@
+require_relative 'hash_eqlable'
+
 class LambdaLifter
   class Pos
+    include HashEqlable
+
     attr_reader :x, :y
     def initialize(x, y)
       @x = x
@@ -21,10 +25,6 @@ class LambdaLifter
 
     def inspect
       "(#{@x}, #{@y})"
-    end
-
-    def eql?(other)
-      hash.eql?(other.hash)
     end
 
     def hash
