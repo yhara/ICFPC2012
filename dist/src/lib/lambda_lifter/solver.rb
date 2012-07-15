@@ -56,8 +56,8 @@ class LambdaLifter
           rollback!
           return false if cur_check_route != @check_route
         end
-        debugger
-        p [:solve, @commands.join]
+        #debugger
+        #p [:solve, @commands.join]
         puts @mine.ascii_map
         next_pos = @mine.robot.pos
       end
