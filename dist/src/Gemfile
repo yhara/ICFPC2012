@@ -1,7 +1,16 @@
 source 'http://rubygems.org'
 
+group :deveopment do
+  gem 'trollop', '1.16.2'
+  gem 'rubysdl', '2.1.2'
+end
+
+#group :mac do
+#  gem 'rsdl', '0.1.4'
+#end
+
 group :test do
-  gem 'test-unit', '= 2.5.1'
-  gem 'shoulda-context', '= 1.0.0'
-  gem 'debugger', '= 1.1.4'
+  gem 'test-unit', '2.5.1'
+  gem 'shoulda-context', '1.0.0'
+  gem 'debugger', '1.1.4'
 end
