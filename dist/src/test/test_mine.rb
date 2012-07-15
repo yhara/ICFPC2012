@@ -313,7 +313,6 @@ R###
 
     context "finished?が呼ばれたとき" do
       should ":winningを返すこと" do
-        pend
         mine = Mine.new(<<-'EOD')
 #####
 #R\L#
@@ -325,7 +324,6 @@ R###
       end
 
       should ":abortを返すこと" do
-        pend
         mine = Mine.new(<<-'EOD')
 #####
 #R  #
