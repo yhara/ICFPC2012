@@ -240,9 +240,9 @@ R###
         assert_equal [:wall, :empty, :lambda, :wall],
                      mine.raw_map[2]
         mine.step!("W")
-        assert_equal [:wall, :empty, :empty,  :wall],
+        assert_equal [:wall, :empty, :rock,  :wall],
                      mine.raw_map[1]
-        assert_equal [:wall, :rock,  :lambda, :wall],
+        assert_equal [:wall, :empty, :lambda, :wall],
                      mine.raw_map[2]
       end
 
