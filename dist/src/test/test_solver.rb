@@ -2,6 +2,7 @@
 class LambdaLifter
   class TestSolver < Test::Unit::TestCase
     should "回答不可能な小さいマップがハイスコアでabortすること" do
+      pend
       desc = <<-'EOD'.freeze
 ######
 #. *R#
@@ -15,6 +16,7 @@ L *.\#
     end
 
     should "回答可能な小さいマップが解けること" do
+      pend
       desc = <<-'EOD'.freeze
 ######
 #.* R#
@@ -27,7 +29,7 @@ L ..\#
       assert_equal "DLLLL", s.solve
     end
 
-    should "" do
+    should "limit_commands_exceeded?がサイズオーバーの時にtrueを返す" do
       desc = <<-'EOD'.freeze
 ###
 LR#
