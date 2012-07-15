@@ -43,6 +43,21 @@ class LambdaLifter
       assert_equal :lambda, @mine[3, 2] 
     end
 
+    should "hashのkeyとして指定できること" do
+      mine2 = Mine.new(<<-'EOD')
+#######
+#R\*. #
+#####L#
+      EOD
+      assert_equal @mine.hash, mine2.hash
+      assert_equal true, @mine.eql?(mine2)
+
+      h = {}
+      h[@mine] = true
+      h[mine2] = true
+      assert_equal 1, h.size
+    end
+
     context "step!が呼ばれたとき" do
       should "コマンドRでロボットを右に動かすこと" do
         mine = Mine.new(ROBOT_CENTERED_MAP)

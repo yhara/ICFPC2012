@@ -63,6 +63,14 @@ class LambdaLifter
       return mine
     end
 
+    def eql?(other)
+      hash.eql?(other.hash)
+    end
+
+    def hash
+      raw_map.hash
+    end
+
     # マップを新規作成する。
     def step(command)
       # TODO
