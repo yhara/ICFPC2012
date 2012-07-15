@@ -14,7 +14,25 @@ class LambdaLifter
       'L' => :closed_lift,
       'O' => :open_lift,
       '.' => :earth,
-      ' ' => :empty
+      ' ' => :empty,
+      'A' => :trampoline_a,
+      'B' => :trampoline_b,
+      'C' => :trampoline_c,
+      'D' => :trampoline_d,
+      'E' => :trampoline_e,
+      'F' => :trampoline_f,
+      'G' => :trampoline_g,
+      'H' => :trampoline_h,
+      'I' => :trampoline_i,
+      '1' => :target_1,
+      '2' => :target_2,
+      '3' => :target_3,
+      '4' => :target_4,
+      '5' => :target_5,
+      '6' => :target_6,
+      '7' => :target_7,
+      '8' => :target_8,
+      '9' => :target_9
     }.freeze
 
     COMMANDS = {
@@ -35,18 +53,23 @@ class LambdaLifter
 
     attr_accessor :robot, :lambdas, :lift, :rocks
     attr_reader :width, :height, :commands, :score, :water, :flooding,
-      :number_of_flooding, :waterproof, :number_of_waterproof
+      :number_of_flooding, :waterproof, :number_of_waterproof,
+      :trampolines, :targets, :trampoline_relationships
 
     def initialize(mine_description)
       unless mine_description.nil?
         @map = nil
         @rocks = []
+        @lambdas = []
         @score = 0
         @water = 0
         @flooding = 0
         @number_of_flooding = 0
         @waterproof = 10
         @number_of_waterproof = 0
+        @trampolines = []
+        @targets = []
+        @trampoline_relationships = []
         parse(mine_description)
         @updated_map = @map.dup
         @commands = []
@@ -91,6 +114,12 @@ class LambdaLifter
       mine.instance_variable_set(:@number_of_waterproof, @number_of_waterproof)
       mine.instance_variable_set(:@number_of_collected_lambdas,
                                   @number_of_collected_lambdas)
+      mine.instance_variable_set(:@trampolines,
+        Marshal.load(Marshal.dump(@trampolines)))
+      mine.instance_variable_set(:@targets,
+        Marshal.load(Marshal.dump(@targets)))
+      mine.instance_variable_set(:@trampoline_relationships,
+        Marshal.load(Marshal.dump(@trampoline_relationships)))
       return mine
     end
 
@@ -314,7 +343,7 @@ class LambdaLifter
       end
     end
 
-    def flood_warning(mine_description)
+    def parse_flood(mine_description)
       if /Water / =~ mine_description ||
          /Flooding / =~ mine_description ||
          /Waterproof / =~ mine_description
@@ -337,14 +366,31 @@ class LambdaLifter
       return mine_description
     end
 
+    def parse_trampoline(mine_description)
+      if /Trampoline / =~ mine_description
+        _mine_description = mine_description.dup
+        rel = _mine_description.scan(/^Trampoline (\w) targets (\d)/)
+        @trampoline_relationships = rel.map {|r|
+          [LAYOUTS[r[0]], LAYOUTS[r[1]]] }
+        _mine_description.gsub!(/^Trampoline .*/, '')
+        _mine_description.strip!
+        return _mine_description 
+      end
+      return mine_description
+    end
+
     def parse(mine_description)
-      mine_description = flood_warning(mine_description).split("\n")
+      remaining_text_and_options = parse_flood(mine_description)
+      remaining_text = parse_trampoline(remaining_text_and_options)
+      _mine_description = remaining_text.split("\n")
       _lambdas = []
       _lift = []
       _rocks = []
+      _trampolines = []
+      _targets = []
       robot_ruby_x = nil
       robot_ruby_y = nil
-      grid = mine_description.each_with_object([]).with_index do |(line, g), y|
+      grid = _mine_description.each_with_object([]).with_index do |(line, g), y|
         g << line.each_char.map.with_index do |c, x|
           layout = LAYOUTS[c]
           case layout
@@ -357,6 +403,10 @@ class LambdaLifter
           when :robot
             robot_ruby_x = x
             robot_ruby_y = y
+          when /trampoline_\w/
+            _trampolines << [layout, x, y]
+          when /target_\d/
+            _targets << [layout, x, y]
           end
           layout
         end
@@ -367,7 +417,17 @@ class LambdaLifter
       if _lift.any?
         @lift = Pos.new(*game_axis(_lift[0], _lift[1]))
       end
-      @rocks = _rocks.map {|x, y| Pos.new(*game_axis(x, y)) }
+      if _rocks.any?
+        @rocks = _rocks.map {|x, y| Pos.new(*game_axis(x, y)) }
+      end
+      if _trampolines.any?
+        @trampolines = _trampolines.map {|l, x, y|
+          [l, Pos.new(*game_axis(x, y))] }
+      end
+      if _targets.any?
+        @targets = _targets.map {|l, x, y|
+          [l, Pos.new(*game_axis(x, y))] }
+      end
       @robot = Robot.new(self,
                          *game_axis(robot_ruby_x, robot_ruby_y))
       # 最大幅より短い行は、文字数が足りない分だけ:emptyを持たせる。

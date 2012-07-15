@@ -154,6 +154,56 @@ Waterproof 42
         assert_equal 0, mine.number_of_flooding
         assert_equal 0, mine.number_of_waterproof
       end
+
+      should "トランポリンの情報を取得すること" do
+        mine = Mine.new(<<-'EOD')
+##L###########
+#.....R#.**..#
+#.*A...#..1..#
+#.*....#.  \.#
+#.\\\..#...\.#
+#2.....**B...#
+##############
+
+Trampoline A targets 1
+Trampoline B targets 2
+        EOD
+        trampolines = [[:trampoline_a, Pos.new(4, 5)],
+                       [:trampoline_b, Pos.new(10, 2)]]
+        targets = [[:target_1, Pos.new(11, 5)],
+                   [:target_2, Pos.new(2, 2)]]
+        trampoline_relationships = [[:trampoline_a, :target_1],
+                                    [:trampoline_b, :target_2]]
+        assert_equal trampolines, mine.trampolines
+        assert_equal targets, mine.targets
+        assert_equal trampoline_relationships, mine.trampoline_relationships
+      end
+
+      should "洪水の情報が混ざっていてもトランポリンの情報を取得すること" do
+        mine = Mine.new(<<-'EOD')
+##L###########
+#.....R#.**..#
+#.*A...#..1..#
+#.*....#.  \.#
+#.\\\..#...\.#
+#2.....**B...#
+##############
+
+Trampoline A targets 1
+Waterproof 42
+Trampoline B targets 2
+        EOD
+        trampolines = [[:trampoline_a, Pos.new(4, 5)],
+                       [:trampoline_b, Pos.new(10, 2)]]
+        targets = [[:target_1, Pos.new(11, 5)],
+                   [:target_2, Pos.new(2, 2)]]
+        trampoline_relationships = [[:trampoline_a, :target_1],
+                                    [:trampoline_b, :target_2]]
+        assert_equal 42, mine.waterproof
+        assert_equal trampolines, mine.trampolines
+        assert_equal targets, mine.targets
+        assert_equal trampoline_relationships, mine.trampoline_relationships
+      end
     end
 
     should "mine[x, y]でその座標にあるものを返すこと" do
@@ -479,6 +529,57 @@ Waterproof 5
 
         assert_equal @mine.lambdas, mine2.lambdas
         assert_not_equal @mine.lambdas.object_id, mine2.lambdas.object_id
+      end
+
+      should "内部のtrampolinesを複製すること" do
+        mine = Mine.new(<<-'EOD')
+######
+#1  A#
+#    #
+# R  #
+######
+
+Trampoline A targets 1
+        EOD
+        mine2 = mine.dup
+
+        assert_equal mine.trampolines, mine2.trampolines
+        assert_not_equal mine.trampolines.object_id,
+                         mine2.trampolines.object_id
+      end
+
+      should "内部のtargetsを複製すること" do
+        mine = Mine.new(<<-'EOD')
+######
+#1  A#
+#    #
+# R  #
+######
+
+Trampoline A targets 1
+        EOD
+        mine2 = mine.dup
+
+        assert_equal mine.targets, mine2.targets
+        assert_not_equal mine.targets.object_id, mine2.targets.object_id
+      end
+
+      should "内部のtrampoline_relationshipsを複製すること" do
+        mine = Mine.new(<<-'EOD')
+######
+#1  A#
+#    #
+# R  #
+######
+
+Trampoline A targets 1
+        EOD
+        mine2 = mine.dup
+
+        assert_equal mine.trampoline_relationships,
+                     mine2.trampoline_relationships
+        assert_not_equal mine.trampoline_relationships.object_id,
+                         mine2.trampoline_relationships.object_id
       end
 
       should "その他の情報を複製すること" do
