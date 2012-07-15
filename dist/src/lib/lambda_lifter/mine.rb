@@ -107,7 +107,7 @@ class LambdaLifter
         when :right
             # 同上。
           if self[@robot.x + 1, @robot.y] == :rock
-            self[@robot.x + 2, @robot.y] = :rock
+            set(@robot.x + 2, @robot.y, :rock)
           end
           if self[@robot.x + 1, @robot.y] == :lambda
             @lambdas.delete(Pos.new(@robot.x + 1, @robot.y))
