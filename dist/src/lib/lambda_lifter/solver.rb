@@ -12,8 +12,7 @@ class LambdaLifter
       @cmd_mine_cache = {}
       # コマンド実行時に失敗したもの
       # {"LLD" => true}
-      # TODO: Setにする
-      @dead_cmd_route = {}
+      @dead_cmd_routes = Set.new
       # commandsのcheckpointに到達した地点のindex
       # [1, 5, 10, 12]
       @checkpoint_watermarks = []
@@ -123,7 +122,7 @@ class LambdaLifter
     # 1つ前のmineにロールバック
     def rollback!
       p [:rollback!]
-      @dead_cmd_route[@commands.join] = true
+      @dead_cmd_routes << @commands.join
       cmd = @commands.pop
       # 成功のケースがないcheckpointを記録
       if !@checkpoint_watermarks.empty? &&
@@ -138,7 +137,7 @@ class LambdaLifter
 
     # 可能性のあるrouteか？
     def possible_route?(commands)
-      return false if @dead_cmd_route[commands.join]
+      return false if @dead_cmd_routes << commands.join
       return true
     end
 
