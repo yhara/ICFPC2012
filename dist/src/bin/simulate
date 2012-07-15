@@ -38,6 +38,7 @@ opts = Trollop.options do
   banner "usage: #$0 mapfile"
 
   opt :sdl, "SDLによる描画を行う", default: false
+  opt :scale, "SDLの拡大倍率(デフォルト: 1.0)", default: 1.0
   opt :wait, "ウェイト(デフォルト: 0.5秒)", default: 0.5
   opt :help, "ヘルプ"
 end
@@ -50,6 +51,7 @@ if opts[:sdl]
   Thread.start{
     LambdaLifter.solve!(ARGF.read, opts)
   }
+  LambdaLifter::SdlVisualizer.instance.scale = opts[:scale]
   LambdaLifter::SdlVisualizer.instance.run
 else
   def sdl(*args); end

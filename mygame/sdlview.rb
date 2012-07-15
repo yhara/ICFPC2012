@@ -5,10 +5,6 @@ require 'mygame/boot'
 require 'singleton'
 
 class LambdaLifter
-  class DummySdlVisualizer
-
-  end
-
   class SdlVisualizer
     include Singleton
 
@@ -28,8 +24,10 @@ class LambdaLifter
       @mine = Mine.new(<<-'EOD')
 RL
       EOD
+      @scale = 1
     end
     attr_accessor :mine
+    attr_writer :scale
 
     def background_color=(col)
       MyGame.background_color = col
@@ -40,10 +38,9 @@ RL
         @mine.raw_map.each.with_index do |raw_row, y|
           raw_row.each.with_index do |sym, x|
             img = @images[sym] or raise "unkown: #{sym}"
-            scale = 1
-            img.x = x * (47*scale)
-            img.y = y * (47*scale)
-            img.scale = scale
+            img.x = x * (47*@scale)
+            img.y = y * (47*@scale)
+            img.scale = @scale
             img.render
           end
         end
