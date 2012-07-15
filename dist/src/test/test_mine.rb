@@ -129,6 +129,20 @@ class LambdaLifter
         end
       end
 
+      should "ロボットの移動に成功するとスコアが-1減ること" do
+        mine = Mine.new(ROBOT_CENTERED_MAP)
+        mine.step!("R")
+        assert_equal -1, mine.score
+        mine.step!("L")
+        assert_equal -2, mine.score
+        mine.step!("U")
+        assert_equal -3, mine.score
+        mine.step!("D")
+        assert_equal -4, mine.score
+        mine.step!("W")
+        assert_equal -4, mine.score
+      end
+
       should "ロボットの移動に伴い岩が移動すること" do
         mine = Mine.new(<<-'EOD')
 #######

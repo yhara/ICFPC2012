@@ -27,12 +27,13 @@ class LambdaLifter
     }.freeze
 
     attr_accessor :robot, :lambdas, :lift, :rocks
-    attr_reader :width, :height, :commands
+    attr_reader :width, :height, :commands, :score
 
     def initialize(mine_description)
       unless mine_description.nil?
         @map = nil
         @rocks = []
+        @score = 0
         parse(mine_description)
         @updated_map = @map.dup
         @commands = []
@@ -106,6 +107,7 @@ class LambdaLifter
           set(@robot.x - 1, @robot.y, :robot)
           @robot = Robot.new(self,
             @robot.x - 1, @robot.y)
+          @score -= 1
         when :right
             # 同上。
           if self[@robot.x + 1, @robot.y] == :rock
@@ -117,6 +119,7 @@ class LambdaLifter
           set(@robot.x + 1, @robot.y, :robot)
           @robot = Robot.new(self,
             @robot.x + 1, @robot.y)
+          @score -= 1
         when :up
           if self[@robot.x, @robot.y + 1] == :lambda
             @lambdas.delete(Pos.new(@robot.x, @robot.y + 1))
@@ -124,6 +127,7 @@ class LambdaLifter
           set(@robot.x, @robot.y + 1, :robot)
           @robot = Robot.new(self,
             @robot.x, @robot.y + 1)
+          @score -= 1
         when :down
           if self[@robot.x, @robot.y - 1] == :lambda
             @lambdas.delete(Pos.new(@robot.x, @robot.y - 1))
@@ -131,6 +135,7 @@ class LambdaLifter
           set(@robot.x, @robot.y - 1, :robot)
           @robot = Robot.new(self,
             @robot.x, @robot.y - 1)
+          @score -= 1
         end
       end
 
