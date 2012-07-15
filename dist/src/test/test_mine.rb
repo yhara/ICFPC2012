@@ -692,6 +692,7 @@ R ****#
 #######
         EOD
       assert_equal result_map, mine.ascii_map
+      assert_equal 281, mine.score
       # TODO: 勝利条件の判定
     end
   end
