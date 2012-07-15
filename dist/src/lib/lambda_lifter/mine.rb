@@ -58,13 +58,14 @@ class LambdaLifter
     attr_reader :width, :height, :commands, :score, :water, :flooding,
       :number_of_flooding, :waterproof, :number_of_waterproof,
       :trampolines, :targets, :trampoline_relationships,
-      :growth, :razors, :higher_order_rocks
+      :growth, :razors, :beards, :number_of_growing, :higher_order_rocks
 
     def initialize(mine_description)
       unless mine_description.nil?
         @map = nil
         @rocks = []
         @lambdas = []
+        @beards = []
         @score = 0
         @water = 0
         @flooding = 0
@@ -77,6 +78,7 @@ class LambdaLifter
         @growth = 0
         @razors = 0
         parse(mine_description)
+        @number_of_growing = @growth > 0 ? @growth - 1 : -1
         @updated_map = @map.dup
         @commands = []
         @number_of_collected_lambdas = 0
@@ -149,8 +151,10 @@ class LambdaLifter
         Marshal.load(Marshal.dump(@targets)))
       mine.instance_variable_set(:@trampoline_relationships,
         Marshal.load(Marshal.dump(@trampoline_relationships)))
+      mine.instance_variable_set(:@beards, @beards.dup)
       mine.instance_variable_set(:@growth, @growth)
       mine.instance_variable_set(:@razors, @razors)
+      mine.instance_variable_set(:@number_of_growing, @number_of_growing)
       return mine
     end
 
@@ -218,6 +222,7 @@ class LambdaLifter
       @updated_map = Marshal.load(Marshal.dump(@map))
       process_map
 
+      beard_growing
       if @command == :abort
         @abort = true
         @score += GIVEN_SCORES[:collected_lambda_abort] * @number_of_collected_lambdas
@@ -298,6 +303,24 @@ class LambdaLifter
       set(to.x, to.y, :rock)
       @rocks.delete(from)
       @rocks << to
+    end
+
+    def spread_beard
+      return if @number_of_growing != 0
+      @number_of_growing = @growth
+      _beards = @beards.dup
+      _beards.each do |beard|
+        range = [-1, 0, 1]
+        range.each do |dx|
+          range.each do |dy|
+            if self[beard.x + dx, beard.y + dy] == :empty
+              set(beard.x + dx, beard.y + dy, :beard)
+              @beards << Pos[beard.x + dx, beard.y + dy]
+            end
+          end
+        end
+      end
+      @beards.uniq!
     end
 
     def process_rock(direction) 
@@ -423,6 +446,12 @@ class LambdaLifter
       end
     end
 
+    def beard_growing
+      spread_beard
+      return if @growth == 0 || @beards.empty?
+      @number_of_growing -= 1
+    end
+
     def parse_mine_params(line)
       if line.match(/^(Water|Flooding|Waterproof|Growth|Razors) (\d+)/)
         self.instance_variable_set("@" + $1.downcase, $2.to_i)
@@ -443,6 +472,7 @@ class LambdaLifter
       _higher_order_rocks = []
       _trampolines = []
       _targets = []
+      _beards = []
       robot_ruby_x = nil
       robot_ruby_y = nil
       grid = _mine_description.each_with_object([]).with_index do |(line, g), y|
@@ -466,6 +496,8 @@ class LambdaLifter
             _targets << [layout, x, y]
           when :higher_order_rock
             _higher_order_rocks << [x, y]
+          when :beard
+            _beards << [x, y]
           end
           layout
         end
@@ -490,6 +522,9 @@ class LambdaLifter
       if _higher_order_rocks.any?
         @higher_order_rocks = _higher_order_rocks.map {|x, y|
           Pos.new(*game_axis(x, y)) }
+      end
+      if _beards.any?
+        @beards = _beards.map {|x, y| Pos.new(*game_axis(x, y)) }
       end
       @robot = Robot.new(self,
                          *game_axis(robot_ruby_x, robot_ruby_y))

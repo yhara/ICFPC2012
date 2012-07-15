@@ -238,6 +238,9 @@ Razors 1
         EOD
         mine = Mine.new(map + param)
         assert_equal 15, mine.growth
+        assert_equal 14, mine.number_of_growing
+        assert_equal  1, mine.razors
+        assert_equal [Pos[5, 2]], mine.beards
         assert_equal map, mine.ascii_map
       end
     end
@@ -628,6 +631,57 @@ result_map = <<-EOD
       EOD
       @mine.step!("R")
       assert_equal true, @mine.lambdas.empty?
+    end
+
+    context "ヒゲについて" do
+      setup do 
+        @mine = Mine.new(<<-'EOD')
+#####
+#R  #
+#   #
+# W #
+#   #
+###\L
+
+Growth 5
+Razors 0
+        EOD
+      end
+
+      should "step!ごとに成長に関する値がデクリメントされること" do
+        assert_equal 4, @mine.number_of_growing
+        @mine.step!('W')
+        assert_equal 3, @mine.number_of_growing
+        @mine.step!('W')
+        assert_equal 2, @mine.number_of_growing
+        @mine.step!('W')
+        assert_equal 1, @mine.number_of_growing
+        @mine.step!('W')
+        assert_equal 0, @mine.number_of_growing
+      end
+
+      should "成長に関する値が0の状態でstep!すると値がリセットされること" do
+        assert_equal 4, @mine.number_of_growing
+        4.times { @mine.step!('W') }
+        assert_equal 0, @mine.number_of_growing
+        @mine.step!('W')
+        assert_equal 4, @mine.number_of_growing
+      end
+
+      should "成長に関する値が0の状態でstep!すると増殖すること" do
+        assert_equal 1, @mine.beards.length
+        5.times { @mine.step!('W') }
+        assert_equal 9, @mine.beards.length
+        expected = <<-'EOD'
+#####
+#R  #
+#WWW#
+#WWW#
+#WWW#
+###\L
+        EOD
+        assert_equal expected, @mine.ascii_map
+      end
     end
 
     context "カミソリについて" do
