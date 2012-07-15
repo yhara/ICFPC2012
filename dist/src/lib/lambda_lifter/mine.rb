@@ -27,13 +27,19 @@ class LambdaLifter
     }.freeze
 
     attr_accessor :robot, :lambdas, :lift, :rocks
-    attr_reader :width, :height, :commands, :score
+    attr_reader :width, :height, :commands, :score, :water, :flooding,
+      :number_of_flooding, :waterproof, :number_of_waterproof
 
     def initialize(mine_description)
       unless mine_description.nil?
         @map = nil
         @rocks = []
         @score = 0
+        @water = 0
+        @flooding = 0
+        @number_of_flooding = 0
+        @waterproof = 10
+        @number_of_waterproof = 0
         parse(mine_description)
         @updated_map = @map.dup
         @commands = []
@@ -189,6 +195,13 @@ class LambdaLifter
         @losing = true
       end
       @map = @updated_map
+
+      if underwater?
+        @number_of_waterproof += 1
+      else
+        @number_of_waterproof = 0
+      end
+      water_rising
       return
     end
   
@@ -252,8 +265,46 @@ class LambdaLifter
       end.join
     end
 
+    def underwater?
+      return @robot.y <= @water
+    end
+
+    def water_rising
+      return if @flooding == 0
+
+      if @number_of_flooding >= @flooding 
+        @water += 1
+        @number_of_flooding = 0
+      else
+        @number_of_flooding += 1
+      end
+    end
+
+    def flood_warning(mine_description)
+      if /Water / =~ mine_description ||
+         /Flooding / =~ mine_description ||
+         /Waterproof / =~ mine_description
+        _mine_description = mine_description.dup
+        if /Water / =~ mine_description
+          @water = _mine_description.scan(/^Water (\d*)/)[0][0].to_i
+          _mine_description.sub!(/^Water .*/, '')
+        end
+        if /Flooding / =~ mine_description
+          @flooding = _mine_description.scan(/^Flooding (\d*)/)[0][0].to_i
+          _mine_description.sub!(/^Flooding .*/, '')
+        end
+        if /Waterproof / =~ mine_description
+          @waterproof = _mine_description.scan(/^Waterproof (\d*)/)[0][0].to_i
+          _mine_description.sub!(/^Waterproof .*/, '')
+        end
+        _mine_description.strip!
+        return _mine_description 
+      end
+      return mine_description
+    end
+
     def parse(mine_description)
-      mine_description = mine_description.split("\n")
+      mine_description = flood_warning(mine_description).split("\n")
       _lambdas = []
       _lift = []
       _rocks = []

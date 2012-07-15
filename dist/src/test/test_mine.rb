@@ -48,6 +48,103 @@ class LambdaLifter
         EOD
         assert_equal [Pos.new(3, 3), Pos.new(3, 2)], @mine.rocks
       end
+
+      should "無指定の場合も洪水に関する情報を取得すること" do
+        mine = Mine.new(<<-'EOD')
+#####
+#   #
+# R #
+#   #
+#####
+        EOD
+        assert_equal 0, mine.water
+        assert_equal 0, mine.flooding
+        assert_equal 10, mine.waterproof
+        assert_equal 0, mine.number_of_flooding
+        assert_equal 0, mine.number_of_waterproof
+      end
+
+      should "すべて指定された洪水に関する情報を取得すること" do
+        mine = Mine.new(<<-'EOD')
+###########
+#....R....#
+#.*******.#
+#.\\\\\\\.#
+#.       .#
+#..*\\\*..#
+#.#*\\\*#.#
+#########L#
+
+Water 42
+Flooding 42
+Waterproof 42
+        EOD
+        assert_equal 42, mine.water
+        assert_equal 42, mine.flooding
+        assert_equal 42, mine.waterproof
+        assert_equal 0, mine.number_of_flooding
+        assert_equal 0, mine.number_of_waterproof
+      end
+
+      should "洪水の指定されたWaterの情報を取得すること" do
+        mine = Mine.new(<<-'EOD')
+###########
+#....R....#
+#.*******.#
+#.\\\\\\\.#
+#.       .#
+#..*\\\*..#
+#.#*\\\*#.#
+#########L#
+
+Water 42
+        EOD
+        assert_equal 42, mine.water
+        assert_equal 0, mine.flooding
+        assert_equal 10, mine.waterproof
+        assert_equal 0, mine.number_of_flooding
+        assert_equal 0, mine.number_of_waterproof
+      end
+
+      should "洪水の指定されたFloodingの情報を取得すること" do
+        mine = Mine.new(<<-'EOD')
+###########
+#....R....#
+#.*******.#
+#.\\\\\\\.#
+#.       .#
+#..*\\\*..#
+#.#*\\\*#.#
+#########L#
+
+Flooding 42
+        EOD
+        assert_equal 0, mine.water
+        assert_equal 42, mine.flooding
+        assert_equal 10, mine.waterproof
+        assert_equal 0, mine.number_of_flooding
+        assert_equal 0, mine.number_of_waterproof
+      end
+
+      should "洪水の指定されたWaterproofの情報を取得すること" do
+        mine = Mine.new(<<-'EOD')
+###########
+#....R....#
+#.*******.#
+#.\\\\\\\.#
+#.       .#
+#..*\\\*..#
+#.#*\\\*#.#
+#########L#
+
+Waterproof 42
+        EOD
+        assert_equal 0, mine.water
+        assert_equal 0, mine.flooding
+        assert_equal 42, mine.waterproof
+        assert_equal 0, mine.number_of_flooding
+        assert_equal 0, mine.number_of_waterproof
+      end
     end
 
     should "mine[x, y]でその座標にあるものを返すこと" do
@@ -262,6 +359,69 @@ R###
                      mine.raw_map[1]
         assert_equal [:wall, :empty, :rock,   :rock,  :wall],
                      mine.raw_map[2]
+      end
+
+      should "水位が上昇すること" do
+        mine = Mine.new(<<-'EOD')
+#####
+#   #
+# R #
+#   #
+#####
+
+Water 0
+Flooding 1
+Waterproof 5
+        EOD
+        assert_equal 0, mine.water
+        mine.step!("L")
+        assert_equal 0, mine.water
+        mine.step!("R")
+        assert_equal 1, mine.water
+        mine.step!("L")
+        assert_equal 1, mine.water
+        mine.step!("R")
+        assert_equal 2, mine.water
+      end
+
+      should "ロボットが水中に連続でいる回数を数えること" do
+        mine = Mine.new(<<-'EOD')
+#####
+#   #
+# R #
+#   #
+#####
+
+Water 5
+Flooding 10
+Waterproof 5
+        EOD
+        mine.step!("R")
+        assert_equal 1, mine.number_of_waterproof
+        mine.step!("L")
+        assert_equal 2, mine.number_of_waterproof
+        mine.step!("R")
+        assert_equal 3, mine.number_of_waterproof
+      end
+
+      should "ロボットが水中から出た時に水中での回数がクリアされること" do
+        mine = Mine.new(<<-'EOD')
+#####
+#   #
+#   #
+# R #
+#####
+
+Water 2
+Flooding 10
+Waterproof 5
+        EOD
+        mine.step!("R")
+        assert_equal 1, mine.number_of_waterproof
+        mine.step!("L")
+        assert_equal 2, mine.number_of_waterproof
+        mine.step!("U")
+        assert_equal 0, mine.number_of_waterproof
       end
     end
 
