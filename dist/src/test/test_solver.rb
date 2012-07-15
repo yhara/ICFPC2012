@@ -1,7 +1,7 @@
 # coding: utf-8
 class LambdaLifter
   class TestSolver < Test::Unit::TestCase
-    should "小さいマップのsolve(解けないマップ)" do
+    should "回答不可能な小さいマップがハイスコアでabortすること" do
       desc = <<-'EOD'.freeze
 ######
 #. *R#
@@ -12,6 +12,19 @@ L *.\#
       s = Solver.new(m)
       # ハイスコア状態でabort
       assert_equal "DA", s.solve
+    end
+
+    should "回答可能な小さいマップが解けること" do
+      desc = <<-'EOD'.freeze
+######
+#.* R#
+L ..\#
+######
+      EOD
+      m = Mine.new(desc)
+      s = Solver.new(m)
+      # ハイスコア状態でabort
+      assert_equal "DLLLL", s.solve
     end
 
     should "contest1.mapのsolve" do

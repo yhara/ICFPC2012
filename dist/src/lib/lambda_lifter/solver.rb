@@ -52,8 +52,8 @@ class LambdaLifter
       while next_pos != checkpoint
         return highscore if @trapped_sigint
         success = exec_next_command(checkpoint)
-        # p [:solve, @commands.join]
-        # puts @mine.ascii_map
+        p [:solve, @commands.join] if $DEBUG
+        puts @mine.ascii_map if $DEBUG
         if not success
           # コマンド実行失敗
           rollback!
