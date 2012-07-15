@@ -4,15 +4,14 @@ class LambdaLifter
     def initialize(mine)
       @mine = mine
       @cmdqueue = []
-      # TODO: メモリサイズの懸念。ある程度のサイズになったらtruncateすべき。
       @cmd_mine_cache = {}
       @dead_cmd_route = {}
       @checkpoint_watermarks = []
       @check_route = []
-      @dead_check_route = {}
+      @passed_check_route = {}
       # TODO: ハイスコアを一緒に覚えておきSIGINTが送られたらその命令列
       # を送る。"A"が必要なものか、それ以外のものかを区別。
-      @highscore = []
+      @highscore = {score: 0, cmd: ""}
       @trapped_sigint = false
       Signal.trap(:INT){ handle_sigint }
     end
@@ -22,6 +21,7 @@ class LambdaLifter
     def solve
       loop do
         # TODO: finished?になってもよりよいスコアを求める
+        return highscore if @trapped_sigint
         return @cmdqueue.join if @mine.finished?
         checkpoint = find_checkpoint
         return highscore if not checkpoint
@@ -43,8 +43,6 @@ class LambdaLifter
           rollback!
           return false if cur_check_route != @check_route
         end
-        debugger if @cmdqueue.join == "LDLLDRRDRL"
-        puts @mine.ascii_map
         next_pos = @mine.robot.pos
       end
       return true
@@ -58,9 +56,7 @@ class LambdaLifter
         possible_check_route?(@check_route + [l])
       end
       checkpoint = nearest_point(possible_lambdas, @mine.robot.pos)
-      if checkpoint.nil? && @mine.lambdas.empty?
-        checkpoint = @mine.lift
-      end
+      checkpoint = @mine.lift if checkpoint.nil? && @mine.lambdas.empty?
       return checkpoint
     end
 
@@ -78,6 +74,10 @@ class LambdaLifter
           @mine = m
         else
           @mine.step!(cmd)
+          if @highscore[:score] < @mine.score
+            @highscore[:score] = @mine.score
+            @highscore[:cmd] = @cmdqueue.join
+          end
         end
         if @mine.losing? || unchanged_mine?(@mine)
           return false
@@ -113,7 +113,7 @@ class LambdaLifter
       # 成功のケースがないcheckpointを記録
       if !@checkpoint_watermarks.empty? &&
           @cmdqueue.size < @checkpoint_watermarks.last
-        @dead_check_route[check_route_to_key(@check_route)] = true
+        @passed_check_route[check_route_to_key(@check_route)] = true
         @checkpoint_watermarks.pop
         expire_cache_mine(@check_route)
         @check_route.pop
@@ -129,7 +129,8 @@ class LambdaLifter
 
     # 可能性のあるcheckpointのrouteか？
     def possible_check_route?(check_route)
-      return false if @dead_check_route[check_route_to_key(check_route)]
+      # すでに通過したroute
+      return false if @passed_check_route[check_route_to_key(check_route)]
       return true
     end
 
@@ -153,16 +154,16 @@ class LambdaLifter
 
     def checkpoint!(point)
       @checkpoint_watermarks << @cmdqueue.size
+      @passed_check_route[check_route_to_key(@check_route)] = true
       @check_route << point
     end
 
     def handle_sigint
-      exit 0 if @highscore.empty?
       @trapped_sigint = true
     end
 
     def highscore
-      @highscore + ["A"]
+      @highscore[:cmd] + "A"
     end
 
     def unchanged_mine?(cur)

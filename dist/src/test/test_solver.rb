@@ -2,7 +2,6 @@
 class LambdaLifter
   class TestSolver < Test::Unit::TestCase
     should "contest1.mapのsolve" do
-      pend
       m = Mine.new(File.read(fixture_path("contest1.map")))
       s = Solver.new(m)
       p s.solve
