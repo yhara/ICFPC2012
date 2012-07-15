@@ -117,5 +117,52 @@ class LambdaLifter
       end
     end
 
+    context "finished?が呼ばれたとき" do
+      should ":winningを返すこと" do
+        pend
+        mine = Mine.new(<<-'EOD')
+#####
+#R\L#
+#####
+        EOD
+        mine.step!("R")
+        mine.step!("R")
+        assert_equal :winning, mine.finished?
+      end
+
+      should ":abortを返すこと" do
+        pend
+        mine = Mine.new(<<-'EOD')
+#####
+#R  #
+#####
+        EOD
+        mine.step!("A")
+        assert_equal :abort, mine.finished?
+      end
+
+      should ":losingを返すこと" do
+        pend
+        mine = Mine.new(<<-'EOD')
+#####
+#*  #
+#   #
+#  R#
+#####
+        EOD
+        mine.step!("L")
+
+        assert_equal :losing, mine.finished?
+      end
+
+      should "falseを返すこと" do
+        mine = Mine.new(<<-'EOD')
+#####
+#R  #
+#####
+        EOD
+        assert_equal false, mine.finished?
+      end
+    end
   end
 end
