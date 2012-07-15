@@ -20,6 +20,14 @@ class LambdaLifter
       @mine = Mine.new(@original_map)
     end
 
+    should "valid_pos?が呼ばれたとき、マップ範囲内なら真を返す" do
+      assert @mine.valid_pos?(Pos[1, 1])
+      assert !@mine.valid_pos?(Pos[0, 0])
+      assert @mine.valid_pos?(Pos[1, 3])
+      assert !@mine.valid_pos?(Pos[1, 4])
+      assert !@mine.valid_pos?(Pos[10, 1])
+    end
+
     # 冗長だが、スコアの計算全てに使用する定数なので前提が間違っていな
     # いことを確認。
     should "加算される各スコアがルール通りであること" do
@@ -56,6 +64,16 @@ class LambdaLifter
 ####
         EOD
         assert_equal [Pos.new(3, 3), Pos.new(3, 2)], @mine.rocks
+      end
+
+      should "ラムダ入りの岩の位置を知っていること" do
+        @mine = Mine.new(<<-'EOD')
+####
+# @#
+#R@#
+####
+        EOD
+        assert_equal [Pos.new(3, 3), Pos.new(3, 2)], @mine.higher_order_rocks
       end
 
       should "無指定の場合も洪水に関する情報を取得すること" do
@@ -228,6 +246,7 @@ Razors 1
       assert_equal :wall, @mine[1, 1] 
       assert_equal :robot, @mine[2, 2] 
       assert_equal :lambda, @mine[3, 2] 
+      assert_equal :out_of_map, @mine[0, 0]
     end
 
     should "hashのkeyとして指定できること" do
@@ -380,15 +399,15 @@ R#####
                      mine.raw_map[1]
         assert_equal [:wall, :rock, :empty, :empty, :rock, :wall],
                      mine.raw_map[2]
-        assert_equal [Pos[2, 2], Pos[2, 3], Pos[5, 2], Pos[5, 3]],
-                     mine.rocks.sort
+        assert_equal Set[Pos[2, 2], Pos[2, 3], Pos[5, 2], Pos[5, 3]],
+                     Set[*mine.rocks]
         mine.step!("W")
         assert_equal [:wall, :empty, :empty, :empty, :empty, :wall],
                      mine.raw_map[1]
         assert_equal [:wall, :rock,  :rock,  :rock,  :rock,  :wall],
                      mine.raw_map[2]
-        assert_equal [Pos[2, 2], Pos[3, 2], Pos[4, 2], Pos[5, 2]],
-                     mine.rocks.sort
+        assert_equal Set[Pos[2, 2], Pos[3, 2], Pos[4, 2], Pos[5, 2]],
+                     Set[*mine.rocks]
       end
 
       should "先にupdateされたlayoutが後のupdateに影響されないこと" do
@@ -402,15 +421,15 @@ R####
                      mine.raw_map[1]
         assert_equal [:wall, :rock, :empty, :rock, :wall],
                      mine.raw_map[2]
-        assert_equal [Pos[2, 2], Pos[2, 3], Pos[4, 2], Pos[4, 3]],
-                     mine.rocks.sort
+        assert_equal Set[Pos[2, 2], Pos[2, 3], Pos[4, 2], Pos[4, 3]],
+                     Set[*mine.rocks]
         mine.step!("W")
         assert_equal [:wall, :empty, :empty, :empty, :wall],
                      mine.raw_map[1]
         assert_equal [:wall, :rock,  :rock,  :rock,  :wall],
                      mine.raw_map[2]
-        assert_equal [Pos[2, 2], Pos[3, 2], Pos[4, 2]],
-                     mine.rocks.sort
+        assert_equal Set[Pos[2, 2], Pos[3, 2], Pos[4, 2]],
+                     Set[*mine.rocks]
       end
 
       should "ラムダの上の岩は右側に崩落すること" do

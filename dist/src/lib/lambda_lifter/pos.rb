@@ -15,15 +15,25 @@ class LambdaLifter
     end
 
     def +(other)
-      return self.class.new(x + other.x, y + other.y)
+      if other.respond_to?(:x)
+        Pos[x + other.x, y + other.y]
+      else
+        Pos[x + other[0], y + other[1]]
+      end
     end
 
     def -(other)
-      return self.class.new(x - other.x, y - other.y)
+      if other.respond_to?(:x)
+        Pos[x - other.x, y - other.y]
+      else
+        Pos[x - other[0], y - other[1]]
+      end
     end
-
+    
+    # Note: ソートしたときに、bottom to top・left to rightになってほしいため、
+    # [y, x]としている
     def <=>(other)
-      [x, y] <=> [other.x, other.y]
+      [y, x] <=> [other.y, other.x]
     end
     include Comparable
 

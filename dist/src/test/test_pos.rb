@@ -18,10 +18,16 @@ class LambdaLifter
       pos = Pos.new(2, 5) + Pos.new(2, 1)
       assert_equal 4, pos.x
       assert_equal 6, pos.y
+      pos = Pos.new(2, 5) + [2, 1]
+      assert_equal 4, pos.x
+      assert_equal 6, pos.y
     end
 
     should "-は引数のPos分減算した場所を返すこと" do
       pos = Pos.new(2, 5) - Pos.new(1, 3)
+      assert_equal 1, pos.x
+      assert_equal 2, pos.y
+      pos = Pos.new(2, 5) - [1, 3]
       assert_equal 1, pos.x
       assert_equal 2, pos.y
     end

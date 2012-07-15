@@ -34,7 +34,8 @@ class LambdaLifter
       '8' => :target_8,
       '9' => :target_9,
       'W' => :beard,
-      '!' => :razors
+      '!' => :razors,
+      '@' => :higher_order_rock
     }.freeze
 
     COMMANDS = {
@@ -57,7 +58,7 @@ class LambdaLifter
     attr_reader :width, :height, :commands, :score, :water, :flooding,
       :number_of_flooding, :waterproof, :number_of_waterproof,
       :trampolines, :targets, :trampoline_relationships,
-      :growth, :razors
+      :growth, :razors, :higher_order_rocks
 
     def initialize(mine_description)
       unless mine_description.nil?
@@ -91,12 +92,35 @@ class LambdaLifter
     # 引数はPosか、整数2つを渡す
     # 例： mine[pos], mine[1, 2]
     def [](arg1, arg2=nil)
-      if arg2
-        x, y = arg1, arg2
-      else
-        x, y = arg1.x, arg1.y
+      if arg2 then x, y = arg1, arg2
+      else         x, y = arg1.x, arg1.y
       end
-      @map[@map.length - y][x - 1]
+
+      if valid_pos?(x, y)
+        @map[@map.length - y][x - 1]
+      else
+        :out_of_map
+      end
+    end
+
+    # 必要なら定義する
+    # def each_pos(&block)
+    #   (1..@height).each do |y|
+    #     (1..@width).each do |x|
+    #       yield Pos[x, y]
+    #     end
+    #   end
+    # end
+
+    # マップ内の各座標について繰り返す。
+    # Posをyieldする。
+    # ただしこのメソッドは出力しやすいように左上から列挙を開始する。
+    def each_pos_from_top_left(&block)
+      @height.downto(1) do |y|
+        (1..@width).each do |x|
+          yield Pos[x, y]
+        end
+      end
     end
 
     # 自分自身を複製したMineオブジェクトを返す。
@@ -136,6 +160,15 @@ class LambdaLifter
 
     def ascii_map
       return array_to_ascii_map(@map)
+    end
+
+    # posがマップの範囲内におさまっているとき真を返す。
+    def valid_pos?(arg1, arg2=nil)
+      if arg2 then x, y = arg1, arg2
+      else         x, y = arg1.x, arg1.y
+      end
+
+      return 1 <= x && x <= @width && 1 <= y && y <= @height
     end
 
     # マップを新規作成する。
@@ -236,33 +269,21 @@ class LambdaLifter
       _rocks = @rocks.dup
       _rocks.each do |rock|
         if self[rock.x, rock.y - 1] == :empty
-          set(rock.x, rock.y, :empty)
-          set(rock.x, rock.y - 1, :rock)
-          @rocks.delete(Pos[rock.x, rock.y])
-          @rocks << Pos[rock.x, rock.y - 1]
+          move_rock(Pos[rock.x, rock.y], Pos[rock.x, rock.y - 1])
         elsif self[rock.x,     rock.y - 1] == :rock  &&
               self[rock.x + 1, rock.y    ] == :empty &&
               self[rock.x + 1, rock.y - 1] == :empty
-          set(rock.x, rock.y, :empty)
-          set(rock.x + 1, rock.y - 1, :rock)
-          @rocks.delete(Pos[rock.x, rock.y])
-          @rocks << Pos[rock.x + 1, rock.y - 1]
+          move_rock(Pos[rock.x, rock.y], Pos[rock.x + 1, rock.y - 1])
         elsif self[rock.x,     rock.y - 1] == :rock       &&
               (self[rock.x + 1, rock.y    ] != :empty ||
                self[rock.x + 1, rock.y - 1] != :empty)    &&
               self[rock.x - 1, rock.y    ] == :empty      &&
               self[rock.x - 1, rock.y - 1] == :empty
-          set(rock.x, rock.y, :empty)
-          set(rock.x - 1, rock.y - 1, :rock)
-          @rocks.delete(Pos[rock.x, rock.y])
-          @rocks << Pos[rock.x - 1, rock.y - 1]
+          move_rock(Pos[rock.x, rock.y], Pos[rock.x - 1, rock.y - 1])
         elsif self[rock.x,     rock.y - 1] == :lambda &&
               self[rock.x + 1, rock.y    ] == :empty  &&
               self[rock.x + 1, rock.y - 1] == :empty
-          set(rock.x, rock.y, :empty)
-          set(rock.x + 1, rock.y - 1, :rock)
-          @rocks.delete(Pos[rock.x, rock.y])
-          @rocks << Pos[rock.x + 1, rock.y - 1]
+          move_rock(Pos[rock.x, rock.y], Pos[rock.x + 1, rock.y - 1])
         end
       end
       @rocks.uniq!
@@ -270,6 +291,13 @@ class LambdaLifter
       if @lift && @lambdas.length == 0 && self[@lift.x, @lift.y] == :closed_lift
         set(@lift.x, @lift.y, :open_lift)
       end
+    end
+
+    def move_rock(from, to)
+      set(from.x, from.y, :empty)
+      set(to.x, to.y, :rock)
+      @rocks.delete(from)
+      @rocks << to
     end
 
     def process_rock(direction) 
@@ -412,6 +440,7 @@ class LambdaLifter
       _lambdas = []
       _lift = []
       _rocks = []
+      _higher_order_rocks = []
       _trampolines = []
       _targets = []
       robot_ruby_x = nil
@@ -435,6 +464,8 @@ class LambdaLifter
             _trampolines << [layout, x, y]
           when /target_\d/
             _targets << [layout, x, y]
+          when :higher_order_rock
+            _higher_order_rocks << [x, y]
           end
           layout
         end
@@ -455,6 +486,10 @@ class LambdaLifter
       if _targets.any?
         @targets = _targets.each_with_object({}) {|(l, x, y), h|
           h.merge!(l => Pos.new(*game_axis(x, y))) }
+      end
+      if _higher_order_rocks.any?
+        @higher_order_rocks = _higher_order_rocks.map {|x, y|
+          Pos.new(*game_axis(x, y)) }
       end
       @robot = Robot.new(self,
                          *game_axis(robot_ruby_x, robot_ruby_y))
