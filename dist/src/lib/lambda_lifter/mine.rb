@@ -151,6 +151,8 @@ class LambdaLifter
           case self[@robot.x - 1, @robot.y]
           when :rock
             self[@robot.x - 2, @robot.y] = :rock
+            @rocks.delete(Pos[@robot.x - 1, @robot.y])
+            @rocks << Pos[@robot.x - 2, @robot.y]
           when :lambda
             @lambdas.delete(Pos.new(@robot.x - 1, @robot.y))
             @number_of_collected_lambdas += 1
@@ -167,6 +169,8 @@ class LambdaLifter
           case self[@robot.x + 1, @robot.y]
           when :rock
             self[@robot.x + 2, @robot.y] = :rock
+            @rocks.delete(Pos[@robot.x + 1, @robot.y])
+            @rocks << Pos[@robot.x + 2, @robot.y]
           when :lambda
             @lambdas.delete(Pos.new(@robot.x + 1, @robot.y))
             @number_of_collected_lambdas += 1
@@ -222,11 +226,15 @@ class LambdaLifter
             if self[width, height - 1] == :empty
               set(width, height, :empty)
               set(width, height - 1, :rock)
+              @rocks.delete(Pos[width, height])
+              @rocks << Pos[width, height - 1]
             elsif self[width,     height - 1] == :rock  &&
                   self[width + 1, height    ] == :empty &&
                   self[width + 1, height - 1] == :empty
               set(width, height, :empty)
               set(width + 1, height - 1, :rock)
+              @rocks.delete(Pos[width, height])
+              @rocks << Pos[width + 1, height - 1]
             elsif self[width,     height - 1] == :rock       &&
                   (self[width + 1, height    ] != :empty ||
                    self[width + 1, height - 1] != :empty   ) &&
@@ -234,11 +242,15 @@ class LambdaLifter
                   self[width - 1, height - 1] == :empty
               set(width, height, :empty)
               set(width - 1, height - 1, :rock)
+              @rocks.delete(Pos[width, height])
+              @rocks << Pos[width - 1, height - 1]
             elsif self[width,     height - 1] == :lambda &&
                   self[width + 1, height    ] == :empty  &&
                   self[width + 1, height - 1] == :empty
               set(width, height, :empty)
               set(width + 1, height - 1, :rock)
+              @rocks.delete(Pos[width, height])
+              @rocks << Pos[width + 1, height - 1]
             end
           when :closed_lift
             if @lambdas.length == 0
