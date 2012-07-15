@@ -160,6 +160,12 @@ class LambdaLifter
         height += 1
       end
 
+      if self[@robot.x, @robot.y] == :open_lift && @lambdas.length == 0
+        @winning = true
+      end
+      if @command == :abort
+        @abort = true
+      end
       if self[@robot.x, @robot.y + 1] == :empty &&
          get(@robot.x, @robot.y + 1) == :rock
         @losing = true
@@ -170,10 +176,10 @@ class LambdaLifter
   
     def finished?
      # :winning, :abort, :losing, falseのどれかを返す。
-     if self[@robot.x, @robot.y] == :open_lift
+     if @winning
        return :winning
      end
-     if @command == :abort
+     if @abort
        return :abort
      end
      if @losing
