@@ -146,11 +146,7 @@ class LambdaLifter
               set(width + 1, height - 1, :rock)
             end
           when :closed_lift
-<<<<<<< HEAD
-            if @lambdas == []
-=======
             if @lambdas.length == 0
->>>>>>> マップがLambdaの位置を把握できるように修正
              set(width, height, :open_lift)
             end
           end
