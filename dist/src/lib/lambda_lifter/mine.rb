@@ -26,6 +26,13 @@ class LambdaLifter
       'A' => :abort
     }.freeze
 
+    GIVEN_SCORES = {
+      :each_move                => -1,
+      :collect_lambda           => 25,
+      :collected_lambda_abort   => 25,
+      :collected_lambda_win     => 50,
+    }.freeze
+
     attr_accessor :robot, :lambdas, :lift, :rocks
     attr_reader :width, :height, :commands, :score, :water, :flooding,
       :number_of_flooding, :waterproof, :number_of_waterproof
@@ -43,6 +50,7 @@ class LambdaLifter
         parse(mine_description)
         @updated_map = @map.dup
         @commands = []
+        @number_of_collected_lambdas = 0
       end
     end
 
@@ -81,6 +89,8 @@ class LambdaLifter
       mine.instance_variable_set(:@number_of_flooding, @number_of_flooding)
       mine.instance_variable_set(:@waterproof, @waterproof)
       mine.instance_variable_set(:@number_of_waterproof, @number_of_waterproof)
+      mine.instance_variable_set(:@number_of_collected_lambdas,
+                                  @number_of_collected_lambdas)
       return mine
     end
 
@@ -112,48 +122,56 @@ class LambdaLifter
             self[@robot.x - 2, @robot.y] = :rock
           when :lambda
             @lambdas.delete(Pos.new(@robot.x - 1, @robot.y))
+            @number_of_collected_lambdas += 1
+            @score += GIVEN_SCORES[:collect_lambda]
           when :open_lift
             @winning = true
           end
           self[@robot.x - 1, @robot.y] = :robot
           @robot = Robot.new(self,
             @robot.x - 1, @robot.y)
-          @score -= 1
+          @score += GIVEN_SCORES[:each_move]
         when :right
           case self[@robot.x + 1, @robot.y]
           when :rock
             self[@robot.x + 2, @robot.y] = :rock
           when :lambda
             @lambdas.delete(Pos.new(@robot.x + 1, @robot.y))
+            @number_of_collected_lambdas += 1
+            @score += GIVEN_SCORES[:collect_lambda]
           when :open_lift
             @winning = true
           end
           self[@robot.x + 1, @robot.y] = :robot
           @robot = Robot.new(self,
             @robot.x + 1, @robot.y)
-          @score -= 1
+          @score += GIVEN_SCORES[:each_move]
         when :up
           case self[@robot.x, @robot.y + 1]
           when :lambda
             @lambdas.delete(Pos.new(@robot.x, @robot.y + 1))
+            @number_of_collected_lambdas += 1
+            @score += GIVEN_SCORES[:collect_lambda]
           when :open_lift
             @winning = true
           end
           self[@robot.x, @robot.y + 1] = :robot
           @robot = Robot.new(self,
             @robot.x, @robot.y + 1)
-          @score -= 1
+          @score += GIVEN_SCORES[:each_move]
         when :down
           case self[@robot.x, @robot.y - 1]
           when  :lambda
             @lambdas.delete(Pos.new(@robot.x, @robot.y - 1))
+            @number_of_collected_lambdas += 1
+            @score += GIVEN_SCORES[:collect_lambda]
           when :open_lift
             @winning = true
           end
           self[@robot.x, @robot.y - 1] = :robot
           @robot = Robot.new(self,
             @robot.x, @robot.y - 1)
-          @score -= 1
+          @score += GIVEN_SCORES[:each_move]
         end
       end
 
@@ -219,9 +237,13 @@ class LambdaLifter
     def finished?
       # :winning, :abort, :losing, falseのどれかを返す。
       if @winning
+        @score +=
+          GIVEN_SCORES[:collected_lambda_win] * @number_of_collected_lambdas
         return :winning
       end
       if @abort
+        @score +=
+          GIVEN_SCORES[:collected_lambda_abort] * @number_of_collected_lambdas
         return :abort
       end
       if @losing

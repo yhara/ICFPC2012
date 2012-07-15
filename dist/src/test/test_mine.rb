@@ -20,6 +20,15 @@ class LambdaLifter
       @mine = Mine.new(@original_map)
     end
 
+    # 冗長だが、スコアの計算全てに使用する定数なので前提が間違っていな
+    # いことを確認。
+    should "加算される各スコアがルール通りであること" do
+      assert_equal Mine::GIVEN_SCORES[:each_move],              -1
+      assert_equal Mine::GIVEN_SCORES[:collect_lambda],         25
+      assert_equal Mine::GIVEN_SCORES[:collected_lambda_abort], 25
+      assert_equal Mine::GIVEN_SCORES[:collected_lambda_win],   50
+    end
+
     should "マップ定義からシンボルの２次元配列を作れること" do
       desc = <<-'EOD'
 #######
@@ -238,6 +247,23 @@ Waterproof 42
         assert_equal -4, mine.score
         mine.step!("W")
         assert_equal -4, mine.score
+      end
+
+      should "ラムダ上に移動したらスコアが25加算されること" do
+        mine = Mine.new(<<-'EOD')
+#######
+#R\\  #
+#####L#
+      EOD
+        mine.step!("R")
+        expected_score = Mine::GIVEN_SCORES[:each_move] +
+                         Mine::GIVEN_SCORES[:collect_lambda]
+        assert_equal expected_score, mine.score
+
+        mine.step!("R")
+        expected_score += Mine::GIVEN_SCORES[:each_move] +
+                          Mine::GIVEN_SCORES[:collect_lambda]
+        assert_equal expected_score, mine.score
       end
 
       should "ロボットの移動に伴い岩が移動すること" do
@@ -476,25 +502,103 @@ Waterproof 5
     end
 
     context "finished?が呼ばれたとき" do
-      should ":winningを返すこと" do
-        mine = Mine.new(<<-'EOD')
+      context ":winingについて" do
+        should "勝利条件を満たした場合に:winningを返すこと" do
+          mine = Mine.new(<<-'EOD')
 #####
 #R\L#
 #####
         EOD
-        mine.step!("R")
-        mine.step!("R")
-        assert_equal :winning, mine.finished?
+          mine.step!("R")
+          mine.step!("R")
+          assert_equal :winning, mine.finished?
+        end
+
+        should "ラムダを1つ回収していた場合、スコアが50加算されること" do
+          mine = Mine.new(<<-'EOD')
+#####
+#R\L#
+#####
+        EOD
+          mine.step!("R")
+          mine.step!("R")
+          before_finished_score = mine.score
+          assert_equal :winning, mine.finished?
+          expected_score = Mine::GIVEN_SCORES[:each_move] * 2 +
+                           Mine::GIVEN_SCORES[:collect_lambda] +
+                           Mine::GIVEN_SCORES[:collected_lambda_win]
+          assert_equal expected_score, mine.score
+          assert_equal mine.score - before_finished_score,
+                       Mine::GIVEN_SCORES[:collected_lambda_win]
+        end
+
+        should "ラムダを2つ回収していた場合、スコアが100加算されること" do
+          mine = Mine.new(<<-'EOD')
+######
+#R\\L#
+######
+        EOD
+          mine.step!("R")
+          mine.step!("R")
+          mine.step!("R")
+          before_finished_score = mine.score
+          assert_equal :winning, mine.finished?
+          expected_score = Mine::GIVEN_SCORES[:each_move] * 3 +
+                           Mine::GIVEN_SCORES[:collect_lambda] * 2 +
+                           Mine::GIVEN_SCORES[:collected_lambda_win] * 2
+          assert_equal expected_score, mine.score
+          assert_equal mine.score - before_finished_score,
+                       Mine::GIVEN_SCORES[:collected_lambda_win] * 2
+        end
       end
 
-      should ":abortを返すこと" do
-        mine = Mine.new(<<-'EOD')
+      context ":abortについて" do
+        should "Aコマンドを使用した場合に:abortを返すこと" do
+          mine = Mine.new(<<-'EOD')
 #####
 #R  #
 #####
         EOD
-        mine.step!("A")
-        assert_equal :abort, mine.finished?
+          mine.step!("A")
+          assert_equal :abort, mine.finished?
+        end
+
+        should "ラムダを1つ回収していた場合、スコアが25加算されること" do
+          mine = Mine.new(<<-'EOD')
+#####
+#R\ #
+#####
+        EOD
+          mine.step!("R")
+          before_finished_score = mine.score
+          mine.step!("A")
+          assert_equal :abort, mine.finished?
+          expected_score = Mine::GIVEN_SCORES[:each_move] +
+                           Mine::GIVEN_SCORES[:collect_lambda] +
+                           Mine::GIVEN_SCORES[:collected_lambda_abort]
+          assert_equal expected_score, mine.score
+          assert_equal mine.score - before_finished_score,
+                       Mine::GIVEN_SCORES[:collected_lambda_abort]
+        end
+
+        should "ラムダを2つ回収していた場合、スコアが50加算されること" do
+          mine = Mine.new(<<-'EOD')
+#####
+#R\\#
+#####
+        EOD
+          mine.step!("R")
+          mine.step!("R")
+          before_finished_score = mine.score
+          mine.step!("A")
+          assert_equal :abort, mine.finished?
+          expected_score = Mine::GIVEN_SCORES[:each_move] * 2 +
+                           Mine::GIVEN_SCORES[:collect_lambda] * 2 +
+                           Mine::GIVEN_SCORES[:collected_lambda_abort] * 2
+          assert_equal expected_score, mine.score
+          assert_equal mine.score - before_finished_score,
+                       Mine::GIVEN_SCORES[:collected_lambda_abort] * 2
+        end
       end
 
       context ":losingについて" do
