@@ -21,34 +21,36 @@ task :package do
   sh "./tools/pack.sh"
 end
 
-desc "環境変数の確認"
-task :check_env do
-  if !ENV['map']
-    raise "must specify map: rake run map=./sample/contest1.map"
-  end
-end
-
-desc "実行環境で実行する"
-task :run => [:check_env, :package] do
-  map_file = ENV['map']
-  raise "must specify map." if !map_file
-  map_path = Pathname(map_file)
-  current_path = Pathname(Dir.pwd)
-  ssh_id_path = current_path + "deploy/id"
-  Dir.mktmpdir do |d|
-    deploy_file = "icfp-#{submit_number}.tgz"
-    cp [deploy_file, map_path], d, preserve: true
-    Dir.chdir(d) do
-      sh "chmod go= #{ssh_id_path}"
-      sh "tar cf - #{deploy_file} #{map_path.basename} | ssh -i #{ssh_id_path} icfp-run@#{deploy_to}"
+namespace :run do
+  task :check do
+    if !ENV['map']
+      raise "must specify map: rake run map=./sample/contest1.map"
     end
   end
-end
 
-desc "実行環境を整備する"
-task :run_setup do
-  sh "tar cf - -C deploy dot.ssh | ssh icfp@#{deploy_to} 'sudo userdel -r icfp-run; sudo adduser --disabled-password --gecos icfp icfp-run && sudo adduser icfp-run sudo && cd /home/icfp-run && sudo tar xf - && sudo -u icfp-run cp -a dot.ssh .ssh'"
+  task :task => [:check, :package] do
+    map_file = ENV['map']
+    raise "must specify map." if !map_file
+    map_path = Pathname(map_file)
+    current_path = Pathname(Dir.pwd)
+    ssh_id_path = current_path + "deploy/id"
+    Dir.mktmpdir do |d|
+      deploy_file = "icfp-#{submit_number}.tgz"
+      cp [deploy_file, map_path], d, preserve: true
+      Dir.chdir(d) do
+        sh "chmod go= #{ssh_id_path}"
+        sh "tar cf - #{deploy_file} #{map_path.basename} | ssh -i #{ssh_id_path} icfp-run@#{deploy_to}"
+      end
+    end
+  end
+
+  desc "実行環境を整備する"
+  task :setup do
+    sh "tar cf - -C deploy dot.ssh | ssh icfp@#{deploy_to} 'sudo userdel -r icfp-run; sudo adduser --disabled-password --gecos icfp icfp-run && sudo adduser icfp-run sudo && cd /home/icfp-run && sudo tar xf - && sudo -u icfp-run cp -a dot.ssh .ssh'"
+  end
 end
+desc "実行環境で実行する"
+task :run => 'run:task'
 
 desc "やるねぇ〜"
 task :yarunee do
