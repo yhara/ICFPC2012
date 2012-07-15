@@ -762,77 +762,50 @@ R ****#
     end
 
     context "scoreが呼ばれたとき" do
-      should "初期状態では0点であること" do
-        mine = Mine.new(<<-'EOD')
+      setup do 
+        @mine = Mine.new(<<-'EOD')
 #####
-#R\L#
+# R\L
 #####
         EOD
-        assert_equal 0, mine.score
+      end
+
+      should "初期状態では0点であること" do
+        assert_equal 0, @mine.score
       end
 
       should "1手動くごとに1点減ること" do
-        mine = Mine.new(<<-'EOD')
-#####
-#R L#
-#####
-        EOD
-        mine.step!("R")
-        assert_equal -1, mine.score
+        @mine.step!("L")
+        assert_equal -1, @mine.score
       end
 
       should "Waitしたときに1点減ること" do
         pend
-        mine = Mine.new(<<-'EOD')
-#####
-#R L#
-#####
-        EOD
-        mine.step!("W")
-        assert_equal -1, mine.score
+        @mine.step!("W")
+        assert_equal -1, @mine.score
       end
 
       should "無理な方向に移動しようとしたきに1点減ること" do
         pend
-        mine = Mine.new(<<-'EOD')
-#####
-#R L#
-#####
-        EOD
-        mine.step!("L")
-        assert_equal -1, mine.score
+        @mine.step!("U")
+        assert_equal -1, @mine.score
       end
 
       should "ラムダ1つにつき25点が入ること" do
-        mine = Mine.new(<<-'EOD')
-#####
-#R\L#
-#####
-        EOD
-        mine.step!("R")
-        assert_equal 25 - 1, mine.score
+        @mine.step!("R")
+        assert_equal 25 - 1, @mine.score
       end
 
       should "Abort時、ラムダ1つにつき25点が入ること" do
-        mine = Mine.new(<<-'EOD')
-#####
-#R\L#
-#####
-        EOD
-        mine.step!("R")
-        mine.step!("A")
-        assert_equal (25 - 1) + 25, mine.score
+        @mine.step!("R")
+        @mine.step!("A")
+        assert_equal (25 - 1) + 25, @mine.score
       end
 
       should "winning時、ラムダ1つにつき50点が入ること" do
-        mine = Mine.new(<<-'EOD')
-#####
-#R\L#
-#####
-        EOD
-        mine.step!("R")
-        mine.step!("R")
-        assert_equal (25 - 1 - 1) + 50, mine.score
+        @mine.step!("R")
+        @mine.step!("R")
+        assert_equal (25 - 1 - 1) + 50, @mine.score
       end
     end
   end
