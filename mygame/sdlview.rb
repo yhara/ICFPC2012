@@ -45,6 +45,12 @@ RL
         end
 
         exit if key_pressed?(Key::Q)
+        @mine.step!("U") if new_key_pressed?(Key::UP)
+        @mine.step!("D") if new_key_pressed?(Key::DOWN)
+        @mine.step!("R") if new_key_pressed?(Key::RIGHT)
+        @mine.step!("L") if new_key_pressed?(Key::LEFT)
+        @mine.step!("W") if new_key_pressed?(Key::W)
+        @mine.step!("A") if new_key_pressed?(Key::A)
       end
     end
   end
