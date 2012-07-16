@@ -54,7 +54,6 @@ if opts[:sdl]
   }
   solver_thread.abort_on_exception = true
   LambdaLifter::SdlVisualizer.instance.scale = opts[:scale]
-  LambdaLifter::SdlVisualizer.instance.background_color = [0, 0, 255]
   LambdaLifter::SdlVisualizer.instance.run(opts)
 else
   def sdl(*args); end
