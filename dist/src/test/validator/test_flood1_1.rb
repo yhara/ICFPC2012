@@ -68,6 +68,7 @@ EOS
       mine = Mine.new(map)
       commands.each_char do |s|
         mine.step!(s)
+        mine = mine.dup
       end
       assert_equal treat_expected_map(processed_map),
         treat_actual_map(mine.validator_map), <<INPUT
@@ -80,7 +81,6 @@ v
 #{processed_map}
 score: #{score}
 INPUT
-      pend
       assert_equal score, mine.score
     end
   end
