@@ -25,6 +25,9 @@ class LambdaLifter
           return highscore_cmd
         end
       end
+    rescue
+      raise if LambdaLifter.debug? || defined? Bundler
+      return highscore_cmd
     end
 
     def handle_sigint
