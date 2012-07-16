@@ -1361,5 +1361,48 @@ Trampoline B targets 2
         assert_equal nil, @mine.target_pos(:foo)
       end
     end
+
+    context "trampoline_possが呼ばれたとき" do
+      setup do 
+        @mine = Mine.new(<<-'EOD')
+##L###########
+#.....R#.**..#
+#.*A...#..1..#
+#.*....#.  \.#
+#.\\\..#...\.#
+#2.....**B...#
+##############
+
+Trampoline A targets 1
+Trampoline B targets 2
+        EOD
+      end
+
+      should "ターゲットに対応するトランポリンの位置を返すこと" do
+        assert_equal [Pos[4, 5]], @mine.trampoline_poss(:target_1)
+        assert_equal [Pos[10, 2]], @mine.trampoline_poss(:target_2)
+      end
+
+      should "ターゲットに対応する複数のトランポリンの位置を返すこと" do
+        mine = Mine.new(<<-'EOD')
+############
+#..*.R..*..#
+#..A....B..######
+#....2.. ..#\\\C#
+#......* *.#\\\1#
+########L########
+
+Trampoline A targets 1
+Trampoline B targets 1
+Trampoline C targets 2
+        EOD
+        assert_equal [Pos[4, 4], Pos[9, 4]], mine.trampoline_poss(:target_1)
+        assert_equal [Pos[16, 3]], mine.trampoline_poss(:target_2)
+      end
+
+      should "存在しないターゲットを指定した場合は[]を返すこと" do
+        assert_equal [], @mine.trampoline_poss(:foo)
+      end
+    end
   end
 end

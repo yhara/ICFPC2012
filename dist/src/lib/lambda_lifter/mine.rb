@@ -306,6 +306,15 @@ class LambdaLifter
       return pos
     end
 
+    def trampoline_poss(target)
+      poss = []
+      trampolines = @trampoline_relationships.select {|_, v| v == target }
+      if trampolines.any?
+        poss = trampolines.map {|t, _| @trampolines[t] }
+      end
+      return poss
+    end
+
     private
 
     def process_map
