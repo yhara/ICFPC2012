@@ -139,6 +139,26 @@ R   * #
         EOD
         assert_equal false, closed_with_static_objects?(m, m.lambdas.first, m.robot.pos)
       end
+
+      should "トランポリンがあるときに、囲まれているかを判定できること" do
+#        m = Mine.new(<<-'EOD')
+########
+## R A #
+########
+## 1 \ #
+########
+#        EOD
+#        assert_equal false, closed_with_static_objects?(m, m.lambdas.first, m.robot.pos)
+
+#        m = Mine.new(<<-'EOD')
+########
+## R 1 #
+########
+## A \ #
+########
+#        EOD
+#        assert_equal true, closed_with_static_objects?(m, m.lambdas.first, m.robot.pos)
+      end
     end
 
     should "poss_from_toは壁を考慮しないfromからtoまでのposを返す" do
