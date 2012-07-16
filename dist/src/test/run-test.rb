@@ -11,7 +11,7 @@ Bundler.require(:default, :test)
 
 require "helper.rb"
 require "lambda_lifter"
-test_file = "./test/test_*.rb"
+test_file = "./test/**/test_*.rb"
 Dir.glob(test_file) do |file|
   require file
 end
