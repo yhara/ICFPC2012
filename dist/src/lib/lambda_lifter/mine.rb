@@ -167,6 +167,19 @@ class LambdaLifter
       return array_to_ascii_map(@map)
     end
 
+    # 標準出力に出力する
+    def ascii_map!(&block)
+      @@inverted_layouts ||= LAYOUTS.invert.freeze
+      self.each_pos_from_top_left do |pos|
+        $stdout.print @@inverted_layouts[self[pos]]
+        if block_given?
+          metadata = block.call(pos)
+          $stdout.print metadata
+        end
+        puts if pos.x == @width
+      end
+    end
+
     # posがマップの範囲内におさまっているとき真を返す。
     def valid_pos?(arg1, arg2=nil)
       if arg2 then x, y = arg1, arg2

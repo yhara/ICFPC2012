@@ -5,6 +5,10 @@ group :deveopment do
   gem 'rubysdl', '2.1.2'
 end
 
+group :deveopment, :test do
+  gem 'rainbow'
+end
+
 #group :mac do
 #  gem 'rsdl', '0.1.4'
 #end
