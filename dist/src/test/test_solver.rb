@@ -166,6 +166,30 @@ Trampoline A targets 1
         EOD
         assert_equal true, closed_with_static_objects?(m, m.lambdas.first, m.robot.pos)
       end
+
+      should "contest8で無限ループにならないこと" do
+        m = Mine.new(<<-'EOD')
+##############       
+#\\... ......#       
+###.#. ...*..#       
+  #.#. ... ..#       
+### #.   \ ..#       
+#. .#..... **####### 
+#.#\#..... ..\\\*. # 
+#*\\#.###. ####\\\ # 
+#\\.#.     ...## \ # 
+#\#.#..... ....# \ # 
+###.#..... ....#   ##
+#\\.#..... ....#\   #
+########.. ..###*####
+#......... .........#
+#......... ....***..#
+#..\\\\\ # ####.....#
+#........*R..\\\   .#
+##########L##########
+        EOD
+        assert_equal false, closed_with_static_objects?(m, m.lambdas.first, m.robot.pos)
+      end
     end
 
     should "poss_from_toは壁を考慮しないfromからtoまでのposを返す" do

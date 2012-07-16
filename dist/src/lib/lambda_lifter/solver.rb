@@ -167,7 +167,7 @@ class LambdaLifter
               boundary << newpos
             else
               if !visited.include?(newpos) && mine.valid_pos?(newpos) 
-                queue.push(newpos)
+                queue.push(newpos) unless queue.include?(newpos)
               end
             end
           end
