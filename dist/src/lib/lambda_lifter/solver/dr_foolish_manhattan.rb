@@ -93,8 +93,8 @@ class LambdaLifter
               "route: #{check_route_to_key(@check_route + [checkpoint])}\n" +
               "passed_check_routes: #{@passed_check_routes.inspect}\n" +
               "depth <= limit: #{depth} < #{limit}\n" +
-              "next_pos == checkpoint: #{@mine.robot.pos} == #{checkpoint}\n" +
-              @mine.ascii_map)
+              "next_pos == checkpoint: #{@mine.robot.pos} == #{checkpoint}")
+            ascii_map(cp: checkpoint) if LambdaLifter.debug?
           else
             log("solve_to_checkpoint: too deep")
             success = nil
@@ -111,7 +111,7 @@ class LambdaLifter
         end
         return true
       end
-  
+
       # 次の目的地を探す
       # TODO: 簡単わかる無理そうなopen lambdaを検出する
       #       (たとえば岩にふさがっているものなど）
@@ -132,7 +132,7 @@ class LambdaLifter
       # 以前のmapと変化がない場合はnil
       def exec_next_command(goal)
         sdl(@mine) if defined? sdl
-        sleep 0.1 if LambdaLifter.debug?
+        sleep 0.5 if LambdaLifter.debug?
         next_position = judge_next_robot_position(movable_positions(@mine.robot), goal)
         return false if limit_commands_exceeded?
         cmd = next_position.nil? ? nil : @mine.robot.command_to(next_position)
@@ -167,8 +167,6 @@ class LambdaLifter
           "dead_cmd=<#{@dead_cmd_routes.inspect}>")
         return nil if points.empty?
         return points.first if points.size == 1
-        neary_lambda = points.find{|pos| @mine[pos] == :lambda }
-        return neary_lambda if neary_lambda
         return nearest_checkpoint(points, goal)
       end
 

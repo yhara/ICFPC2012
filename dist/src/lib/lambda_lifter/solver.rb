@@ -112,6 +112,10 @@ class LambdaLifter
         @cached_distance_map[pos] = map
         return map
       end
+
+      def ascii_map(opts)
+        @mine.ascii_map!
+      end
     end
 
     # 確実に到達不可能な地点を見つける
