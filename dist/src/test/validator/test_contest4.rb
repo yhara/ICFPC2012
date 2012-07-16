@@ -64,7 +64,7 @@ EOS
       end
       ascii_map = mine.validator_map
       # Validatorはクリア時にOだがMineはクリア時はRなのでその補正
-      ascii_map = ascii_map.sub("R", "O") if !/O/.match(ascii_map)
+      ascii_map = ascii_map.sub("R", "O") if !/[LO]/.match(ascii_map)
       assert_equal processed_map, ascii_map, <<INPUT
 #{map}
 
