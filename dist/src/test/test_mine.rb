@@ -565,6 +565,205 @@ Waterproof 5
         mine.step!("U")
         assert_equal 0, mine.number_of_waterproof
       end
+
+      should "ロボットの移動に伴いラムダ入りの岩が移動すること" do
+        mine = Mine.new(<<-'EOD')
+#######
+# @R@ #
+#######
+        EOD
+        assert_equal [:wall, :empty, :higher_order_rock, :robot, :higher_order_rock, :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [Pos[3, 2], Pos[5, 2]], mine.higher_order_rocks.sort
+        mine.step!("L")
+        assert_equal [:wall, :higher_order_rock, :robot, :empty, :higher_order_rock, :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [Pos[2, 2], Pos[5, 2]], mine.higher_order_rocks.sort
+        mine.step!("R")
+        mine.step!("R")
+        assert_equal [:wall, :higher_order_rock, :empty, :empty, :robot, :higher_order_rock, :wall],
+                     mine.raw_map[1]
+        assert_equal [Pos[2, 2], Pos[6, 2]], mine.higher_order_rocks.sort
+      end
+
+      should "ラムダ入りの岩が落下すること" do
+        mine = Mine.new(<<-'EOD')
+R##
+#@#
+# #
+###
+        EOD
+        assert_equal [:wall, :higher_order_rock,  :wall], mine.raw_map[1]
+        assert_equal [Pos[2, 3]], mine.higher_order_rocks
+        assert_equal [], mine.lambdas
+        mine.step!("W")
+        assert_equal [:wall, :empty, :wall], mine.raw_map[1]
+        assert_equal [:wall, :lambda,  :wall], mine.raw_map[2]
+        assert_equal [], mine.higher_order_rocks
+        assert_equal [Pos[2, 2]], mine.lambdas
+      end
+
+      should "ラムダ入りの岩が左右に崩落すること" do
+        mine = Mine.new(<<-'EOD')
+R#####
+#@  @#
+#@  @#
+######
+        EOD
+        assert_equal [:wall, :higher_order_rock, :empty, :empty, :higher_order_rock, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :higher_order_rock, :empty, :empty, :higher_order_rock, :wall],
+                     mine.raw_map[2]
+        assert_equal Set[Pos[2, 2], Pos[2, 3], Pos[5, 2], Pos[5, 3]],
+                     Set[*mine.higher_order_rocks]
+        assert_equal [], mine.lambdas
+        mine.step!("W")
+        assert_equal [:wall, :empty, :empty, :empty, :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :higher_order_rock, :lambda, :lambda, :higher_order_rock, :wall],
+                     mine.raw_map[2]
+        assert_equal Set[Pos[2, 2], Pos[5, 2]], Set[*mine.higher_order_rocks]
+        assert_equal Set[Pos[3, 2], Pos[4, 2]], Set[*mine.lambdas]
+      end
+
+      should "岩の衝突時に更新が後のラムダ入りの岩が残ること" do
+        mine = Mine.new(<<-'EOD')
+R####
+#* @#
+#@ @#
+#####
+        EOD
+        assert_equal [:wall, :rock, :empty, :higher_order_rock, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :higher_order_rock, :empty, :higher_order_rock, :wall],
+                     mine.raw_map[2]
+        assert_equal [Pos[2, 3]], mine.rocks
+        assert_equal Set[Pos[2, 2], Pos[4, 2], Pos[4, 3]],
+                     Set[*mine.higher_order_rocks]
+        mine.step!("W")
+        assert_equal [:wall, :empty, :empty, :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :higher_order_rock, :lambda, :higher_order_rock, :wall],
+                     mine.raw_map[2]
+        assert_equal [], mine.rocks
+        assert_equal Set[Pos[2, 2], Pos[4, 2]],
+                     Set[*mine.higher_order_rocks]
+        assert_equal [Pos[3, 2]], mine.lambdas
+      end
+
+      should "岩の衝突時に更新が後の岩が残ること" do
+        mine = Mine.new(<<-'EOD')
+R####
+#@ *#
+#@ @#
+#####
+        EOD
+        assert_equal [:wall, :higher_order_rock, :empty, :rock, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :higher_order_rock, :empty, :higher_order_rock, :wall],
+                     mine.raw_map[2]
+        assert_equal Set[Pos[4, 3]],
+                     Set[*mine.rocks]
+        assert_equal Set[Pos[2, 2], Pos[2, 3], Pos[4, 2]],
+                     Set[*mine.higher_order_rocks]
+        assert_equal [], mine.lambdas
+        mine.step!("W")
+        assert_equal [:wall, :empty, :empty, :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :higher_order_rock, :rock, :higher_order_rock, :wall],
+                     mine.raw_map[2]
+        assert_equal Set[Pos[3, 2]],
+                     Set[*mine.rocks]
+        assert_equal Set[Pos[2, 2], Pos[4, 2]],
+                     Set[*mine.higher_order_rocks]
+        assert_equal [Pos[3, 2]], mine.lambdas
+      end
+
+      should "ラムダ入りの岩は右側に崩落すること" do
+        mine = Mine.new(<<-'EOD')
+R####
+# @ #
+# \ #
+#####
+        EOD
+        assert_equal [:wall, :empty, :higher_order_rock,   :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :empty, :lambda, :empty, :wall],
+                     mine.raw_map[2]
+        assert_equal [Pos[3, 3]], mine.higher_order_rocks
+        assert_equal [Pos[3, 2]], mine.lambdas
+        mine.step!("W")
+        assert_equal [:wall, :empty, :empty, :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :empty, :lambda, :lambda,  :wall],
+                     mine.raw_map[2]
+        assert_equal [], mine.higher_order_rocks
+        assert_equal Set[Pos[3, 2], Pos[4, 2]], Set[*mine.lambdas]
+      end
+
+      should "ラムダ上のラムダ入りの岩は左側に崩落しないこと" do
+        mine = Mine.new(<<-'EOD')
+R###
+# @#
+# \#
+####
+        EOD
+        assert_equal [:wall, :empty, :higher_order_rock,   :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :empty, :lambda, :wall],
+                     mine.raw_map[2]
+        assert_equal [Pos[3, 3]], mine.higher_order_rocks
+        mine.step!("W")
+        assert_equal [:wall, :empty, :higher_order_rock,  :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :empty, :lambda, :wall],
+                     mine.raw_map[2]
+        assert_equal [Pos[3, 3]], mine.higher_order_rocks
+      end
+
+      should "ロボットによるラムダ入りの岩の移動と更新によるラムダ入りの岩の移動は区別されていること" do
+        mine = Mine.new(<<-'EOD')
+#####
+#R@ #
+# @ #
+#####
+        EOD
+        assert_equal [:wall, :robot, :higher_order_rock, :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :empty, :higher_order_rock, :empty, :wall],
+                     mine.raw_map[2]
+        assert_equal [Pos[3, 2], Pos[3, 3]], mine.higher_order_rocks.sort
+        assert_equal [], mine.lambdas
+        mine.step!("R")
+        assert_equal [:wall, :empty, :robot,  :empty, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :empty, :higher_order_rock, :lambda, :wall],
+                     mine.raw_map[2]
+        assert_equal [Pos[3, 2]], mine.higher_order_rocks
+        assert_equal [Pos[4, 2]], mine.lambdas
+      end
+
+      should "ラムダ入りの岩以外のラムダを回収してもリフトは閉じていること" do
+        mine = Mine.new(<<-'EOD')
+#####
+#R\L#
+# @ #
+#####
+        EOD
+        assert_equal [:wall, :robot, :lambda, :closed_lift, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :empty, :higher_order_rock, :empty, :wall],
+                     mine.raw_map[2]
+        assert_equal [Pos[3, 3]], mine.lambdas.sort
+        assert_equal [Pos[3, 2]], mine.higher_order_rocks.sort
+        mine.step!("R")
+        assert_equal [:wall, :empty, :robot, :closed_lift, :wall],
+                     mine.raw_map[1]
+        assert_equal [:wall, :empty, :higher_order_rock, :empty, :wall],
+                     mine.raw_map[2]
+        assert_equal [], mine.lambdas.sort
+        assert_equal [Pos[3, 2]], mine.higher_order_rocks.sort
+      end
     end
 
     should "ロボットがトランポリンの上に来たらターゲットへ移動すること" do
@@ -920,9 +1119,11 @@ Trampoline A targets 1
         assert_equal @mine.number_of_flooding, mine2.number_of_flooding
         assert_equal @mine.waterproof, mine2.waterproof
         assert_equal @mine.number_of_waterproof, mine2.number_of_waterproof
+        assert_equal @mine.higher_order_rocks, mine2.higher_order_rocks
         assert_not_equal @mine.commands.object_id, mine2.commands.object_id
         assert_not_equal @mine.rocks.object_id, mine2.rocks.object_id
         assert_not_equal @mine.lambdas.object_id, mine2.lambdas.object_id
+        assert_not_equal @mine.higher_order_rocks.object_id, mine2.higher_order_rocks.object_id
       end
     end
 

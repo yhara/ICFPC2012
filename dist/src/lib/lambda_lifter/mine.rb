@@ -78,6 +78,7 @@ class LambdaLifter
         @trampoline_relationships = {}
         @growth = 0
         @razors = 0
+        @higher_order_rocks = []
         parse(mine_description)
         @number_of_growing = @growth > 0 ? @growth - 1 : -1
         @updated_map = @map.dup
@@ -156,6 +157,7 @@ class LambdaLifter
       mine.instance_variable_set(:@growth, @growth)
       mine.instance_variable_set(:@razors, @razors)
       mine.instance_variable_set(:@number_of_growing, @number_of_growing)
+      mine.instance_variable_set(:@higher_order_rocks, @higher_order_rocks.dup)
       return mine
     end
 
@@ -219,6 +221,8 @@ class LambdaLifter
         case layout
         when :rock
           process_rock(@command)
+        when :higher_order_rock
+          process_higher_order_rock(@command)
         when :lambda
           process_lambda(@command)
         when :razor
@@ -291,29 +295,55 @@ class LambdaLifter
     private
 
     def process_map
-      _rocks = @rocks.dup
-      _rocks.each do |rock|
-        if self[rock.x, rock.y - 1] == :empty
-          move_rock(Pos[rock.x, rock.y], Pos[rock.x, rock.y - 1])
-        elsif self[rock.x,     rock.y - 1] == :rock  &&
-              self[rock.x + 1, rock.y    ] == :empty &&
-              self[rock.x + 1, rock.y - 1] == :empty
-          move_rock(Pos[rock.x, rock.y], Pos[rock.x + 1, rock.y - 1])
-        elsif self[rock.x,     rock.y - 1] == :rock       &&
-              (self[rock.x + 1, rock.y    ] != :empty ||
-               self[rock.x + 1, rock.y - 1] != :empty)    &&
-              self[rock.x - 1, rock.y    ] == :empty      &&
-              self[rock.x - 1, rock.y - 1] == :empty
-          move_rock(Pos[rock.x, rock.y], Pos[rock.x - 1, rock.y - 1])
-        elsif self[rock.x,     rock.y - 1] == :lambda &&
-              self[rock.x + 1, rock.y    ] == :empty  &&
-              self[rock.x + 1, rock.y - 1] == :empty
-          move_rock(Pos[rock.x, rock.y], Pos[rock.x + 1, rock.y - 1])
+      _rocks = @rocks.map {|r| [r, :rock] }
+      _higher_order_rocks = @higher_order_rocks.map {|h|
+        [h, :higher_order_rocks] }
+      layouts = _rocks + _higher_order_rocks
+      layouts.sort.each do |pos, layout|
+        if self[pos.x, pos.y - 1] == :empty
+          case layout
+          when :rock
+            move_rock(Pos[pos.x, pos.y], Pos[pos.x, pos.y - 1])
+          when :higher_order_rocks
+            move_higher_order_rock(Pos[pos.x, pos.y], Pos[pos.x, pos.y - 1])
+          end
+        elsif (self[pos.x,     pos.y - 1] == :rock ||
+               self[pos.x,     pos.y - 1] == :higher_order_rock) &&
+               self[pos.x + 1, pos.y    ] == :empty &&
+               self[pos.x + 1, pos.y - 1] == :empty
+          case layout
+          when :rock
+            move_rock(Pos[pos.x, pos.y], Pos[pos.x + 1, pos.y - 1])
+          when :higher_order_rocks
+            move_higher_order_rock(Pos[pos.x, pos.y], Pos[pos.x + 1, pos.y - 1])
+          end
+        elsif (self[pos.x,     pos.y - 1] == :rock ||
+               self[pos.x,     pos.y - 1] == :higher_order_rock) &&
+              (self[pos.x + 1, pos.y    ] != :empty  ||
+               self[pos.x + 1, pos.y - 1] != :empty) &&
+               self[pos.x - 1, pos.y    ] == :empty  &&
+               self[pos.x - 1, pos.y - 1] == :empty
+          conflict_rock(Pos[pos.x - 1, pos.y - 1])
+          case layout
+          when :rock
+            move_rock(Pos[pos.x, pos.y], Pos[pos.x - 1, pos.y - 1])
+          when :higher_order_rocks
+            move_higher_order_rock(Pos[pos.x, pos.y], Pos[pos.x - 1, pos.y - 1])
+          end
+        elsif self[pos.x,     pos.y - 1] == :lambda &&
+              self[pos.x + 1, pos.y    ] == :empty  &&
+              self[pos.x + 1, pos.y - 1] == :empty
+          case layout
+          when :rock
+            move_rock(Pos[pos.x, pos.y], Pos[pos.x + 1, pos.y - 1])
+          when :higher_order_rocks
+            move_higher_order_rock(Pos[pos.x, pos.y], Pos[pos.x + 1, pos.y - 1])
+          end
         end
       end
-      @rocks.uniq!
 
-      if @lift && @lambdas.length == 0 && self[@lift.x, @lift.y] == :closed_lift
+      if @lift && (@lambdas + @higher_order_rocks).length == 0 &&
+        self[@lift.x, @lift.y] == :closed_lift
         set(@lift.x, @lift.y, :open_lift)
       end
     end
@@ -323,6 +353,32 @@ class LambdaLifter
       set(to.x, to.y, :rock)
       @rocks.delete(from)
       @rocks << to
+    end
+
+    def move_higher_order_rock(from, to)
+      set(from.x, from.y, :empty)
+      if get(to.x, to.y - 1) == :empty
+        set(to.x, to.y, :higher_order_rock)
+        @higher_order_rocks.delete(from)
+        @higher_order_rocks << to
+      else
+        set(to.x, to.y, :lambda)
+        @higher_order_rocks.delete(from)
+        @lambdas << to
+      end
+    end
+
+    def conflict_rock(to)
+      if (get(to.x, to.y) == :rock ||
+          get(to.x, to.y) == :higher_order_rock) &&
+          self[to.x, to.y] != get(to.x, to.y)
+        case get(to.x, to.y)
+        when :rock
+          @rocks.delete(to)
+        when :higher_order_rock
+          @higher_order_rocks.delete(to)
+        end
+      end
     end
 
     def spread_beard
@@ -353,6 +409,19 @@ class LambdaLifter
         self[@robot.x + 2, @robot.y] = :rock
         @rocks.delete(Pos[@robot.x + 1, @robot.y])
         @rocks << Pos[@robot.x + 2, @robot.y]
+      end
+    end
+
+    def process_higher_order_rock(direction) 
+      case direction
+      when :left
+        self[@robot.x - 2, @robot.y] = :higher_order_rock
+        @higher_order_rocks.delete(Pos[@robot.x - 1, @robot.y])
+        @higher_order_rocks << Pos[@robot.x - 2, @robot.y]
+      when :right
+        self[@robot.x + 2, @robot.y] = :higher_order_rock
+        @higher_order_rocks.delete(Pos[@robot.x + 1, @robot.y])
+        @higher_order_rocks << Pos[@robot.x + 2, @robot.y]
       end
     end
 
