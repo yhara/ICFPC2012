@@ -7,8 +7,8 @@ class LambdaLifter
       @mine = mine
       @highscore = {score: 0, cmd: "A"}
       Signal.trap(:INT){ handle_sigint }
-      @try_solvers = [DrManhattan.new(@mine.dup)]
-#      @try_solvers = [DrFoolishManhattan.new(@mine.dup)]
+      @try_solvers = [DrFoolishManhattan.new(@mine.dup),
+        DrManhattan.new(@mine.dup)]
     end
 
     # コマンドの列を文字列で返す。
@@ -82,16 +82,16 @@ class LambdaLifter
         @cached_distance_map ||= {}
         return @cached_distance_map[pos] if @cached_distance_map[pos]
         map = []
-        stack = [[{pos: pos, dist: 0}]]
-        until stack.empty?
-          s = stack.pop
+        queue = [[{pos: pos, dist: 0}]]
+        until queue.empty?
+          s = queue.shift
           s.each do |cell|
             base = cell[:dist]
             pos = cell[:pos]
             next if map[pos.x] && map[pos.x][pos.y]
             map[pos.x] ||= []
             map[pos.x][pos.y] ||= base
-            stack << [{pos: Pos[pos.x-1, pos.y-1], dist: base+2},
+            queue << [{pos: Pos[pos.x-1, pos.y-1], dist: base+2},
               {pos: Pos[pos.x-1, pos.y+1], dist: base+2},
               {pos: Pos[pos.x+1, pos.y-1], dist: base+2},
               {pos: Pos[pos.x+1, pos.y+1], dist: base+2},
@@ -110,7 +110,7 @@ class LambdaLifter
               else
                 cell
               end
-            }.flatten(1)
+            }.flatten(1).sort_by{|cell| cell[:pos].x}
           end
         end
 

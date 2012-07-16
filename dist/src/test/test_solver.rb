@@ -216,7 +216,7 @@ Trampoline A targets 1
       s = Solver::DrFoolishManhattan.new(m)
       map = s.calc_distance_map(Pos[2, 2])
       assert_equal 0, map[2][2]
-      assert_equal 6, map[6][2]
+      assert_equal 8, map[6][2]
       assert_equal 8, map[6][6]
 
       desc = <<-'EOD'.freeze
@@ -235,6 +235,7 @@ Trampoline C targets 2
       s = Solver::DrFoolishManhattan.new(m)
       map = s.calc_distance_map(Pos[15, 2])
       assert_equal 1, map[4][4]
+      assert_equal 2, map[4][5]
     end
   end
 end

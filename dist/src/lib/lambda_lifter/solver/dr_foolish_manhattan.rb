@@ -113,8 +113,6 @@ class LambdaLifter
       end
 
       # 次の目的地を探す
-      # TODO: 簡単わかる無理そうなopen lambdaを検出する
-      #       (たとえば岩にふさがっているものなど）
       def find_checkpoint
         possible_lambdas = @mine.lambdas.select do |l|
           possible_check_route?(@check_route + [l])

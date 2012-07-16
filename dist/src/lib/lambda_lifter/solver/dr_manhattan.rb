@@ -22,14 +22,17 @@ class LambdaLifter
       def judge_next_robot_position(points, goal)
         point = super
         if LambdaLifter.debug?
+          puts [@mine.number_of_waterproof, @mine.water]
           @mine.ascii_map! do |pos|
             map = calc_distance_map(goal)
             if map[pos.x] && map[pos.x][pos.y]
               s = map[pos.x][pos.y].to_s.ljust(2)
               next s.background(:red).color(:white) if pos == point
               s = points.include?(pos) ? s.background(:green).color(:white) : s.background(:black).color(:white)
+              s += @visited_poss.include?(pos) ? " ".background(:yellow) : " "
+              s
             else
-              "".ljust(2)
+              "".ljust(3)
             end
           end
         end
