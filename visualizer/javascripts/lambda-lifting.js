@@ -1,12 +1,12 @@
 var ImageSize = [40, 40]; // [width, height]
 
 var ObjectsMapping = {
-  "L" : "closed-lift",
+  "L" : "closed_lift",
   "." : "earth",
   " " : "empty",
   "\\": "lambda",
   "/" : "lambda",
-  "O" : "open-lift",
+  "O" : "open_lift",
   "R" : "robot",
   "*" : "rock",
   "#" : "wall"
@@ -65,7 +65,7 @@ Object.extend(
       if (this.type == "rock") {
         this.calcNewStateForRock();
       }
-      else if (this.type == "closed-lift") {
+      else if (this.type == "closed_lift") {
         this.calcNewStateForClosedList(remainedLambdaNum);
       }
       else {
@@ -101,7 +101,7 @@ Object.extend(
 
     calcNewStateForClosedList: function(remainedLambdaNum) {
       if (remainedLambdaNum == 0) {
-        this.newState = "open-lift";
+        this.newState = "open_lift";
       }
     },
 
@@ -192,7 +192,7 @@ Object.extend(
       if (destCell.type == "empty" ||
           destCell.type == "earth" ||
           destCell.type == "lambda" ||
-          destCell.type == "open-lift") {
+          destCell.type == "open_lift") {
         return true;
       }
       else {
@@ -302,7 +302,7 @@ Object.extend(
             this.remainedLambdaNum++;
           }
           if (cell.newState) {
-            if (cell.type == "open-lift" && cell.newState == "robot") {
+            if (cell.type == "open_lift" && cell.newState == "robot") {
               this.won = true;
             }
             cell.update();
