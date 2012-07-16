@@ -11,8 +11,13 @@ require_relative "../lib/lambda_lifter"
 
 class LambdaLifter
   def self.solve!(mine, opts)
-    puts "solving..."
-    route = Solver.new(mine.dup).solve
+    if opts[:route]
+      route = opts[:route]
+    else
+      puts "solving..."
+      route = Solver.new(mine.dup).solve
+    end
+
     puts "route: #{route}"
     SdlVisualizer.instance.background_color = [255, 255, 255] if opts[:sdl]
 
@@ -35,10 +40,13 @@ end
 opts = Trollop.options do
   banner "usage: #$0 mapfile"
 
+  opt :route, "ルート (デフォルト: なし(Solverに解かせる))", type: String
+  opt :wait, "ウェイト (デフォルト: 0.5秒)", default: 0.5
+
   opt :sdl, "SDLによる描画を行う", default: false
-  opt :scale, "SDLの拡大倍率(デフォルト: 1.0)", default: nil, type: Float
+  opt :scale, "SDLの拡大倍率 (デフォルト: 1.0)", default: nil, type: Float
   opt :interactive, "インタラクティブモード", default: false
-  opt :wait, "ウェイト(デフォルト: 0.5秒)", default: 0.5
+
   opt :help, "ヘルプ"
 end
 opts[:sdl] = true if opts[:interactive] || opts[:scale]
