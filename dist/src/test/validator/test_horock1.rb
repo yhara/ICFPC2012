@@ -38,8 +38,10 @@ v
 score: 206
 =end
 
+require_relative "validator_test"
+
 class LambdaLifter
-  class TestHorock1 < Test::Unit::TestCase
+  class TestFlood1 < ValidatorTest
     should "Validatorと同じ結果になる" do
       commands = "LLLLDDDDDRUUURRUDLLLURDRRURRDRDRLRDDDDLDDRRRA"
       score = 206
