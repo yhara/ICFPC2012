@@ -82,10 +82,9 @@ class LambdaLifter
         stack = [[{pos: pos, dist: 0}]]
         until stack.empty?
           s = stack.pop
-          s.each do |pos|
-            base = pos[:dist]
-            pos = pos[:pos]
-            next if [:wall, :out_of_space].include?(@mine[pos])
+          s.each do |cell|
+            base = cell[:dist]
+            pos = cell[:pos]
             next if map[pos.x] && map[pos.x][pos.y]
             map[pos.x] ||= []
             map[pos.x][pos.y] ||= base
@@ -98,9 +97,18 @@ class LambdaLifter
               {pos: Pos[pos.x+1, pos.y], dist: base+1},
               {pos: Pos[pos.x, pos.y-1], dist: base+1},
               {pos: Pos[pos.x, pos.y+1], dist: base+1},
-            ]
+            ].select{|cell| ![:wall, :out_of_map].include?(@mine[pos]) }
           end
         end
+
+        # DEBUG用
+        # @mine.ascii_map! do |pos|
+        #   if map[pos.x] && map[pos.x][pos.y]
+        #     map[pos.x][pos.y].to_s.background(:red).color(:white)
+        #   else
+        #     " ".to_s.background(:black).color(:white)
+        #   end
+        # end
         @cached_distance_map[pos] = map
         return map
       end

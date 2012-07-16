@@ -209,7 +209,7 @@ R   * #
     should "calc_distance_mapは指定位置からの距離マップを作成する" do
       m = Mine.new(<<-'EOD')
 ####### 
-# #   #
+# #    
 #   * #
 #*R*###
 ##  **#
