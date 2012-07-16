@@ -41,7 +41,6 @@ score: 206
 class LambdaLifter
   class TestHorock1 < Test::Unit::TestCase
     should "Validatorと同じ結果になる" do
-      pend
       commands = "LLLLDDDDDRUUURRUDLLLURDRRURRDRDRLRDDDDLDDRRRA"
       score = 206
       map = <<'EOS'
@@ -79,10 +78,8 @@ EOS
       commands.each_char do |s|
         mine.step!(s)
       end
-      ascii_map = mine.validator_map
-      # Validatorはクリア時にOだがMineはクリア時はRなのでその補正
-      ascii_map = ascii_map.sub("R", "O") if !/[LO]/.match(ascii_map)
-      assert_equal processed_map, ascii_map, <<INPUT
+      assert_equal treat_expected_map(processed_map),
+        treat_actual_map(mine.validator_map), <<INPUT
 #{map}
 
 |
