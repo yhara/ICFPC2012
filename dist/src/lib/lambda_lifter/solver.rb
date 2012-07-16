@@ -28,7 +28,7 @@ class LambdaLifter
     end
 
     def handle_sigint
-      @solver.handle_sigint
+      @solver.handle_sigint if not @solver.nil?
       @trapped_sigint = true
     end
 
