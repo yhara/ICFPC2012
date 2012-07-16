@@ -36,7 +36,9 @@ RL
       }]
 
       MyGame.main_loop do
-        scale = @scale || [(screen_h.to_f/@mine.height)/47, 1].min
+        scale = @scale || [(screen_h.to_f/@mine.height)/47,
+                           (screen_w.to_f/@mine.width)/47,
+                           1].min
         @mine.raw_map.each.with_index do |raw_row, y|
           raw_row.each.with_index do |sym, x|
             sym = $1.to_sym if sym.match(/(trampoline|target)_\w/)
