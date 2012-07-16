@@ -2,6 +2,8 @@
 # シミュレータ
 class LambdaLifter
   class UnknownCommandError < StandardError; end
+  class NotFoundTarget < StandardError; end
+  class NotFoundTrampoline < StandardError; end
 
   class Mine
     include HashEqlable
@@ -300,19 +302,14 @@ class LambdaLifter
 
     def target_pos(trampoline)
       target = @trampoline_relationships[trampoline]
-      if target
-        pos = @targets[target]
-      end
-      return pos
+      raise NotFoundTarget unless target
+      return @targets[target]
     end
 
     def trampoline_poss(target)
-      poss = []
       trampolines = @trampoline_relationships.select {|_, v| v == target }
-      if trampolines.any?
-        poss = trampolines.map {|t, _| @trampolines[t] }
-      end
-      return poss
+      raise NotFoundTrampoline if trampolines.empty?
+      return trampolines.map {|t, _| @trampolines[t] }
     end
 
     private

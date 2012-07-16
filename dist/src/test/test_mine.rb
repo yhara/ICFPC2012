@@ -1357,8 +1357,10 @@ Trampoline B targets 2
         assert_equal Pos[2, 2], @mine.target_pos(:trampoline_b)
       end
 
-      should "存在しないトランポリンを指定した場合はnilを返すこと" do
-        assert_equal nil, @mine.target_pos(:foo)
+      should "存在しないトランポリンを指定した場合は例外を発生すること" do
+        assert_raise(NotFoundTarget) do
+          @mine.target_pos(:foo)
+        end
       end
     end
 
@@ -1400,8 +1402,10 @@ Trampoline C targets 2
         assert_equal [Pos[16, 3]], mine.trampoline_poss(:target_2)
       end
 
-      should "存在しないターゲットを指定した場合は[]を返すこと" do
-        assert_equal [], @mine.trampoline_poss(:foo)
+      should "存在しないターゲットを指定した場合は例外を発生すること" do
+        assert_raise(NotFoundTrampoline) do
+          @mine.trampoline_poss(:foo)
+        end
       end
     end
   end
