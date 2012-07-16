@@ -23,7 +23,7 @@ RL
     end
 
     IMAGE_FILES = %w(closed_lift earth empty lambda open_lift robot rock wall)
-    def run
+    def run(opts = {})
       screen_w = 800
       screen_h = 600
       MyGame.create_screen screen_w, screen_h

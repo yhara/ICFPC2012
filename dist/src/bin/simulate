@@ -10,9 +10,7 @@ require_relative "../lib/lambda_lifter"
 #end
 
 class LambdaLifter
-  def self.solve!(maptxt, opts)
-    mine = Mine.new(maptxt)
-    sdl(mine)
+  def self.solve!(mine, opts)
     puts "solving..."
     route = Solver.new(mine.dup).solve
     puts "route: #{route}"
@@ -39,6 +37,7 @@ opts = Trollop.options do
 
   opt :sdl, "SDLによる描画を行う", default: false
   opt :scale, "SDLの拡大倍率(デフォルト: 1.0)", default: nil, type: Float
+  opt :interactive, "インタラクティブモード", default: false
   opt :wait, "ウェイト(デフォルト: 0.5秒)", default: 0.5
   opt :help, "ヘルプ"
 end
@@ -49,12 +48,15 @@ if opts[:sdl]
   require_relative "../../../mygame/sdlview.rb"
 
   Thread.start{
-    LambdaLifter.solve!(ARGF.read, opts)
+    mine = LambdaLifter::Mine.new(ARGF.read)
+    sdl(mine)
+    LambdaLifter.solve!(mine, opts) unless opts[:interactive]
   }
   LambdaLifter::SdlVisualizer.instance.scale = opts[:scale]
-  LambdaLifter::SdlVisualizer.instance.run
+  LambdaLifter::SdlVisualizer.instance.run(opts)
 else
   def sdl(*args); end
 
-  LambdaLifter.solve!(ARGF.read, opts)
+  mine = LambdaLifter::Mine.new(ARGF.read)
+  LambdaLifter.solve!(mine, opts)
 end
