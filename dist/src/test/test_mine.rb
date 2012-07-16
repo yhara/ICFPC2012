@@ -1335,5 +1335,31 @@ R ****#
         assert_equal (25 - 1 - 1) + 50, @mine.score
       end
     end
+
+    context "target_posが呼ばれたとき" do
+      setup do 
+        @mine = Mine.new(<<-'EOD')
+##L###########
+#.....R#.**..#
+#.*A...#..1..#
+#.*....#.  \.#
+#.\\\..#...\.#
+#2.....**B...#
+##############
+
+Trampoline A targets 1
+Trampoline B targets 2
+        EOD
+      end
+
+      should "トランポリンに対応するターゲットの位置を返すこと" do
+        assert_equal Pos[11, 5], @mine.target_pos(:trampoline_a)
+        assert_equal Pos[2, 2], @mine.target_pos(:trampoline_b)
+      end
+
+      should "存在しないトランポリンを指定した場合はnilを返すこと" do
+        assert_equal nil, @mine.target_pos(:foo)
+      end
+    end
   end
 end

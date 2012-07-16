@@ -298,6 +298,14 @@ class LambdaLifter
       finished? == :abort
     end
 
+    def target_pos(trampoline)
+      target = @trampoline_relationships[trampoline]
+      if target
+        pos = @targets[target]
+      end
+      return pos
+    end
+
     private
 
     def process_map
