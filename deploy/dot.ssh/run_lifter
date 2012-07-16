@@ -21,6 +21,7 @@ l.info("timeout is #{to_sigint_timeout} seconds.")
 out_r, out_w = *IO.pipe
 err_r, err_w = *IO.pipe
 pid = spawn("./lifter", in: map_path.to_s, out: out_w, err: err_w)
+success = true
 begin
   timeout(to_sigint_timeout) do
     Process.wait(pid)
@@ -38,6 +39,7 @@ rescue Timeout::Error
   rescue Timeout::Error
     l.warn("timeout #{to_sigkill_timeout} seconds and sending SIGKILL to lifter...")
     Process.kill(:KILL, pid)
+    success = false
   end
 ensure
   out_w.close
@@ -54,8 +56,7 @@ EOS
 lifter stderr:
 #{s}
 EOS
-    l.info("run_lifter is finished.")
-    exit(EXIT_FAILURE)
   end
 end
 l.info("run_lifter is finished.")
+exit(EXIT_FAILURE) if !success
