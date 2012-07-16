@@ -52,6 +52,7 @@ RL
         @mine.step!("L") if new_key_pressed?(Key::LEFT)
         @mine.step!("W") if new_key_pressed?(Key::W)
         @mine.step!("A") if new_key_pressed?(Key::A)
+        @mine.step!("S") if new_key_pressed?(Key::S)
       end
     end
   end
