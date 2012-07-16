@@ -535,8 +535,6 @@ class LambdaLifter
         end
         line
       end
-
-      # TODO: 水位情報の取得
     end
   end
 end
