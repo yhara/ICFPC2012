@@ -573,7 +573,7 @@ class LambdaLifter
     end
 
     def parse(mine_description)
-      _mine_description = mine_description.split("\n")
+      _mine_description = mine_description.split(/\r?\n/)
       _lambdas = []
       _lift = []
       _rocks = []
