@@ -48,7 +48,10 @@ RL
           end
         end
         water_lv = (@mine.height  - @mine.water) * (47*scale)
-        screen.fillRect 0, water_lv, @mine.width * (47*scale), 5, [0, 0, 255]
+        MyGame.screen.draw_filled_rect_alpha(0, water_lv,
+                                             @mine.width * (47*scale),
+                                             @mine.height * (47*scale) - water_lv,
+                                             [0,0,255],100)
 
         exit if key_pressed?(Key::Q)
         @mine.step!("U") if new_key_pressed?(Key::UP)
