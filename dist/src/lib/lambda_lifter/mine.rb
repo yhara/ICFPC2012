@@ -257,6 +257,7 @@ class LambdaLifter
       else
         @number_of_waterproof = 0
       end
+      @losing = true if @number_of_waterproof >= @waterproof
       water_rising
       return
     end
