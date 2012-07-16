@@ -11,7 +11,6 @@ L* .\#
       m = Mine.new(desc)
       s = Solver.new(m)
       # ハイスコア状態でabort
-      s.solve
       assert_equal "DA", s.solve
     end
 
@@ -26,32 +25,6 @@ L ..\#
       s = Solver.new(m)
       # ハイスコア状態でabort
       assert_equal "DLLLL", s.solve
-    end
-
-    should "limit_commands_exceeded?がサイズオーバーの時にtrueを返す" do
-      desc = <<-'EOD'.freeze
-###
-LR#
-###
-      EOD
-      m = Mine.new(desc)
-      s = Solver.new(m)
-      s.instance_variable_set(:@commands, (0..(m.width * m.height+1)).map.to_a)
-      assert_equal true, s.send(:limit_commands_exceeded?)
-    end
-
-    should "contest1.mapのsolve" do
-      desc = <<-'EOD'.freeze
-######
-#. *R#
-#  \.#
-#\ * #
-L  .\#
-######
-      EOD
-      m = Mine.new(desc)
-      s = Solver.new(m)
-      assert_equal "LDLLDRRDRLULLDL", s.solve
     end
 
     should "contest3.mapのsolve" do
@@ -72,20 +45,6 @@ L  .\#
       assert_equal "LDLLDRRDRLULLDL", s.solve
     end
 
-    should "solve_to_checkpointでcheckpointまでの経路をA*探索で導くこと" do
-      desc = <<-'EOD'.freeze
-######
-#. *R#
-#  \.#
-#\ * #
-L  .\#
-######
-      EOD
-      m = Mine.new(desc)
-      s = Solver.new(m)
-      assert_equal true, s.send(:solve_to_checkpoint, Pos.new(5, 2))
-    end
-
     should "contest2.mapのsolve" do
       pend
       desc = <<-'EOD'.freeze
@@ -100,6 +59,48 @@ LR....#
       m = Mine.new(desc)
       s = Solver.new(m)
       assert_equal "LDLLDRRDRLULLDL", s.solve
+    end
+
+    should "contest1.mapのsolve" do
+      desc = <<-'EOD'.freeze
+######
+#. *R#
+#  \.#
+#\ * #
+L  .\#
+######
+      EOD
+      m = Mine.new(desc)
+      s = Solver.new(m)
+      assert_equal "LDLLDRRDRLULLDL", s.solve
+    end
+
+    context "マンハッタン探索のソルバは" do
+      should "limit_commands_exceeded?がサイズオーバーの時にtrueを返す" do
+        desc = <<-'EOD'.freeze
+###
+LR#
+###
+      EOD
+        m = Mine.new(desc)
+        s = Solver::DrFoolishManhattan.new(m)
+        s.instance_variable_set(:@commands, (0..(m.width * m.height+1)).map.to_a)
+        assert_equal true, s.send(:limit_commands_exceeded?)
+      end
+
+      should "solve_to_checkpointでcheckpointまでの経路をA*探索で導くこと" do
+        desc = <<-'EOD'.freeze
+######
+#. *R#
+#  \.#
+#\ * #
+L  .\#
+######
+      EOD
+        m = Mine.new(desc)
+        s = Solver::DrFoolishManhattan.new(m)
+        assert_equal true, s.send(:solve_to_checkpoint, Pos.new(5, 2))
+      end
     end
 
     context "確実に到達不可能な地点を見つけるとき" do
