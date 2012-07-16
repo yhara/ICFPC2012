@@ -206,11 +206,17 @@ class LambdaLifter
   
     # マップを書き換える。
     def step!(command)
-      raise "This mine is already finished" if finished?
-
       @command = COMMANDS[command]
       raise UnknownCommandError if @command.nil?
       @commands << command
+
+      if @command == :abort
+        @abort = true
+        @score += GIVEN_SCORES[:collected_lambda_abort] * @number_of_collected_lambdas
+        return
+      end
+
+      raise "This mine is already finished" if finished?
 
       if @robot.movable?(@command)
         self[@robot.x, @robot.y] = :empty
@@ -257,10 +263,6 @@ class LambdaLifter
       process_map
 
       beard_growing
-      if @command == :abort
-        @abort = true
-        @score += GIVEN_SCORES[:collected_lambda_abort] * @number_of_collected_lambdas
-      end
       if self[@robot.x, @robot.y + 1] == :empty &&
          get(@robot.x, @robot.y + 1) == :rock
         @losing = true
