@@ -247,6 +247,8 @@ class LambdaLifter
           process_beard(@robot.x, @robot.y)
           @razors -= 1
         end
+      elsif [:left, :right, :up, :down, :wait].include?(@command)
+        @score += GIVEN_SCORES[:each_move]
       end
 
       # 岩を更新する

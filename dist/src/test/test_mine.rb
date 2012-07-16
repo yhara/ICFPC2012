@@ -348,7 +348,7 @@ Razors 1
         mine.step!("D")
         assert_equal -4, mine.score
         mine.step!("W")
-        assert_equal -4, mine.score
+        assert_equal -5, mine.score
       end
 
       should "ラムダ上に移動したらスコアが25加算されること" do
@@ -1307,15 +1307,24 @@ R ****#
       end
 
       should "Waitしたときに1点減ること" do
-        pend
         @mine.step!("W")
         assert_equal -1, @mine.score
       end
 
       should "無理な方向に移動しようとしたきに1点減ること" do
-        pend
-        @mine.step!("U")
-        assert_equal -1, @mine.score
+        mine = Mine.new(<<-'EOD')
+###
+#R#
+###
+        EOD
+        mine.step!("R")
+        assert_equal -1, mine.score
+        mine.step!("L")
+        assert_equal -2, mine.score
+        mine.step!("U")
+        assert_equal -3, mine.score
+        mine.step!("D")
+        assert_equal -4, mine.score
       end
 
       should "ラムダ1つにつき25点が入ること" do
