@@ -69,15 +69,6 @@ EOS
       commands.each_char do |s|
         mine.step!(s)
       end
-=begin
-      commands[0 ... -2].each_char do |s|
-        mine.step!(s)
-      end
-breakpoint
-      commands[-2 .. -1].each_char do |s|
-        mine.step!(s)
-      end
-=end
       assert_equal treat_expected_map(processed_map),
         treat_actual_map(mine.validator_map), <<INPUT
 #{map}
