@@ -137,6 +137,11 @@ class LambdaLifter
         return false if limit_commands_exceeded?
         cmd = next_position.nil? ? nil : @mine.robot.command_to(next_position)
         return false if cmd.nil?
+        # ヒゲ対応: ヒゲがあったら剃っておく
+        if @mine.razors > 0 &&
+            movable_positions(@mine.robot).any?{|pos| @mine[pos] == :beard }
+          cmd = "S"
+        end
         @commands << cmd
         if m = cached_mine(@commands)
           @mine = m
