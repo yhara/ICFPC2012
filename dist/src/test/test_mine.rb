@@ -682,6 +682,28 @@ Razors 0
         EOD
         assert_equal expected, @mine.ascii_map
       end
+
+      should "隣接するemptyでないセルには増殖しないこと" do
+        map = <<-'EOD'
+#####
+#R  #
+#!.##
+#*W\#
+#.A1#
+###\L
+EOD
+        param = <<-'EOD'
+
+Growth 1
+Razors 1
+        EOD
+
+        mine = Mine.new(map + param)
+        assert_equal 1, mine.beards.length
+        mine.step!('W')
+        assert_equal 1, mine.beards.length
+        assert_equal map, mine.ascii_map
+      end
     end
 
     context "カミソリについて" do
