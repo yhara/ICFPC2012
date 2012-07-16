@@ -1,4 +1,7 @@
 #! /usr/bin/env ruby
+require "bundler"
+Bundler.require(:default, :deveopment)
+
 require_relative "../lib/lambda_lifter.rb"
 ENV["DEBUG"] = "true"
 LambdaLifter.run

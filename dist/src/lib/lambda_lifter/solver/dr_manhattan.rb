@@ -36,7 +36,6 @@ class LambdaLifter
         return point
       end
       
-      require "rainbow"
       def ascii_map(opts)
         # map = calc_distance_map(opts[:cp])
         # @mine.ascii_map! do |pos|
