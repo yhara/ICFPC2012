@@ -1,6 +1,8 @@
 # coding: utf-8
 class LambdaLifter
   class TestSolver < Test::Unit::TestCase
+    include Solver::Util
+
     should "mini1.mapという回答不可能な小さいマップがハイスコアでabortすること" do
       desc = <<-'EOD'.freeze
 ######
@@ -46,7 +48,6 @@ L ..\#
     end
 
     should "contest2.mapのsolve" do
-      pend
       desc = <<-'EOD'.freeze
 #######
 #..***#
@@ -58,7 +59,7 @@ LR....#
       EOD
       m = Mine.new(desc)
       s = Solver.new(m)
-      assert_equal "LDLLDRRDRLULLDL", s.solve
+      assert_equal "RRULLRRDRRULLUURRLDDURLLLLDDL", s.solve
     end
 
     should "contest1.mapのsolve" do
@@ -168,6 +169,41 @@ R   * #
         EOD
         assert_equal false, closed_with_static_objects?(m, m.lambdas.first, m.robot.pos)
       end
+    end
+
+    should "poss_from_toは壁を考慮しないfromからtoまでのposを返す" do
+        m = Mine.new(<<-'EOD')
+####### 
+#     #
+#   * #
+#*R*\*#
+#  ***#
+#  #  #
+#######
+        EOD
+      assert_equal([Pos[3, 2], Pos[3, 3], Pos[4, 3],
+        Pos[4, 4], Pos[5, 4], Pos[5, 5]],
+        poss_from_to(m, Pos[2, 2], Pos[6, 5]))
+      assert_equal([Pos[3, 2], Pos[3, 3], Pos[4, 3],
+        Pos[4, 4], Pos[5, 4], Pos[5, 5]].reverse,
+        poss_from_to(m, Pos[6, 5], Pos[2, 2]))
+      assert_equal([Pos[3, 2], Pos[4, 2]],
+        poss_from_to(m, Pos[2, 2], Pos[5, 2]))
+    end
+
+    should "wall_cnt_from_toはfromからtoまでの直線上の壁の数を返す" do
+      m = Mine.new(<<-'EOD')
+####### 
+# #   #
+#   * #
+#*R*###
+####**#
+#  ## #
+#######
+        EOD
+      s = Solver::DrFoolishManhattan.new(m)
+      
+      assert_equal(2, s.wall_cnt_from_to(Pos[2, 2], Pos[6, 2]))
     end
   end
 end

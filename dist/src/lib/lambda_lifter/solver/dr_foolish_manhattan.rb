@@ -169,13 +169,14 @@ class LambdaLifter
         return points.first if points.size == 1
         neary_lambda = points.find{|pos| @mine[pos] == :lambda }
         return neary_lambda if neary_lambda
-        # TODO: 最短距離はマンハッタン距離で試し
-        #       各方位の4個の実際の距離をシュミレート、障害物がない想定で計算。
-        index = points.map.with_index{|point, i|
-          [manhattan_distance(point, goal), i]
+        return nearest_position(points, goal)
+      end
+
+      # 最も近いポジションを探索
+      def nearest_position(poss, from)
+        points.map.with_index{|point, i|
+          [manhattan_distance(point, goal), point]
         }.sort_by{|distance, _| distance }.first[1]
-        return nil if index.nil?
-        return points[index]
       end
   
       # ポイントの内、次に移動するポイントを決定

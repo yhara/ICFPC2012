@@ -39,6 +39,40 @@ class LambdaLifter
       def log(msg)
         LambdaLifter.logger.info(msg)
       end
+
+      # fromからtoまでの直線距離のpos配列を返す
+      def poss_from_to(mine, from, to)
+        res = []
+        [:x, :y].cycle.each_with_object(res) do |move_to, poss|
+          cur = poss.last || from
+          if move_to == :x
+            if cur.x < to.x
+              cur = Pos[cur.x+1, cur.y]
+            elsif cur.x > to.x
+              cur = Pos[cur.x-1, cur.y]
+            else
+              next
+            end
+          else
+            if cur.y < to.y
+              cur = Pos[cur.x, cur.y+1]
+            elsif cur.y > to.y
+              cur = Pos[cur.x, cur.y-1]
+            else
+              next
+            end
+          end
+          break if cur == to
+          poss << cur
+        end
+        return res
+      end
+
+      # 直線距離の間の壁の枚数
+      def wall_cnt_from_to(from, to)
+        return poss_from_to(@mine, from, to).
+          select{|pos| @mine[pos] == :wall }.size
+      end
     end
 
     # 確実に到達不可能な地点を見つける
