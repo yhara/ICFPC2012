@@ -74,7 +74,7 @@ class LambdaLifter
               end
             end
           end
-p        end
+        end
         return [internal_space, boundary]
       end
 

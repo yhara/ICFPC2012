@@ -119,7 +119,7 @@ class LambdaLifter
         possible_lambdas = @mine.lambdas.select do |l|
           possible_check_route?(@check_route + [l])
         end
-        checkpoint = judge_next_point(possible_lambdas, @mine.robot.pos)
+        checkpoint = judge_next_checkpoint(possible_lambdas, @mine.robot.pos)
         if checkpoint.nil? && @mine.lambdas.empty? && !unreachable?(@mine.lift)
           checkpoint = @mine.lift
         end
@@ -133,7 +133,7 @@ class LambdaLifter
       def exec_next_command(goal)
         sdl(@mine) if defined? sdl
         sleep 0.1 if LambdaLifter.debug?
-        next_position = judge_next_point(movable_positions(@mine.robot), goal)
+        next_position = judge_next_robot_position(movable_positions(@mine.robot), goal)
         return false if limit_commands_exceeded?
         cmd = next_position.nil? ? nil : @mine.robot.command_to(next_position)
         return false if cmd.nil?
@@ -159,10 +159,10 @@ class LambdaLifter
         end
         return true
       end
-  
-      # ポイントの内、次に移動するポイントを決定
-      def judge_next_point(points, goal)
-        log("judge_next_point: " +
+
+      # ポイントの内、次に移動するチェックポイントを決定
+      def judge_next_checkpoint(points, goal)
+        log("judge_next_checkpoint: " +
           "positions=<#{points.map{|pos| @mine.robot.command_to(pos)}}>, " +
           "dead_cmd=<#{@dead_cmd_routes.inspect}>")
         return nil if points.empty?
@@ -171,6 +171,23 @@ class LambdaLifter
         return neary_lambda if neary_lambda
         # TODO: 最短距離はマンハッタン距離で試し
         #       各方位の4個の実際の距離をシュミレート、障害物がない想定で計算。
+        index = points.map.with_index{|point, i|
+          [manhattan_distance(point, goal), i]
+        }.sort_by{|distance, _| distance }.first[1]
+        return nil if index.nil?
+        return points[index]
+      end
+  
+      # ポイントの内、次に移動するポイントを決定
+      def judge_next_robot_position(points, goal)
+        log("judge_next_robot_position: " +
+          "positions=<#{points.map{|pos| @mine.robot.command_to(pos)}}>, " +
+          "dead_cmd=<#{@dead_cmd_routes.inspect}>")
+        return nil if points.empty?
+        return points.first if points.size == 1
+        neary_lambda = points.find{|pos| @mine[pos] == :lambda }
+        return neary_lambda if neary_lambda
+        return nil if (@mine.lambdas + [@mine.lift]).any?{|pos| unreachable?(pos)}
         index = points.map.with_index{|point, i|
           [manhattan_distance(point, goal), i]
         }.sort_by{|distance, _| distance }.first[1]
