@@ -54,6 +54,24 @@ L  .\#
       assert_equal "LDLLDRRDRLULLDL", s.solve
     end
 
+    should "contest3.mapのsolve" do
+      pend
+      desc = <<-'EOD'.freeze
+########
+#..R...#
+#..*...#
+#..#...#
+#.\.\..L
+####**.#
+#\.....#
+#\..* .#
+########
+      EOD
+      m = Mine.new(desc)
+      s = Solver.new(m)
+      assert_equal "LDLLDRRDRLULLDL", s.solve
+    end
+
     should "solve_to_checkpointでcheckpointまでの経路をA*探索で導くこと" do
       desc = <<-'EOD'.freeze
 ######

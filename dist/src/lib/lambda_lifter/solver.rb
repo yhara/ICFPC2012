@@ -4,7 +4,7 @@ require "set"
 class LambdaLifter
   class Solver
     # 探索する深さのMAX係数
-    GIVEUP_DEPTH_FACTOR = 5
+    @@giveup_depth_factor = 5
 
     def initialize(mine)
       @mine = mine
@@ -92,9 +92,11 @@ class LambdaLifter
         end
         # 実行可能コマンドなし
         if not success
-          return false if start_pos == @mine.robot.pos
           rollback!
-          depth-=1
+          if start_pos == @mine.robot.pos &&
+            (start_cmd_size == @commands.join.size)
+            return false
+          end
         end
         next_pos = @mine.robot.pos
       end
@@ -104,7 +106,6 @@ class LambdaLifter
     # 次の目的地を探す
     # TODO: 簡単わかる無理そうなopen lambdaを検出する
     #       (たとえば岩にふさがっているものなど）
-    # TODO: チェックポイントを戻るが未実装
     def find_checkpoint
       possible_lambdas = @mine.lambdas.select do |l|
         possible_check_route?(@check_route + [l])
@@ -128,7 +129,6 @@ class LambdaLifter
       cmd = next_position.nil? ? nil : @mine.robot.command_to(next_position)
       return false if cmd.nil?
       @commands << cmd
-      #p [:exe_commands, @commands.join]
       if m = cached_mine(@commands)
         @mine = m
       else
@@ -153,6 +153,9 @@ class LambdaLifter
 
     # ポイントの内、次に移動するポイントを決定
     def judge_next_point(points, goal)
+      log("judge_next_point: " +
+        "positions=<#{points.map{|pos| @mine.robot.command_to(pos)}}>, " +
+        "dead_cmd=<#{@dead_cmd_routes.inspect}>")
       return nil if points.empty?
       return points.first if points.size == 1
       neary_lambda = points.find{|pos| @mine[pos] == :lambda }
@@ -174,7 +177,7 @@ class LambdaLifter
 
     # 1つ前のmineにロールバック
     def rollback!
-      log("rollback!: cmd=<#{@commands.join}> wts=<#{@checkpoint_watermarks}>")
+      log("rollback!: #{@commands.join} -> #{@commands[0..-2].to_a.join} wts=<#{@checkpoint_watermarks}>")
       @dead_cmd_routes << @commands.join
       cmd = @commands.pop
       # 成功のケースがないcheckpointを記録
@@ -271,7 +274,7 @@ class LambdaLifter
     end
 
     def solve_depth_limit(checkpoint)
-      normal = manhattan_distance(@mine.robot.pos, checkpoint) * GIVEUP_DEPTH_FACTOR
+      normal = manhattan_distance(@mine.robot.pos, checkpoint) * @@giveup_depth_factor
       if @mine.lift.eql?(checkpoint)
         return normal * 2
       else
