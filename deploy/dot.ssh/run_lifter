@@ -56,7 +56,8 @@ EOS
 lifter stderr:
 #{s}
 EOS
+    success = false
   end
 end
 l.info("run_lifter is finished.")
-exit(EXIT_FAILURE) if !success
+exit(1) if !success
