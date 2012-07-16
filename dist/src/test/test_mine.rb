@@ -758,6 +758,69 @@ Razors 0
           assert_equal expected, @mine.raw_map[1]
         end
       end
+
+      context "Sコマンドを使用したとき" do
+      setup do
+        @mine = Mine.new(<<-'EOD')
+#####
+#WR!#
+###\L
+
+Growth 3
+Razors 0
+        EOD
+        end
+
+        should "使用回数が1以下の場合は何もしない" do
+          assert_equal 1, @mine.beards.length
+          @mine.step!('S')
+          assert_equal 1, @mine.beards.length
+          expected = [:wall, :beard, :robot, :razors, :wall]
+          assert_equal expected, @mine.raw_map[1]
+        end
+
+        should "使用回数が1以上の場合は隣接するヒゲを狩る" do
+          assert_equal 1, @mine.beards.length
+          assert_equal 0, @mine.razors
+          @mine.step!('R')
+          assert_equal 1, @mine.beards.length
+          assert_equal 1, @mine.razors
+          @mine.step!('L')
+          assert_equal 1, @mine.beards.length
+          assert_equal 1, @mine.razors
+          @mine.step!('S')
+          assert_equal 0, @mine.beards.length
+          assert_equal 0, @mine.razors
+          expected = [:wall, :empty, :robot, :empty, :wall]
+          assert_equal expected, @mine.raw_map[1]
+        end
+
+        should "8方向のヒゲを狩る" do
+        mine = Mine.new(<<-'EOD')
+#####
+#WWW#
+#WRW#
+#WWW#
+###\L
+
+Growth 10
+Razors 1
+        EOD
+          assert_equal 8, mine.beards.length
+          assert_equal 1, mine.razors
+          mine.step!('S')
+          assert_equal 0, mine.beards.length
+          assert_equal 0, mine.razors
+          expected = <<-'EOD'
+#####
+#   #
+# R #
+#   #
+###\L
+        EOD
+          assert_equal expected, mine.ascii_map
+        end
+      end
     end
 
     context "dupが呼ばれたとき" do

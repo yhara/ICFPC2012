@@ -44,7 +44,8 @@ class LambdaLifter
       'U' => :up,
       'D' => :down,
       'W' => :wait,
-      'A' => :abort
+      'A' => :abort,
+      'S' => :shave
     }.freeze
 
     GIVEN_SCORES = {
@@ -215,6 +216,11 @@ class LambdaLifter
         process_robot(@command)
         if /trampoline_\w/ =~ layout
           process_trampoline(layout)
+        end
+      elsif @command == :shave
+        if @razors > 0
+          process_beard(@robot.x, @robot.y)
+          @razors -= 1
         end
       end
 
@@ -399,6 +405,19 @@ class LambdaLifter
 
       self[pos.x, pos.y] = :robot
       @robot = Robot.new(self, pos.x, pos.y)
+    end
+
+    def process_beard(robot_x, robot_y)
+      return if @beards.empty?
+      range = [-1, 0, 1]
+      range.each do |dx|
+        range.each do |dy|
+          if self[robot_x + dx, robot_y + dy] == :beard
+            set(robot_x + dx, robot_y + dy, :empty)
+            @beards.delete(Pos[robot_x + dx, robot_y + dy])
+          end
+        end
+      end
     end
 
     def []=(game_x, game_y, val)
