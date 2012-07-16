@@ -174,7 +174,7 @@ class LambdaLifter
 
       # 最も近いポジションを探索
       def nearest_position(poss, from)
-        points.map.with_index{|point, i|
+        poss.map.with_index{|point, i|
           [manhattan_distance(point, goal), point]
         }.sort_by{|distance, _| distance }.first[1]
       end
