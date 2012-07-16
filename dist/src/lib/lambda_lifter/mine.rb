@@ -484,11 +484,11 @@ class LambdaLifter
       @trampoline_relationships.reject! {|k, _|
         deleted_trampolines.keys.include?(k) }
       deleted_trampolines.keys.uniq.each do |t|
-        set(@trampolines[t].x, @trampolines[t].y, :empty)
+        self[@trampolines[t].x, @trampolines[t].y] = :empty
         @trampolines.delete(t)
       end
       deleted_trampolines.values.uniq.each do |t|
-        set(@targets[t].x, @targets[t].y, :empty)
+        self[@targets[t].x, @targets[t].y] = :empty
         @targets.delete(t)
       end
 
