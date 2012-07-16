@@ -14,8 +14,10 @@ v
 score: %{score}
 =end
 
+require_relative "validator_test"
+
 class LambdaLifter
-  class %{test_name} < Test::Unit::TestCase
+  class %{test_name} < ValidatorTest
     should "Validatorと同じ結果になる" do
       commands = "%{commands}"
       score = %{score}
@@ -30,10 +32,8 @@ EOS
       commands.each_char do |s|
         mine.step!(s)
       end
-      ascii_map = mine.validator_map
-      # Validatorはクリア時にOだがMineはクリア時はRなのでその補正
-      ascii_map = ascii_map.sub("R", "O") if !/[LO]/.match(ascii_map)
-      assert_equal processed_map, ascii_map, <<INPUT
+      assert_equal treat_expected_map(processed_map),
+        treat_actual_map(mine.validator_map), <<INPUT
 #{map}
 
 |
