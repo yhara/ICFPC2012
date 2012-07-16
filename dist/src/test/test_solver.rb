@@ -140,24 +140,31 @@ R   * #
         assert_equal false, closed_with_static_objects?(m, m.lambdas.first, m.robot.pos)
       end
 
-      should "トランポリンがあるときに、囲まれているかを判定できること" do
-#        m = Mine.new(<<-'EOD')
-########
-## R A #
-########
-## 1 \ #
-########
-#        EOD
-#        assert_equal false, closed_with_static_objects?(m, m.lambdas.first, m.robot.pos)
+      should "トランポリンがあるときに、囲まれていないことを判定できること" do
+        m = Mine.new(<<-'EOD')
+#######
+# R A #
+#######
+# 1 \ #
+#######
 
-#        m = Mine.new(<<-'EOD')
-########
-## R 1 #
-########
-## A \ #
-########
-#        EOD
-#        assert_equal true, closed_with_static_objects?(m, m.lambdas.first, m.robot.pos)
+Trampoline A targets 1
+        EOD
+        assert_equal false, closed_with_static_objects?(m, m.lambdas.first, m.robot.pos)
+      end
+
+      should "トランポリンがあるときに、囲まれていることを判定できること" do
+
+        m = Mine.new(<<-'EOD')
+#######
+# R 1 #
+#######
+# A \ #
+#######
+
+Trampoline A targets 1
+        EOD
+        assert_equal true, closed_with_static_objects?(m, m.lambdas.first, m.robot.pos)
       end
     end
 

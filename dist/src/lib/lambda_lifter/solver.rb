@@ -141,10 +141,10 @@ class LambdaLifter
 
       # 壁と岩を単純に境界として、区切られている空間を
       # Posの配列で返す。区切られていない場合はnilを返す。
+      # from: lambdaなどのある位置
+      # to: ロボットのいる位置
       def space_bounded_by_rocks_and_walls(mine, from, to)
-        is_boundary = lambda{|pos|
-          [:rock, :wall].include? mine[pos]
-        }
+        is_boundary = lambda{|pos| mine[pos] =~ /rock|wall|target/}
         boundary = Set.new
         internal_space = Set.new
         visited = Set.new
@@ -154,8 +154,15 @@ class LambdaLifter
           return nil if pos == to  # 区切られてなかった
           visited << pos
           internal_space << pos
-          DIRECTIONS.each do |diff|
-            newpos = pos + diff
+
+          # 現在位置から連続しているマスを列挙する
+          if mine[pos] =~ /target/
+            newposs = mine.trampoline_poss(mine[pos])
+          else
+            newposs = DIRECTIONS.map{|diff| pos + diff}
+          end
+
+          newposs.each do |newpos|
             if is_boundary[newpos]
               boundary << newpos
             else
@@ -170,6 +177,8 @@ class LambdaLifter
 
       # ある岩と壁で囲まれた地点に対し、
       # 確実にstaticなもので囲まれているかどうかを返す。
+      # from: lambdaなどのある位置
+      # to: ロボットのいる位置
       def closed_with_static_objects?(mine, from, to)
         internal_space, boundary = space_bounded_by_rocks_and_walls(mine, from, to)
         return false if internal_space.nil? || boundary.nil?
