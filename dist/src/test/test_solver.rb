@@ -29,53 +29,6 @@ L ..\#
       assert_equal "DLLLL", s.solve
     end
 
-    should "contest3.mapのsolve" do
-      pend
-      desc = <<-'EOD'.freeze
-########
-#..R...#
-#..*...#
-#..#...#
-#.\.\..L
-####**.#
-#\.....#
-#\..* .#
-########
-      EOD
-      m = Mine.new(desc)
-      s = Solver.new(m)
-      assert_equal "LDLLDRRDRLULLDL", s.solve
-    end
-
-    should "contest2.mapのsolve" do
-      desc = <<-'EOD'.freeze
-#######
-#..***#
-#..\\\#
-#...**#
-#.*.*\#
-LR....#
-#######
-      EOD
-      m = Mine.new(desc)
-      s = Solver.new(m)
-      assert_equal "RRULLRRDRRULLUURRLDDURLLLLDDL", s.solve
-    end
-
-    should "contest1.mapのsolve" do
-      desc = <<-'EOD'.freeze
-######
-#. *R#
-#  \.#
-#\ * #
-L  .\#
-######
-      EOD
-      m = Mine.new(desc)
-      s = Solver.new(m)
-      assert_equal "LDLLDRRDRLULLDL", s.solve
-    end
-
     should "solveでSIGINTを受け取ったとき@solverがnilでも動作する" do
       desc = <<-'EOD'.freeze
 #######
