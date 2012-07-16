@@ -277,7 +277,9 @@ Razors 1
       EOD
       mine_2 = Mine.new(original_map_2)
       assert_equal original_map_2, mine_2.ascii_map, "Open Lambda Lift確認"
+    end
 
+    should "validator_mapが呼ばれたとき" do
       original_map_3 = <<-'EOD'.freeze
  ##
 #RO#
@@ -286,7 +288,7 @@ Razors 1
 #
       EOD
       mine_3 = Mine.new(original_map_3)
-      assert_equal original_map_3, mine_3.ascii_map, "末尾の空白除去確認"
+      assert_equal original_map_3, mine_3.validator_map, "末尾の空白除去確認"
     end
 
     context "step!が呼ばれたとき" do
