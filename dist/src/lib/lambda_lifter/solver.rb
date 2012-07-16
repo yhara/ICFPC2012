@@ -100,16 +100,26 @@ class LambdaLifter
               {pos: Pos[pos.x+1, pos.y], dist: base+1},
               {pos: Pos[pos.x, pos.y-1], dist: base+1},
               {pos: Pos[pos.x, pos.y+1], dist: base+1},
-            ].select{|cell| ![:wall, :out_of_map].include?(@mine[pos]) }
+            ].select{|cell|
+              ![:wall, :out_of_map].include?(@mine[pos])
+            }.map{|cell|
+              if @mine[cell[:pos]] =~ /target_/
+                @mine.trampoline_poss(@mine[cell[:pos]]).map {|trm_pos|
+                  {pos: trm_pos, dist: cell[:dist]}
+                }
+              else
+                cell
+              end
+            }.flatten(1)
           end
         end
 
         # DEBUG用
         # @mine.ascii_map! do |pos|
         #   if map[pos.x] && map[pos.x][pos.y]
-        #     map[pos.x][pos.y].to_s.background(:red).color(:white)
+        #     map[pos.x][pos.y].to_s.ljust(2).background(:red).color(:white)
         #   else
-        #     " ".to_s.background(:black).color(:white)
+        #     "".to_s.ljust(2).background(:black).color(:white)
         #   end
         # end
         @cached_distance_map[pos] = map

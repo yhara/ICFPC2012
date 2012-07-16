@@ -211,6 +211,23 @@ R   * #
       assert_equal 0, map[2][2]
       assert_equal 6, map[6][2]
       assert_equal 8, map[6][6]
+
+      desc = <<-'EOD'.freeze
+############
+#..*.R..*..#
+#..A....B..######
+#....2.. ..#\\\C#
+#......* *.#\\\1#
+########L########
+
+Trampoline A targets 1
+Trampoline B targets 1
+Trampoline C targets 2
+      EOD
+      m = Mine.new(desc)
+      s = Solver::DrFoolishManhattan.new(m)
+      map = s.calc_distance_map(Pos[15, 2])
+      assert_equal 1, map[4][4]
     end
   end
 end
