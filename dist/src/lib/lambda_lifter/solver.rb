@@ -16,10 +16,10 @@ class LambdaLifter
     def solve
       loop do
         return highscore_cmd if @trapped_sigint
-        solver = @try_solvers.pop
-        solver.solve
-        if @highscore[:score] <= solver.highscore[:score]
-          @highscore = solver.highscore
+        @solver = @try_solvers.pop
+        @solver.solve
+        if @highscore[:score] <= @solver.highscore[:score]
+          @highscore = @solver.highscore
         end
         if @try_solvers.empty?
           return highscore_cmd

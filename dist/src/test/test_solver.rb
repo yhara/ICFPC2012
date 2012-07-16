@@ -76,6 +76,23 @@ L  .\#
       assert_equal "LDLLDRRDRLULLDL", s.solve
     end
 
+    should "solveでSIGINTを受け取ったとき@solverがnilでも動作する" do
+      desc = <<-'EOD'.freeze
+#######
+#..***#
+#..\\\#
+#...**#
+#.*.*\#
+LR....#
+#######
+      EOD
+      m = Mine.new(desc)
+      s = Solver.new(m)
+      s.instance_variable_set(:@solver, nil)
+      s.send(:handle_sigint)
+      assert_equal true, s.instance_variable_get(:@trapped_sigint)
+    end
+
     context "マンハッタン探索のソルバは" do
       should "limit_commands_exceeded?がサイズオーバーの時にtrueを返す" do
         desc = <<-'EOD'.freeze
