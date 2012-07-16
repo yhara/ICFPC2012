@@ -38,7 +38,7 @@ class LambdaLifter
   
       def solve
         res = "A"
-        log("---------- start(foolish manhattan) ----------")
+        log("---------- start(#{self.class.name}) ----------")
         res = loop do
           break highscore_cmd if @trapped_sigint
           break @commands.join if @mine.finished?
@@ -61,7 +61,7 @@ class LambdaLifter
             @passed_check_routes << @check_route + [checkpoint]
           end
         end
-        log("----------  stop(foolish manhattan)  ----------")
+        log("---------- end(#{self.class.name}) ----------")
         log("commands: #{res}")
         @highscore[:cmd] = res
       end
@@ -169,16 +169,9 @@ class LambdaLifter
         return points.first if points.size == 1
         neary_lambda = points.find{|pos| @mine[pos] == :lambda }
         return neary_lambda if neary_lambda
-        return nearest_position(points, goal)
+        return nearest_checkpoint(points, goal)
       end
 
-      # 最も近いポジションを探索
-      def nearest_position(poss, from)
-        poss.map.with_index{|point, i|
-          [manhattan_distance(point, goal), point]
-        }.sort_by{|distance, _| distance }.first[1]
-      end
-  
       # ポイントの内、次に移動するポイントを決定
       def judge_next_robot_position(points, goal)
         log("judge_next_robot_position: " +
@@ -189,12 +182,17 @@ class LambdaLifter
         neary_lambda = points.find{|pos| @mine[pos] == :lambda }
         return neary_lambda if neary_lambda
         return nil if (@mine.lambdas + [@mine.lift]).any?{|pos| unreachable?(pos)}
-        index = points.map.with_index{|point, i|
-          [manhattan_distance(point, goal), i]
-        }.sort_by{|distance, _| distance }.first[1]
-        return nil if index.nil?
-        return points[index]
+        return nearest_robot_position(points, goal)
       end
+  
+      # 最も近いポジションを探索
+      def nearest_position(poss, from)
+        poss.map.with_index{|point, i|
+          [manhattan_distance(point, from), point]
+        }.sort_by{|distance, _| distance }.first[1]
+      end
+      alias :nearest_checkpoint :nearest_position
+      alias :nearest_robot_position :nearest_position
   
       # 移動可能な位置
       def movable_positions(robot)

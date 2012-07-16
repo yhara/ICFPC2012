@@ -7,7 +7,8 @@ class LambdaLifter
       @mine = mine
       @highscore = {score: 0, cmd: "A"}
       Signal.trap(:INT){ handle_sigint }
-      @try_solvers = [DrFoolishManhattan.new(@mine.dup)]
+      @try_solvers = [DrManhattan.new(@mine.dup)]
+#      @try_solvers = [DrFoolishManhattan.new(@mine.dup)]
     end
 
     # コマンドの列を文字列で返す。
@@ -72,6 +73,36 @@ class LambdaLifter
       def wall_cnt_from_to(from, to)
         return poss_from_to(@mine, from, to).
           select{|pos| @mine[pos] == :wall }.size
+      end
+
+      def calc_distance_map(pos)
+        @cached_distance_map ||= {}
+        return @cached_distance_map[pos] if @cached_distance_map[pos]
+        map = []
+        stack = [[{pos: pos, dist: 0}]]
+        until stack.empty?
+          s = stack.pop
+          s.each do |pos|
+            base = pos[:dist]
+            pos = pos[:pos]
+            next if [:wall, :out_of_space].include?(@mine[pos])
+            next if map[pos.x] && map[pos.x][pos.y]
+            map[pos.x] ||= []
+            map[pos.x][pos.y] ||= base
+            stack << [{pos: Pos[pos.x-1, pos.y-1], dist: base+2},
+              {pos: Pos[pos.x-1, pos.y+1], dist: base+2},
+              {pos: Pos[pos.x+1, pos.y-1], dist: base+2},
+              {pos: Pos[pos.x+1, pos.y+1], dist: base+2},
+              {pos: Pos[pos.x+1, pos.y+1], dist: base+2},
+              {pos: Pos[pos.x-1, pos.y], dist: base+1},
+              {pos: Pos[pos.x+1, pos.y], dist: base+1},
+              {pos: Pos[pos.x, pos.y-1], dist: base+1},
+              {pos: Pos[pos.x, pos.y+1], dist: base+1},
+            ]
+          end
+        end
+        @cached_distance_map[pos] = map
+        return map
       end
     end
 
@@ -161,3 +192,4 @@ class LambdaLifter
 end
 
 require_relative "solver/dr_foolish_manhattan"
+require_relative "solver/dr_manhattan"

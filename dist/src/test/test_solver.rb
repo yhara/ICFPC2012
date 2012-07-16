@@ -205,5 +205,22 @@ R   * #
       
       assert_equal(2, s.wall_cnt_from_to(Pos[2, 2], Pos[6, 2]))
     end
+
+    should "calc_distance_mapは指定位置からの距離マップを作成する" do
+      m = Mine.new(<<-'EOD')
+####### 
+# #   #
+#   * #
+#*R*###
+##  **#
+#  #  #
+#######
+        EOD
+      s = Solver::DrFoolishManhattan.new(m)
+      map = s.calc_distance_map(Pos[2, 2])
+      assert_equal 0, map[2][2]
+      assert_equal 6, map[6][2]
+      assert_equal 8, map[6][6]
+    end
   end
 end
