@@ -719,7 +719,7 @@ Razors 0
       end
 
       should "シンボルの２次元配列が作られること" do
-        expected = [:wall, :robot, :razors, :empty, :wall]
+        expected = [:wall, :robot, :razor, :empty, :wall]
         assert_equal expected, @mine.raw_map[1]
       end
 
@@ -775,7 +775,7 @@ Razors 0
           assert_equal 1, @mine.beards.length
           @mine.step!('S')
           assert_equal 1, @mine.beards.length
-          expected = [:wall, :beard, :robot, :razors, :wall]
+          expected = [:wall, :beard, :robot, :razor, :wall]
           assert_equal expected, @mine.raw_map[1]
         end
 

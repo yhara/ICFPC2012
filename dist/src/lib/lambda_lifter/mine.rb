@@ -34,7 +34,7 @@ class LambdaLifter
       '8' => :target_8,
       '9' => :target_9,
       'W' => :beard,
-      '!' => :razors,
+      '!' => :razor,
       '@' => :higher_order_rock
     }.freeze
 
@@ -208,7 +208,7 @@ class LambdaLifter
           process_rock(@command)
         when :lambda
           process_lambda(@command)
-        when :razors
+        when :razor
           process_razors
         when :open_lift
           process_open_lift
