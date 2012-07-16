@@ -169,7 +169,7 @@ class LambdaLifter
       return array_to_ascii_map(@map)
     end
 
-    def ascii_map
+    def ascii_map(&block)
       @@inverted_layouts ||= LAYOUTS.invert.freeze
       s = ""
       self.each_pos_from_top_left do |pos|
