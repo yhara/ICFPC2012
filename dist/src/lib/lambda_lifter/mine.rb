@@ -247,6 +247,7 @@ class LambdaLifter
           process_beard(@robot.x, @robot.y)
           @razors -= 1
         end
+        @score += GIVEN_SCORES[:each_move]
       elsif [:left, :right, :up, :down, :wait].include?(@command)
         @score += GIVEN_SCORES[:each_move]
       end

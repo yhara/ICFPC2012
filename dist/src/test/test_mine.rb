@@ -351,6 +351,25 @@ Razors 1
         assert_equal -5, mine.score
       end
 
+      should "ロボットがカミソリを使用するとスコアが-1減ること" do
+        mine = Mine.new(<<-'EOD')
+#####
+#WWW#
+#WRW#
+#WWW#
+#####
+
+Growth 5
+Razors 5
+        EOD
+        mine.step!("S")
+        assert_equal -1, mine.score
+        assert_equal [], mine.beards
+        mine.step!("S")
+        assert_equal -2, mine.score
+        assert_equal [], mine.beards
+      end
+
       should "ラムダ上に移動したらスコアが25加算されること" do
         mine = Mine.new(<<-'EOD')
 #######
