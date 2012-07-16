@@ -47,6 +47,8 @@ RL
             img.render
           end
         end
+        water_lv = (@mine.height  - @mine.water) * (47*scale)
+        screen.fillRect 0, water_lv, @mine.width * (47*scale), 5, [0, 0, 255]
 
         exit if key_pressed?(Key::Q)
         @mine.step!("U") if new_key_pressed?(Key::UP)
