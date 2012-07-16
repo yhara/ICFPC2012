@@ -30,6 +30,7 @@ O ****#
 class LambdaLifter
   class TestFlood2 < Test::Unit::TestCase
     should "Validatorと同じ結果になる" do
+      pend
       mine = Mine.new(<<EOS)
 #######
 #..***#
