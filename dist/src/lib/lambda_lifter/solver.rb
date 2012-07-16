@@ -182,7 +182,7 @@ class LambdaLifter
             true
           else
             ret = case mine[pos]
-                  when :wall, :out_of_space 
+                  when :wall, :out_of_map
                     true
                   when :rock
                     never_fall = (is_static[pos + [-1, -1]] || is_static[pos + [-1, 0]]) &&  # 左下・左のいずれか
