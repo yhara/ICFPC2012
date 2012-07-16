@@ -47,11 +47,12 @@ Trollop.die if opts[:help]
 if opts[:sdl]
   require_relative "../../../mygame/sdlview.rb"
 
-  Thread.start{
+  solver_thread = Thread.start{
     mine = LambdaLifter::Mine.new(ARGF.read)
     sdl(mine)
     LambdaLifter.solve!(mine, opts) unless opts[:interactive]
   }
+  solver_thread.abort_on_exception = true
   LambdaLifter::SdlVisualizer.instance.scale = opts[:scale]
   LambdaLifter::SdlVisualizer.instance.run(opts)
 else
