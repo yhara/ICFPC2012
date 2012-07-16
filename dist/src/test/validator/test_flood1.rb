@@ -36,7 +36,7 @@ score: 403
 require_relative "validator_test"
 
 class LambdaLifter
-  class TestFlood1_1 < ValidatorTest
+  class TestFlood1 < ValidatorTest
     should "Validatorと同じ結果になる" do
       commands = "RRRRDDLLLLLLRRWLDUDUDUDUDUDUDUDLRUULDLUURRDDDDRA"
       score = 403
