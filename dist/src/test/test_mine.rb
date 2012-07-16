@@ -377,13 +377,11 @@ Razors 5
 #####L#
       EOD
         mine.step!("R")
-        expected_score = Mine::GIVEN_SCORES[:each_move] +
-                         Mine::GIVEN_SCORES[:collect_lambda]
+        expected_score = -1 + 25
         assert_equal expected_score, mine.score
 
         mine.step!("R")
-        expected_score += Mine::GIVEN_SCORES[:each_move] +
-                          Mine::GIVEN_SCORES[:collect_lambda]
+        expected_score += -1 + 25
         assert_equal expected_score, mine.score
       end
 
@@ -1184,12 +1182,9 @@ Trampoline A targets 1
           before_finished_score = mine.score
           mine.step!("A")
           assert_equal :abort, mine.finished?
-          expected_score = Mine::GIVEN_SCORES[:each_move] +
-                           Mine::GIVEN_SCORES[:collect_lambda] +
-                           Mine::GIVEN_SCORES[:collected_lambda_abort]
+          expected_score = -1 + 25 + 25
           assert_equal expected_score, mine.score
-          assert_equal mine.score - before_finished_score,
-                       Mine::GIVEN_SCORES[:collected_lambda_abort]
+          assert_equal 25, mine.score - before_finished_score
         end
 
         should "ラムダを2つ回収していた場合、スコアが50加算されること" do
@@ -1203,12 +1198,9 @@ Trampoline A targets 1
           before_finished_score = mine.score
           mine.step!("A")
           assert_equal :abort, mine.finished?
-          expected_score = Mine::GIVEN_SCORES[:each_move] * 2 +
-                           Mine::GIVEN_SCORES[:collect_lambda] * 2 +
-                           Mine::GIVEN_SCORES[:collected_lambda_abort] * 2
+          expected_score = -1 + 25 - 1 + 25 + 25 + 25
           assert_equal expected_score, mine.score
-          assert_equal mine.score - before_finished_score,
-                       Mine::GIVEN_SCORES[:collected_lambda_abort] * 2
+          assert_equal 50, mine.score - before_finished_score
         end
       end
 
