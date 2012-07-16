@@ -15,7 +15,6 @@ class LambdaLifter
     # 例："DLLRA"
     def solve
       loop do
-        return highscore_cmd if @trapped_sigint
         @solver = @try_solvers.pop
         @solver.solve
         if @highscore[:score] <= @solver.highscore[:score]
@@ -31,8 +30,18 @@ class LambdaLifter
     end
 
     def handle_sigint
-      @solver.handle_sigint if not @solver.nil?
-      @trapped_sigint = true
+      if @solver
+        if @highscore[:score] < @solver.highscore[:score]
+          @highscore = @solver.highscore
+        end
+      end
+      print_and_exit
+    end
+
+    def print_and_exit
+      $stdout.sync = true
+      print highscore_cmd
+      exit 0
     end
 
     def highscore_cmd
