@@ -41,6 +41,7 @@ opts = Trollop.options do
   opt :wait, "ウェイト(デフォルト: 0.5秒)", default: 0.5
   opt :help, "ヘルプ"
 end
+opts[:sdl] = true if opts[:interactive] || opts[:scale]
 Trollop.die "missing filename" if ARGV.size == 0
 Trollop.die if opts[:help]
 
