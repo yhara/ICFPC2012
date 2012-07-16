@@ -22,7 +22,8 @@ RL
       MyGame.background_color = col
     end
 
-    IMAGE_FILES = %w(closed_lift earth empty lambda open_lift robot rock wall)
+    IMAGE_FILES = %w(closed_lift earth empty lambda open_lift robot rock wall
+                    razor beard higher_order_rock)
     def run(opts = {})
       screen_w = 800
       screen_h = 600
