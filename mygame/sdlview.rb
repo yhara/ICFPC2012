@@ -23,13 +23,14 @@ RL
     end
 
     IMAGE_FILES = %w(closed_lift earth empty lambda open_lift robot rock wall
-                    razor beard higher_order_rock)
+                    razor beard higher_order_rock trampoline target)
     def run(opts = {})
       screen_w = 800
       screen_h = 600
       MyGame.create_screen screen_w, screen_h
 
       images = Hash[IMAGE_FILES.map{|name|
+        name = $1 if name.match(/(trampoline|target)_\w/)
         [name.to_sym, Image.new("#{File.dirname __FILE__}/../visualizer/images/#{name}.png")]
       }]
 
@@ -37,6 +38,7 @@ RL
         scale = @scale || [(screen_h.to_f/@mine.height)/47, 1].min
         @mine.raw_map.each.with_index do |raw_row, y|
           raw_row.each.with_index do |sym, x|
+            sym = $1.to_sym if sym.match(/(trampoline|target)_\w/)
             img = images[sym] or raise "unkown: #{sym}"
             img.x = x * (47*scale)
             img.y = y * (47*scale)
